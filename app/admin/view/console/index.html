@@ -1,0 +1,19 @@
+{include file="$header"}
+{empty name="html"}
+<div id="app" v-cloak>
+    <el-empty description="亲亲，控制台空空如也，快去安装一个流量统计插件吧~">
+        <el-button type="primary" @click="parent.parentVm.clickMenu('plugins/list')">安装插件</el-button>
+    </el-empty>
+</div>
+<script>
+new Vue({
+    el: '#app',
+    data() {
+        return {}
+    },
+})
+</script>
+{else/}
+{$html|raw}
+{/empty}
+{include file="$footer"}

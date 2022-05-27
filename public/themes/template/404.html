@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="shortcut icon" href="/upload/favicon.ico" /> 
+<title>OneKeyAdmin</title>
+<style type="text/css">
+    .copyright{
+        width: 640px;
+        height: 250px;
+        margin: 0 auto;
+        position: absolute;
+        top: 50%;
+        left:50%;
+        transform: translate(-50%,-50%);
+    }
+    .copyright img{
+        vertical-align: middle;
+        height: 250px
+    }
+    .copyright div{
+        text-align: left;
+        display: inline-block;
+    }
+    .copyright .title {
+        margin-bottom: 20px;
+        font-size: 32px;
+        line-height: 40px;
+        color: #1890ff;
+        -webkit-animation-fill-mode: forwards;
+        animation-fill-mode: forwards;
+        font-weight: 700;
+    }
+    .copyright .ctitle{
+        margin-bottom: 10px;
+        font-size: 20px;
+        line-height: 24px;
+        color: #222;
+        -webkit-animation-delay: .1s;
+        animation-delay: .1s;
+        -webkit-animation-fill-mode: forwards;
+        animation-fill-mode: forwards;
+        font-weight: 700;
+    }
+    .copyright .tips{
+        margin-bottom: 30px;
+        font-size: 13px;
+        line-height: 21px;
+        color: rgba(0,0,0,.65);
+        -webkit-animation-delay: .2s;
+        animation-delay: .2s;
+        -webkit-animation-fill-mode: forwards;
+        animation-fill-mode: forwards;
+    }
+    .copyright .home {
+        display: block;
+        float: left;
+        width: 110px;
+        height: 36px;
+        font-size: 14px;
+        line-height: 36px;
+        color: #fff;
+        text-align: center;
+        cursor: pointer;
+        background: #1890ff;
+        border-radius: 100px;
+        -webkit-animation-delay: .3s;
+        animation-delay: .3s;
+        -webkit-animation-fill-mode: forwards;
+        animation-fill-mode: forwards;
+    }
+</style>
+</head>
+<body>
+<div class="copyright">
+    <img src="/themes/template/static/images/404.png">
+    <div>
+        <p class="title">{:lang('sorry')}!</p>
+        <p class="ctitle">{:lang('the current page does not exist')}...</p>
+        <p class="tips">{:lang('please check that the URL you entered is correct, or click the button below to return to the home page')}。</p>
+        <a href="/" class="home">{:lang('back to home')}</a>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,52 @@
+{include file="$header"}
+<div id="app" v-cloak>
+    <el-curd :field="field" :table-sort="{prop: 'create_time', order: 'desc'}">
+    </el-curd>
+</div>
+<script>
+    new Vue({
+        el: "#app",
+        data() {
+            return {
+                field: [
+                    {
+                        prop: 'id',
+                        label: '编号', 
+                        table: false
+                    },
+                    {
+                        prop: 'admin_nickname', 
+                        label: '管理员', 
+                        table: {sort: true}
+                    },
+                    {
+                        prop: 'title', 
+                        label: '标题', 
+                        table: {sort: true}
+                    },
+                    {
+                        prop: 'path',
+                        label: '路径',
+                        table: {sort: true}
+                    },
+                    {
+                        prop: 'ip',
+                        label: 'ip', 
+                        table: {sort: true}
+                    },
+                    {
+                        prop: 'language', 
+                        label: '语言', 
+                        table: {sort: true}
+                    },
+                    {
+                        prop: 'create_time', 
+                        label: '时间', 
+                        table: {sort: true}
+                    },
+				],
+            }
+        },
+    })
+</script>
+{include file="$footer"}

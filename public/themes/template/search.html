@@ -1,0 +1,90 @@
+{include file="$header"}
+<div id="app" v-cloak>
+    <div class="el-warp">
+        <div class="el-search">
+            <el-form ref="search" :model="search" inline>
+                <el-form-item prop="keyword">
+                    <el-input v-model="search.keyword" placeholder="{:lang('keyword')}"></el-input>
+                </el-form-item>
+                <el-form-item prop="modular">
+                    <el-select v-model="search.modular" placeholder="{:lang('category')}">
+                        <el-option label="{:lang('all')}" value=""></el-option>
+                        {volist name="modulars" id="item"}
+                        <el-option label="{$item.title}" value="{$item.catalog}"></el-option>
+                        {/volist}
+                    </el-select>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="searchList()">{:lang('search')}</el-button>
+                </el-form-item>
+            </el-form>
+            <div class="list" v-infinite-scroll="list" :infinite-scroll-disabled="disabled" :style="{height: height + 'px'}">
+                <el-row :gutter="20">
+                    <el-col :md="8" :sm="12" v-for="(item, index) in data" style="margin-bottom: 20px">
+                        <el-card class="item">
+                            <img :src="item.cover">
+                            <div class="title" v-html="item.title"></div>
+                            <div class="time">
+                                <span>{{item.create_time}}</span>
+                                <a :href="item.url">{{lang('read more')}}</a>
+                            </div>
+                        </el-card>
+                    </el-col>
+                </el-row>
+                <div v-if="loading" class="el-loader">{:lang('loading')}</div>
+                <div v-if="noMore && loading === false" class="el-nomore">{:lang('no more')}</div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                data: [],
+                search:{
+                    page: 1,
+                    keyword: "{$keyword}",
+                    modular: "{$modular}",
+                },
+                height: (document.body.clientHeight || document.documentElement.clientHeight) - 340,
+                loading: false,
+            }
+        },
+        computed: {
+            noMore() {
+                return this.count <= this.data.length;
+            },
+            disabled() {
+                return this.loading || this.noMore;
+            }
+        },
+        methods: {
+            /**
+             * 加载列表
+             */
+            list() {
+                let self = this;
+                self.loading = true;
+                request.post('search', self.search, function (res) {
+                    if (res.status === 'success') {
+                        self.search.page++;
+                        self.data  = self.data.concat(res.data);
+                        self.count = res.count;
+                    }
+                    self.loading = false;
+                })
+            },
+            /**
+             * 搜索
+             */
+            searchList() {
+                this.search.page = 1;
+                this.data = [];
+                this.list();
+            },
+        }
+    });
+</script>
+{include file="$footer"}

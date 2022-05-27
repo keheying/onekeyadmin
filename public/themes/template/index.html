@@ -1,0 +1,67 @@
+{include file="$header"}
+<div id="app" v-cloak>
+	<div class="el-index-warp">
+		<div class="el-warp">
+			<el-row class="head">
+				<el-col :md="24" :sm="24">
+					<div class="inner">
+						<div class="title">{:lang('characteristics')}</div>
+						<div class="content">{$system.characteristic}</div>
+						<a class="link" href="">{:lang('read more')}<i class="el-icon-right"></i></a>
+					</div>
+				</el-col>
+			</el-row>
+			<el-row>
+				<el-col :md="8" :sm="24">
+					<div class="inner">
+						<div class="title">
+							{:lang('framework')}
+							<p class="c-title">{$system.frame}</p>
+						</div>
+						<ul class="list1">
+							{volist name="system.frame_list" id="item"}
+							<li class="wow fadeInUp" data-wow-delay=".1s">{$item.title}<i class="el-icon-right"></i></li>
+							{/volist}
+						</ul>
+					</div>
+				</el-col>
+				<el-col :md="16" :sm="24">
+					<div class="marketing">
+						<el-row :gutter="40">
+							<el-col :md="12" :sm="24">
+								<div class="title">{:lang('project')}</div>
+								<div class="content">{$system.project}</div>
+								<a class="link" href="">{:lang('read more')}<i class="el-icon-right"></i></a>
+							</el-col>
+							<el-col :md="12" :sm="24">
+								<ul class="list2">
+									{volist name="system.project_list" id="item"}
+									<li>
+										<el-button icon="{$item.icon}" circle></el-button>
+										<div class="info"><div>{$item.title}</div><p>{$item.content}</p></div>
+									</li>
+									{/volist}
+								</ul>
+								<div class="s-content">{$system.project_desc}</div>
+							</el-col>
+						</el-row>
+					</div>
+				</el-col>
+			</el-row>
+		</div>
+	</div>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {}
+        },
+        mounted() {
+            this.$nextTick(function () {
+                new WOW().init()
+            })
+        },
+    })
+</script>
+{include file="$footer"}

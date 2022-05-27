@@ -1,0 +1,116 @@
+{include file="$header"}
+<div id="app" v-cloak>
+    <el-curd 
+        :field="field" 
+        :search-date="false" 
+        :table-sort="{prop: 'sort', order: 'desc'}"
+        @get-data="refresh($event)"
+        table-tree>
+    </el-curd>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                field: [
+                    {
+                        label: '编号', 
+                        prop: 'id',
+                        table: false,
+                    },
+                    {
+                        prop: 'icon', 
+                        label: '图标', 
+                        table: false,
+                        form: {
+                            is: 'el-file-select',
+                            type: 'image',
+                            tips: '请<a target="_blank" href="https://www.iconfont.cn/">点击此处</a>选择菜单图标，建议图片16*16像素PNG格式',
+                        },
+                    },
+                    {
+                        prop: 'title', 
+                        label: '名称', 
+                        table: {sort: true},
+                        form: {
+                            placeholder: '请输入标题', 
+                            rules: [
+                                {required: true,message: '名称不能为空'},
+                            ]
+                        }
+                    },
+                    {
+                        prop: 'pid', 
+                        label: '父级', 
+                        table: false, 
+                        form: {
+                            is: 'el-select',
+                            child: {is: 'el-option', value: 'this'},
+                            filterable: true,
+                            rules: [
+                                {required: true,message: '父级不能为空'},
+                            ]
+                        },
+                    },
+                    {
+                        prop: 'sort', 
+                        label: '排序', 
+                        table: false,
+                        form: {
+                            type: 'number',
+                            default: 0, 
+                            placeholder: '降序排序，值越大越靠前'
+                        },
+                    },
+                    {
+                        prop: 'path', 
+                        label: '路径', 
+                        table: {sort: true},
+                        form: {
+                            tips:'开启一键curd后，此处请填写表名称如:mk_banner_table，系统根据表名称生成BannerTable控制器、模型、视图、增删改查权限菜单',
+                            placeholder: '请输入控制器/方法名', 
+                            rules: [
+                                {required: true,message: '路径不能为空'},
+                            ]
+                        }
+                    },
+                    {
+                        prop: 'curd',
+                        label: '一键curd',  
+                        table: false, 
+                        form: {
+                            is: 'el-switch',
+                            default: 0,
+                            update: false,
+                        },
+                    },
+                    {
+                        prop: 'ifshow',
+                        label: '显示菜单',  
+                        table: {sort: true, prop: 'c_ifshow'},
+                        form: {
+                            is: 'el-switch',
+                            default: 1, 
+                        },
+                    },
+                    {
+                        prop: 'logwriting',
+                        label: '写入日志',  
+                        table: {sort: true, prop: 'c_logwriting'},
+                        form: {
+                            is: 'el-switch',
+                            default: 1, 
+                        },
+                    },
+                ],
+            }
+        },
+        methods: {
+            refresh(res) {
+                parent.parentVm.menu = res.publicMenu;
+            }
+        }
+    })
+</script>
+{include file="$footer"}

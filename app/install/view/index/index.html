@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>OneKeyAdmin程序快速安装向导</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+<link rel="shortcut icon" href="{$domain}/upload/favicon.ico" />
+<link rel="stylesheet" type="text/css" href="{$domain}/admin/css/element.min.css" />
+<style type="text/css">
+	[v-cloak]{display: none;}
+	.content{max-width: 1200px;margin:0 auto;border: 1px dashed rgb(71, 71, 71);}
+	.header{display: flex;background-color: rgb(71, 71, 71);padding: 0 30px;}
+	.header .logo{width: 200px;margin-top: 5px;}
+	.header .el-steps{width:calc(100% - 200px);background-color: rgb(71, 71, 71)}
+	.header .el-step__title.is-process{color: rgb(255, 208, 75)}
+	.header .is-process .el-step__icon i{color: rgb(255, 208, 75)}
+	.el-tabs{padding: 30px}
+	.el-tabs__header{display: none}
+	.tip{padding: 8px 16px;background-color: #ecf8ff;border-radius: 4px;border-left: 5px solid #50bfff;margin: 20px 0;margin-left: 40px;}
+	.tip p{font-size: 14px;color: #5e6d82;line-height: 0;}
+</style>
+</head>
+<body>
+<div id="app" v-cloak>
+	<div class="content">
+		<div class="header">
+			<div class="logo"><img src="{$domain}/admin/images/logo.png"></div>
+			<el-steps :active="active" finish-status="success" direction="vertical" simple>
+				<el-step title="填写信息" icon="el-icon-edit"></el-step>
+				<el-step title="安装完成" icon="el-icon-check"></el-step>
+			</el-steps>
+		</div>
+		<el-tabs v-model="active">
+			<el-tab-pane :name="0">
+				<el-form :model="form" :rules="rules" ref="form" label-width="200px">
+					<div class="tip"><p>基本信息</p></div>
+					<el-form-item label="站点名称：" prop="name">
+						<el-input v-model="form.name" placeholder="例：温州市万旗信息科技有限公司"></el-input>
+					</el-form-item>
+					<el-form-item label="邮箱账号：" prop="email">
+						<el-input v-model="form.email" placeholder="邮箱账号非常重要，忘记密码可用它找回"></el-input>
+					</el-form-item>
+					<div class="tip"><p>管理系统配置</p></div>
+					<el-form-item label="管理系统地址：" prop="admin_url">
+						<el-input v-model="form.admin_url" placeholder="例：ok_admin"></el-input>
+					</el-form-item>
+					<el-form-item label="超级管理员账号：" prop="admin_account">
+						<el-input v-model="form.admin_account" placeholder="例：admin"></el-input>
+					</el-form-item>
+					<el-form-item label="超级管理员密码：" prop="admin_password">
+						<el-input v-model="form.admin_password" show-password placeholder="例：123456"></el-input>
+					</el-form-item>
+					<div class="tip"><p>数据库配置</p></div>
+					<el-form-item label="数据库名：" prop="sql_database">
+						<el-input v-model="form.sql_database" placeholder="例：onekeyadmin"></el-input>
+					</el-form-item>
+					<el-form-item label="数据库用户名：" prop="sql_username">
+						<el-input v-model="form.sql_username" placeholder="例：root"></el-input>
+					</el-form-item>
+					<el-form-item label="数据库密码：" prop="sql_password">
+						<el-input v-model="form.sql_password" show-password placeholder="例：root"></el-input>
+					</el-form-item>
+					<div class="tip"><p>安装协议说明(可以免费下载并商业使用，但是请遵守Apache2.0开源协议)</p></div>
+					<el-form-item label="安装协议：" prop="agreement">
+						<el-checkbox v-model="form.agreement" true-label="同意" false-label="">同意安装协议</el-checkbox>
+						<div style="cursor: pointer;color: #50bfff" @click="dialog = true">点击查看OneKeyAdmin安装协议</div>
+					</el-form-item>
+					<el-form-item>
+						<el-button type="primary" @click="submitForm()" :loading="loading">一键安装</el-button>
+						<el-button @click="resetForm()">重置信息</el-button>
+					</el-form-item>
+				</el-form>
+			</el-tab-pane>
+			<el-tab-pane :name="1">
+				<el-card shadow="hover">
+					<el-form label-width="200px">
+						<div class="tip"><p>后台管理系统</p></div>
+						<el-form-item label="后台链接地址：">
+							<el-link :href="domain + '/' + form.admin_url" target="_blank">
+								{{domain}}/{{form.admin_url}}
+							</el-link>
+							<p style="color: #F56C6C" v-if="domain.indexOf('localhost') !== -1">请配置域名访问，<span>{{domain}}</span>无法访问静态资源</p>
+						</el-form-item>
+						<el-form-item label="超级管理员账号：">
+							{{form.admin_account}}
+						</el-form-item>
+						<el-form-item label="超级管理员密码：">
+							{{form.admin_password}}
+						</el-form-item>
+						<div class="tip"><p>以phpstudy集成环境为例</p></div>
+						<el-form-item label="运行目录：">
+							public
+						</el-form-item>
+						<el-form-item label="Apache伪静态：">
+							<div v-text="apacheHead"></div>
+								<div>&nbsp;&nbsp;&nbsp;&nbsp;Options +FollowSymlinks -Multiviews</div>
+								<div>&nbsp;&nbsp;&nbsp;&nbsp;RewriteEngine on</div>
+								<div>&nbsp;&nbsp;&nbsp;&nbsp;RewriteCond %{REQUEST_FILENAME} !-d</div>
+								<div>&nbsp;&nbsp;&nbsp;&nbsp;RewriteCond %{REQUEST_FILENAME} !-f</div>
+								<div>&nbsp;&nbsp;&nbsp;&nbsp;RewriteRule ^(.*)$ index.php [L,E=PATH_INFO:$1]</div>
+							<div v-text="apacheFoot"></div>
+							<div>请将以上代码复制到<span style="color: #E6A23C">public/.htaccess</span>文件中</div>
+						</el-form-item>
+						<el-form-item label="Nginx伪静态：">
+                        	<div>if (!-e $request_filename){</div>
+	                        	<div>&nbsp;&nbsp;&nbsp;&nbsp;rewrite ^(.*)$ /index.php?s=$1 last; break;</div>
+	                        <div>}</div>
+                        	<div>请将以上代码复制到<span style="color: #E6A23C">public/nginx.htaccess</span>文件中</div>
+						</el-form-item>
+					</el-form>
+			    </el-card>
+			</el-tab-pane>
+		</el-tabs>
+	</div>
+	<el-dialog :visible.sync="dialog" width="80%" :close-on-click-modal="false">{$licenses|raw}</el-dialog>
+</div>
+<script type="text/javascript" charset="utf-8" src="{$domain}/admin/js/jquery.min.js"></script>
+<script type="text/javascript" charset="utf-8" src="{$domain}/admin/js/vue.min.js"></script>
+<script type="text/javascript" charset="utf-8" src="{$domain}/admin/js/element.min.js"></script>
+<script type="text/javascript" charset="utf-8" src="{$domain}/admin/js/common.js"></script>
+<script type="text/javascript">
+new Vue({
+    el: '#app',
+    data() {
+        return {
+        	dialog: false,
+        	loading: false,
+        	domain: '{$domain}',
+        	active: {$active},
+        	apacheHead: '<IfModule mod_rewrite.c>',
+        	apacheFoot: '</IfModule>',
+			rules: {
+				name: [
+					{ required: true, message: '请填写站点名称', trigger: 'blur' },
+					{ min: 4, max: 100, message: '长度在 4 到 100 个字符', trigger: 'blur' }
+				],
+				email: [
+					{ required: true, message: '请填写邮箱账号', trigger: 'blur' },
+					{ type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' },
+				],
+				admin_url: [
+					{ required: true, message: '请填写管理系统地址', trigger: 'blur' },
+					{ pattern: /^[A-Za-z0-9_\-]+$/ig, message: '只能输入字母、数字、下划线_、破折号-', trigger: 'blur' },
+					{ min: 5, max: 40, message: '长度在 5 到 40 个字符', trigger: 'blur' }
+				],
+				admin_account: [
+					{ required: true, message: '请填写超级管理员账号', trigger: 'blur' },
+					{ pattern: /^[^\u4e00-\u9fa5]+$/, message: '不能包含中文字符', trigger: 'blur' },
+                    { min: 5, max: 40, message: '长度在 5 到 40 个字符', trigger: 'blur' },
+				],
+				admin_password: [
+					{ required: true, message: '请填写超级管理员密码', trigger: 'blur' },
+					{ pattern: /^[^\u4e00-\u9fa5]+$/, message: '不能包含中文字符', trigger: 'blur' },
+					{ min: 6, max: 40, message: '长度在 6 到 40 个字符', trigger: 'blur' }
+				],
+				sql_username: [
+					{ required: true, message: '请填写数据库用户名', trigger: 'blur' },
+				],
+				sql_password: [
+					{ required: true, message: '请填写数据库密码', trigger: 'blur' },
+				],
+				sql_database: [
+					{ required: true, message: '请填写数据库名', trigger: 'blur' },
+				],
+				agreement: [
+					{ required: true, message: '请同意安装协议', trigger: 'blur' },
+				],
+			},
+			form: {},
+        }
+    },
+    created() {
+    	this.getCache();
+    },
+    methods: {
+    	submitForm() {
+    		let self = this;
+			self.$refs.form.validate((valid) => {
+				if (valid) {
+					self.loading = true;
+					$.ajax({
+						url: '',
+						type: 'post',
+						DataType: 'json',
+						data: self.form,
+						success:function(res) {
+							self.loading = false;
+							if (res.status === 'success') {
+								self.active++;
+								self.setCache();
+							} else {
+								self.$message({showClose: true, message: res.message, type: 'error'});
+							}
+						},
+						error:function(){
+							self.loading = false;
+							self.$message({showClose: true, message: '服务器错误', type: 'error'});
+						}
+					})
+				} else {
+					return false;
+				}
+			});
+    	},
+    	setCache(){
+		    localStorage.setItem('install', JSON.stringify({data: this.form, time: Date.now(), expire: 6*60*60000}));
+		},
+		getCache(){
+		    let val = JSON.parse(localStorage.getItem('install'));
+		    if (! val) return false;
+		    if (Date.now() - val.time > val.expire) return false;
+		    this.form = val.data;
+		},
+    	resetForm() {
+    		this.$refs.form.resetFields();
+    	},
+    },
+})
+</script>
+</body>
+</html>

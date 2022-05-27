@@ -1,0 +1,346 @@
+{include file="$header"}
+<script type="text/javascript" src="/themes/template/static/js/cropper.min.js"></script>
+<div id="app" v-cloak>
+    <div class="el-warp">
+        <div class="el-user">
+            {include file="user/site"}
+            <el-card class="box-card content">
+                <div slot="header" class="clearfix">
+                    <span>{:lang('account settings')}</span> 
+                    <a style="float: right;" :href="url('login/password')">
+                        {:lang('change password')}
+                    </a>
+                </div>
+                <div class="set">
+                    <el-form ref="user" label-width="160px" :model="user" :rules="rules">
+                        <el-form-item prop="account">
+                            <el-image :src="user.cover" :preview-src-list="[user.cover]" style="height: 120px;width: 120px"></el-image>
+                            <div><el-button @click="coverDialog = true" size="small">更换头像</el-button></div>
+                        </el-form-item>
+                        <el-form-item label="{:lang('email')}：" prop="email">
+                            <div>{{user.email}}</div>
+                            <el-button @click="bindShow('email')" size="small">
+                                {{user.email === '' ? lang('bind email') : lang('email change')}}
+                            </el-button>
+                        </el-form-item>
+                        <el-form-item label="{:lang('phone')}：" prop="mobile">
+                            <div>{{user.mobile}}</div>
+                            <el-button @click="bindShow('mobile')" size="small">
+                                {{user.mobile === '' ? lang('bind mobile') : lang('mobile change')}}
+                            </el-button>
+                        </el-form-item>
+                        <el-form-item label="{:lang('nickname')}：" prop="nickname">
+                            <el-input v-model="user.nickname" maxlength="12" show-word-limit></el-input>
+                        </el-form-item>
+                        <el-form-item label="{:lang('sign')}：" prop="describe">
+                            <el-input v-model="user.describe" maxlength="255" show-word-limit></el-input>
+                        </el-form-item>
+                        <el-form-item label="允许TA人访问主页：" prop="describe">
+                            <el-switch
+                                v-model="user.hide"
+                                :active-value="1"
+                                :inactive-value="0">
+                            </el-switch>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="update()" :loading="loading">
+                                {:lang('determine')}
+                            </el-button>
+                        </el-form-item>
+                    </el-form>
+                </div>
+            </el-card>
+        </div>
+    </div>
+    <el-dialog
+        title="更换头像"
+        :visible.sync="coverDialog"
+        width="440px">
+        <label for="uploads" icon="el-icon-upload" size="small" style="padding: 9px 15px;border: 1px solid #DCDFE6">上传本地照片</label>
+        <input type="file" id="uploads" style="position:absolute; clip:rect(0 0 0 0);" accept="image/png, image/jpeg, image/jpg" @change="uploadImg($event, 1)">
+        <div style="margin-bottom: 20px;"></div>
+        <vue-cropper
+            style="width: 400px;height: 400px;"
+            ref="cropper" 
+            mode="cover" 
+            :img="option.img" 
+            :output-size="option.size" 
+            :output-type="option.outputType" 
+            :info="true" 
+            :full="option.full" 
+            :fixed="fixed" 
+            :fixed-number="fixedNumber"
+            :can-move="option.canMove" 
+            :can-move-box="option.canMoveBox" 
+            :fixed-box="option.fixedBox" 
+            :original="option.original"
+            :auto-crop="option.autoCrop" 
+            :auto-crop-width="option.autoCropWidth" 
+            :auto-crop-height="option.autoCropHeight" 
+            :center-box="option.centerBox"
+            :high="option.high"  
+            :max-img-size="option.max" 
+            @real-time="realTime">
+        </vue-cropper>
+        <div style="margin: 20px 0">
+            <el-button @click="changeScale(1)" icon="el-icon-plus" size="small"></el-button>
+            <el-button @click="changeScale(-1)" icon="el-icon-minus" size="small"></el-button>
+            <el-button @click="rotateLeft" icon="el-icon-refresh-left" size="small"></el-button>
+            <el-button @click="rotateRight" icon="el-icon-refresh-right" size="small"></el-button>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="down()" size="small">确 定</el-button>
+            <el-button @click="coverDialog = false" size="small">取 消</el-button>
+        </span>
+    </el-dialog>
+    <el-dialog :title="dialogTitle" :visible.sync="dialog" width="350px" :close-on-click-modal="false">
+        <el-form :model="dialogForm" :rules="dialogRules" ref="dialogForm" @submit.native.prevent>
+            <el-form-item prop="bind">
+                <el-input 
+                    v-model="dialogForm.bind" 
+                    :prefix-icon="bind === 'email' ? 'el-icon-message' : 'el-icon-mobile-phone'" 
+                    :placeholder="bind === 'email' ? lang('please enter email') : lang('please enter mobile')">
+                </el-input>
+            </el-form-item>
+            <el-form-item prop="captcha">
+                <el-input style="width: 194px" v-model="dialogForm.captcha" prefix-icon="el-icon-warning-outline" placeholder="{:lang('graphic verification')}"></el-input>
+                <img style="vertical-align: middle;height: 40px;width: 112px" :src="captcha" @click="getCaptcha()" />
+            </el-form-item>
+            <el-form-item prop="code">
+                <el-input style="width: 194px" v-model="dialogForm.code" prefix-icon="el-icon-time" placeholder="{:lang('please enter the verification code')}"></el-input>
+                <el-button style="width: 112px" @click="getCode()" :disabled="now_interval != 0" :loading="codeLoading">
+                    {{now_interval == 0 ? lang('get verification code') : now_interval + lang('resend in seconds')}}
+                </el-button>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="binding()" :loading="bindLoading">{:lang('determine')}</el-button>
+        </div>
+    </el-dialog>
+</div>
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                user: {:json_encode($userInfo)},
+                loading: false,
+                rules: {
+                    nickname: [
+                        { required: true, message: lang('please enter'), trigger: 'blur' },
+                    ],
+                    describe: [
+                        { required: true, message: lang('please enter'), trigger: 'blur' },
+                    ],
+                },
+                captcha: '',
+                codeLoading: false,
+                bindLoading: false,
+                now_interval: 0,
+                interval: 60,
+                timer: '',
+                bind: '',
+                dialog: false,
+                dialogTitle: '',
+                dialogForm: {
+                    bind: '',
+                    code: '',
+                    captcha: '',
+                },
+                dialogRules: {
+                    bind: [
+                        { required: true, message: lang('please enter'), trigger: 'blur' },
+                    ],
+                    code: [
+                        { required: true, message: lang('please enter'), trigger: 'blur' },
+                    ],
+                    captcha: [
+                        { required: true, message: lang('please enter'), trigger: 'blur' },
+                    ],
+                },
+                // 更换头像
+                previews: {},
+                coverDialog: false,
+                option: {
+                    img: "{$userInfo.cover}",
+                    size: 1,
+                    full: true, // 是否输出原图比例的截图
+                    outputType: 'png', // 输出格式png,jpg,webp
+                    canMove: true, // 拖动图片
+                    fixedBox: true, // 截图框固定大小
+                    original: false, // 上传图片是否显示原始宽高
+                    canMoveBox: true, // 拖动截图框
+                    autoCrop: true, // 是否自动生成截图框
+                    // 只有自动生成截图框后以下配置才能开启
+                    autoCropWidth: 200,
+                    autoCropHeight: 200,
+                    centerBox: true,  // 截图框是否限制在图片里
+                    high: true, // 是否根据dpr生成适合屏幕的高清图片
+                    max: 400
+                },
+                fixed: true,
+                fixedNumber: [1, 1]
+            }
+        },
+        methods: {
+            /**
+             * 提交
+             */
+            update() {
+                let self = this;
+                self.$refs.user.validate((valid) => {
+                    if (valid) {
+                        self.loading = true;
+                        request.post("user/set", self.user, function(res){
+                            self.loading = false;
+                            self.$message({ showClose: true, message: res.message, type: res.status });
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            /**
+             * 绑定
+             */
+            bindShow(bind) {
+                this.bind = bind;
+                this.dialog = true;
+                this.dialogTitle = this.bind === 'email' ? lang('bind email') : lang('bind mobile');
+                this.getCaptcha();
+            },
+            /**
+             * 点击获取邮箱验证码
+             */
+            getCaptcha() {
+                this.captcha = url('login/verify', {rand: Math.random()});
+            },
+            /**
+             * 获取验证码
+             */
+            getCode() {
+                let self = this;
+                if (self.now_interval == 0) {
+                    self.codeLoading = true;
+                    let url = self.bind === 'email' ? 'user/sendBindEmailCode' : 'user/sendBindMobileCode';
+                    let data = {captcha: self.dialogForm.captcha};
+                    data[self.bind] = self.dialogForm.bind;
+                    request.post(url, data, function(res){
+                        if (res.status === 'success') {
+                            self.now_interval = 60;
+                            self.timer  = setInterval(() => {
+                                if (self.now_interval > 0) self.now_interval--;
+                            }, 1000);
+                        } else {
+                            self.$message({ showClose: true, message: res.message, type: res.status});
+                            self.getCaptcha();
+                            self.dialogForm.captcha = '';
+                        }
+                        self.codeLoading = false;
+                    })
+                }
+            },
+            /**
+             * 绑定
+             */
+            binding() {
+                let self = this;
+                self.$refs.dialogForm.validate((valid) => {
+                    if (valid) {
+                        self.bindLoading = true;
+                        let url = self.bind === 'email' ? 'user/bindEmail' : 'user/bindMobile';
+                        let data = self.dialogForm;
+                        data[self.bind] = self.dialogForm.bind;
+                        request.post(url, data, function(res){
+                            if (res.status === "success") {
+                                self.dialog = false;
+                                self.user[self.bind] = self.dialogForm.bind;
+                                self.$refs.dialogForm.resetFields();
+                            }
+                            self.bindLoading = false;
+                            self.$message({ showClose: true, message: res.message, type: res.status});
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            /**
+             * 更换头像
+             */
+            changeScale(num) {
+                num = num || 1
+                this.$refs.cropper.changeScale(num)
+            },
+            rotateLeft() {
+                this.$refs.cropper.rotateLeft()
+            },
+            rotateRight() {
+                this.$refs.cropper.rotateRight()
+            },
+            realTime(data) {
+                this.previews = data;
+            },
+            down() {
+                let self = this;
+                self.$refs.cropper.getCropData((data) => {
+                    let arr = data.split(','), mime = arr[0].match(/:(.*?);/)[1],
+                    bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+                    while(n--){
+                        u8arr[n] = bstr.charCodeAt(n);
+                    }
+                    let file = new File([u8arr], 'header.' + self.option.outputType, {type:mime});
+                    let formData = new FormData();
+                    formData.append('file', file);
+                    $.ajax({
+                        url: url('user/upload'),
+                        type: 'post',
+                        data: formData,
+                        async:false,
+                        cache:false,
+                        contentType:false,
+                        processData:false,
+                        success:function(res) {
+                            if (res.status === 'login') location.reload();
+                            if (res.status === 'success') {
+                                self.user = Object.assign({}, self.user, {cover: res.data});
+                                self.update();
+                            } else {
+                                self.$message({showClose: true, message: res.message, type: res.status});
+                            }
+                            self.coverDialog = false;
+                        },
+                        error:function(res) {
+                            self.$message({showClose: true, message: lang('system error'), type: 'error'});
+                            self.coverDialog = false;
+                        }
+                    })
+                })
+            },
+            uploadImg(e, num) {
+                var file = e.target.files[0]
+                if (!/\.(jpg|jpeg|png|JPG|PNG)$/.test(e.target.value)) {
+                    self.$message({ showClose: true, message: '只允许jpg、jpeg、png格式', type: 'errpr'});
+                    return false
+                }
+                var reader = new FileReader()
+                reader.onload = (e) => {
+                    let data;
+                    if (typeof e.target.result === 'object') {
+                        data = window.URL.createObjectURL(new Blob([e.target.result]));
+                    } else {
+                        data = e.target.result;
+                    }
+                    if (num === 1) {
+                        this.option.img = data;
+                    } else if (num === 2) {
+                        this.example2.img = data;
+                    }
+                }
+                reader.readAsArrayBuffer(file);
+            },
+        }
+    });
+</script>
+</body>
+</html>

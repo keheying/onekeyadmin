@@ -1,0 +1,34 @@
+{include file="$header"}
+<div id="app" v-cloak>
+    <el-curd :field="field" :search-keyword="false" :search-date="false"></el-curd>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                field: [
+                    {
+                        prop: 'id', 
+                        label: '编号', 
+                        table: false,
+                    },
+                    {
+                        prop: 'user', 
+                        label: '用户', 
+                        table: {is: 'object', child: ['email','mobile']}
+                    },
+                    {
+                        prop: 'explain', 
+                        label: '操作说明', 
+                    },
+                    {
+                        prop: 'create_time', 
+                        label: '记录日期', 
+                    },
+                ],
+            }
+        },
+    });
+</script>
+{include file="$footer"}

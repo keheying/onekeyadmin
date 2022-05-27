@@ -1,0 +1,299 @@
+{include file="$header"}
+<div id="app" v-cloak>
+	<el-container class="el-index">
+		<el-aside :width="asideWidth">
+	        <a class="header" href="/" target="_blank">
+	        	<i class="iconfont icon-onekey"></i><span>OneKeyAdmin</span>
+	        </a>
+	        <el-menu class="menu" :default-active="path" :collapse="isCollapse" text-color="#fff" active-text-color="#fff" @select="clickMenu">
+	            <template v-for="(item, index) in menuTree" :key="index">
+	                <template v-if="item.children">
+	                    <el-submenu :index="item.path" :key="item.path">
+	                        <template slot="title">
+	                            <img class="el-menu-icon" :src="item.icon" />
+	                            <span slot="title">{{item.title}}</span>
+	                            <span v-if="item.unread" class="is-dot"><span></span></span>
+	                        </template>
+	                        <template v-for="(subItem,subIndex) in item.children" :key="subIndex">
+	                            <el-submenu v-if="subItem.children" :index="subItem.path" :key="subItem.path">
+	                                <template slot="title">
+		                                {{subItem.title}}
+		                                <span v-if="subItem.unread" class="is-dot"><span></span></span>
+		                            </template>
+	                                <el-menu-item v-for="(threeItem,i) in subItem.children" :key="i" :index="threeItem.path">
+	                                    {{threeItem.title}}
+	                                    <span v-if="threeItem.unread" class="is-dot"><span></span></span>
+	                                </el-menu-item>
+	                            </el-submenu>
+	                            <el-menu-item v-else :index="subItem.path" :key="subItem.path">
+	                                {{subItem.title}}
+	                                <span v-if="subItem.unread" class="is-dot"><span></span></span>
+	                            </el-menu-item>
+	                        </template>
+	                    </el-submenu>
+	                </template>
+	                <template v-else>
+	                    <el-menu-item :index="item.path" :key="item.path">
+	                        <img class="el-menu-icon" :src="item.icon" />
+	                        <span slot="title">{{item.title}}</span>
+	                        <span v-if="item.unread" class="is-dot"><span></span></span>
+	                    </el-menu-item>
+	                </template>
+	            </template>
+	        </el-menu>
+	    </el-aside>
+		<el-container>
+			<el-header>
+				<row :gutter="10">
+					<el-col :md="12">
+						<div class="el-notice">
+							<i class="iconfont" :class="isCollapse ? 'icon-caidanyou' : 'icon-caidanzuo01'" @click="isCollapse = !isCollapse"></i>
+					        <i class="iconfont icon-bobao"></i>
+					        <ul :class="{top: animate}">
+					            <li v-for="(item,index) in horn" :key="index" v-html="item"></li>
+					        </ul>
+					    </div>
+					</el-col>
+					<el-col :md="12">
+						<div class="el-right-panel">
+							<el-dropdown class="el-language-dropdown" @command="langClick">
+								<div>
+									<img :src="languageArr.cover">
+									<span>{{languageArr.title}}</span>
+									<i class="el-icon-arrow-down el-icon--right"></i>
+								</div>
+								<el-dropdown-menu slot="dropdown">
+									<el-dropdown-item v-for="(item, index) in langAllow" :key="index" :command="item.name">
+										<img class="el-language-item" :src="item.cover">{{item.title}}
+									</el-dropdown-item>
+								</el-dropdown-menu>
+							</el-dropdown>
+							<span class="item" @click="cacheClear()"><span class="iconfont icon-qingchuhuancun1"></span>清除缓存</span>
+							<span class="item" @click="systemCheck()"><span class="iconfont icon-gengxin"></span>检测更新</span>
+							<el-dropdown class="el-userinfo-dropdown" @command="userClick">
+								<div>
+									<el-avatar size="medium" :src="userInfo.cover">
+										<img src="/admin/images/error.png"/>
+									</el-avatar>
+									<span>{{userInfo.nickname}}</span>
+									<i class="el-icon-arrow-down el-icon--right"></i>
+								</div>
+								<el-dropdown-menu slot="dropdown">
+									<el-dropdown-item command="personal">个人中心</el-dropdown-item>
+									<el-dropdown-item command="logout">退出登录</el-dropdown-item>
+								</el-dropdown-menu>
+							</el-dropdown>
+						</div>
+						<el-dialog 
+							top="120px" 
+							width="800px"
+							:title="'当前版本：'+version" 
+							:visible.sync="dialogCheck" 
+							:close-on-click-modal="false">
+				            <div v-loading="loadingCheck">
+				                <div v-if="versionList.length > 0">
+				                    <el-timeline v-for="(item, index) in versionList">
+				                        <el-timeline-item :timestamp="item.c_version" placement="top">
+					                        <el-card>
+					                            <div v-html="item.content"></div>
+					                            <p style="margin-top: 10px">版本提交于 {{item.create_time}}</p>
+					                        </el-card>
+					                    </el-timeline-item>
+					                </el-timeline>
+				                </div>
+				                <div v-else>
+				                    已经是最新版本啦~
+				                </div>
+				            </div>
+				            <span slot="footer" class="dialog-footer">
+				                <el-button size="small" @click="dialogCheck = false">关 闭</el-button>
+				                <el-button v-if="versionList.length > 0" size="small" type="primary" @click="systemUpdate()" :disabled="loadingUpdate">
+				                    {{loadingUpdate ? loadingTitle : '开始更新'}}
+				                </el-button>
+				            </span>
+				        </el-dialog>
+			        </el-col>
+			    </row>
+		    </el-header>
+		    <el-tabs type="card" v-model="path" @tab-remove="removeTab" closable>
+	            <el-tab-pane v-for="(item, index) in tabs" :key="item.path" :name="item.path" :label="item.title"></el-tab-pane>
+	        </el-tabs>
+	        <el-main><iframe :src="url(path)"></iframe></el-main>
+		</el-container>
+	</el-container>
+</div>
+<script> 
+	var parentVm = new Vue({
+		el: '#app',
+		data () {
+	        return {
+	        	menu: {:json_encode($menu)},
+	            horn: {:json_encode($notification)},
+	            version: "{$version}",
+	            userInfo: userInfo,
+	            language: language,
+	            langAllow: langAllow,
+	            versionList: [],
+	            tabs: [],
+	            path: "",
+	            animate: false,
+	            isCollapse: false,
+	            dialogCheck: false,
+	            loadingCheck: false,
+	            loadingUpdate: false,
+	            loadingTitle: '开始更新',
+	            updateUrl: 'index/update',
+	            cacheClearUrl: 'index/cacheClear',
+	            checkUpdateUrl: 'index/checkUpdate',
+	        }
+	    },
+	    computed: {
+	    	asideWidth() {
+	    		return this.isCollapse ? '64px' : '266px'; 
+	    	},
+	    	menuTree() {
+	    		return tree.convert(this.menu);
+	    	},
+	        languageArr() {
+	            let index = common.arrayIndex(this.langAllow, this.language, 'name');
+	            return index === -1 ? "" : this.langAllow[index];
+	        },
+	    },
+	    created() {
+	    	this.init();
+	    	setInterval(this.showMarquee, 4000);
+	    },
+	    methods: {
+	    	/**
+	    	 * 初始化
+	    	 */
+	    	init() {
+	    		// 控制台选项
+	    		let consoleIndex = common.arrayIndex(this.menu, 'console/index', 'path');
+	    		if (consoleIndex !== -1) {
+	    			this.tabs.push(this.menu[consoleIndex]);
+	    		}
+	    		// 当前路由选项
+		        let route = window.location.hash === "" ? '#console/index' : window.location.hash;
+		        this.path = route.replace('#', '');
+	    	},
+	        /**
+	         * 点击菜单
+	         * @param  {Object} path 路径
+	         */
+	        clickMenu(path) {
+	            if (path !== this.path) {
+	            	this.path = path;
+	            }
+	        },
+	        /**
+	         * 删除导航项
+	         * @param  {String} targetName 导航项
+	         */
+	        removeTab(targetName) {
+	            let index = common.arrayIndex(this.tabs, targetName, 'path');
+	            this.tabs.splice(index, 1);
+	            if (targetName === this.path) this.path = this.tabs[index-1]['path'];
+	        },
+	        /**
+	         * 用户选择项
+	         * @param  {Object} item
+	         */
+	        userClick(item) {
+	            switch (item) {
+                    case 'personal':
+                        this.clickMenu('admin/personal');
+                        break;
+                    case 'logout':
+                        location.href = url('login/logout');
+                        break;
+                }
+	        },
+	        /**
+	         * 系统更新
+	         */
+	        systemUpdate(key = 0) {
+	            let self = this;
+	            let cversion = self.versionList[key]['c_version'];
+	            let version  = self.versionList[key]['version'];
+	            self.loadingUpdate = true;
+	            self.loadingTitle  = '开始安装：' + cversion;
+	            request.post(self.updateUrl,{version: version},function(res){
+	                if (res.status === 'success') {
+	                    if (res.isnew === 1) {
+	                        self.loadingTitle = '更新完成';
+	                        setTimeout(() => {
+			                    location.reload();
+			                }, 1000);
+	                    } else {
+	                        self.loadingTitle = '更新至：' + cversion;
+	                        key++;
+	                        self.systemUpdate(key);
+	                    }
+	                }
+	            })
+	        },
+	        /**
+	         * 检测更新
+	         */
+	        systemCheck() {
+	        	let self = this;
+	        	self.dialogCheck = true;
+                self.loadingCheck = true;
+                request.post(self.checkUpdateUrl,{},function(res){
+                    if (res.status === 'success') {
+                        self.versionList = res.data;
+                    } else {
+                        self.$message({ showClose: true, message: res.message, type: res.status });
+                    }
+                    self.loadingCheck = false;
+                })
+	        },
+	        /**
+	         * 访问站点
+	         */
+	        visitSite() {
+	        	window.open('/');
+	        },
+	        /**
+	         * 清除缓存
+	         */
+	        cacheClear() {
+	        	let self = this;
+	        	request.post(self.cacheClearUrl,{},function(res){
+                    self.$message({ showClose: true, message: res.message, type: res.status });
+                })
+	        },
+	        /**
+	         * 选择语言
+	         */
+	        langClick(name) {
+	            locationUrl.set('lang', name);
+	        },
+	        /**
+			 * 文字通告
+			 */
+	        showMarquee() {
+	            if (this.horn.length > 1) {
+	                this.animate = true;
+	                setTimeout(() => {
+	                    this.horn.push(this.horn[0]);
+	                    this.horn.shift();
+	                    this.animate = false;
+	                }, 1000);
+	            } else {
+	                this.animate = false;
+	            }
+	        },
+	    },
+	    watch: {
+	    	path(path) {
+	    		window.location.hash = path;
+	    		let pathIndex = common.arrayIndex(this.menu, path, 'path');
+                let tabsIndex = common.arrayIndex(this.tabs, path, 'path');
+                if (tabsIndex === -1) this.tabs.push(this.menu[pathIndex]);
+	    	},
+	    }
+	})
+</script>
+{include file="$footer"}

@@ -1,0 +1,121 @@
+{include file="$header"}
+<div id="app" v-cloak>
+    <div class="el-warp">
+        <div class="el-user">
+            {include file="user/site"}
+            <el-card class="box-card content">
+                <div slot="header" class="search">
+                    <el-input size="small" @keyup.enter.native="searchList" placeholder="{:lang('search')}" v-model="search.keyword">
+                        <el-button slot="append" icon="el-icon-search" @click="searchList"></el-button>
+                    </el-input>
+                    <el-date-picker
+                        size="small"
+                        v-model="search.date"
+                        type="daterange"
+                        align="right"
+                        unlink-panels
+                        range-separator="{:lang('to')}"
+                        start-placeholder="{:lang('start date')}"
+                        end-placeholder="{:lang('end date')}"
+                        format="yyyy-MM-dd"
+                        value-format="yyyy-MM-dd"
+                        :picker-options="pickerOptions"
+                        @change="searchList">
+                    </el-date-picker>
+                    <div style="float: right;line-height: 33px">
+                        {:lang('current integral')}：{$userInfo.now_integral}
+                    </div>
+                </div>
+                <div class="list" v-infinite-scroll="list" :infinite-scroll-disabled="disabled">
+                    <div class="item" v-for="(item, index) in data">
+                        <div class="explain">{{lang(item.explain)}}<div class="time">{{common.diaplayTime(item.create_time)}}</div></div>
+                        <div class="number" :style="{color: item.inc == 1 ? '#18bc9c' : '#dd4a68'}">{{item.inc === 1 ? '+' : '-'}}{{item.number}}</div>
+                    </div>
+                    <div v-if="loading" class="el-loader">{:lang('loading')}</div>
+                    <div v-if="noMore && loading === false" class="el-nomore">{:lang('no more')}</div>
+                </div>
+            </el-card>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                data: [],
+                search:{
+                    page: 1,
+                    date: [],
+                    keyword: "",
+                },
+                loading: false,
+                pickerOptions: {
+                    shortcuts: [{
+                        text: lang('last week'),
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            end.setTime(start.getTime() + 3600 * 1000 * 24 * 1);
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, {
+                        text: lang('last month'),
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            end.setTime(start.getTime() + 3600 * 1000 * 24 * 1);
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, {
+                        text: lang('last three months'),
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            end.setTime(start.getTime() + 3600 * 1000 * 24 * 1);
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }]
+                },
+            }
+        },
+        computed: {
+            noMore() {
+                return this.count <= this.data.length;
+            },
+            disabled() {
+                return this.loading || this.noMore;
+            }
+        },
+        methods: {
+            /**
+             * 加载列表
+             */
+            list() {
+                let self = this;
+                self.loading = true;
+                request.post('user/integral', self.search, function (res) {
+                    if (res.status === 'success') {
+                        self.search.page++;
+                        self.data  = self.data.concat(res.data);
+                        self.count = res.count;
+                    }
+                    self.loading = false;
+                })
+            },
+            /**
+             * 搜索
+             */
+            searchList() {
+                this.search.page = 1;
+                this.data = [];
+                this.list();
+            },
+        },
+    });
+</script>
+</body>
+</html>

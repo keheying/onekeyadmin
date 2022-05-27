@@ -1,0 +1,57 @@
+{include file="$header"}
+<div id="app" v-cloak>
+    <el-curd 
+        :field="field" 
+        :search-date="false" 
+        :table-sort="{prop: 'id', order: 'asc'}">
+    </el-curd>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                field: [
+                    {
+                        label: '编号', 
+                        prop: 'id',
+                        table: false,
+                    },
+                    {
+                        label: '名称', 
+                        prop: 'title', 
+                        table: {sort: true},
+                        form:{
+                            rules: [
+                                {required: true,message: '名称不能为空'},
+                            ]
+                        }
+                    },
+                    {
+                        prop: 'status', 
+                        label: '状态',  
+                        table: {prop: 'c_status', sort: true},
+                        form: {
+                            is: 'el-switch', 
+                            default: 1,
+                            rules: [
+                                {required: true,message: '状态不能为空'},
+                            ]
+                        }
+                    },
+                    {
+                        prop: 'role', 
+                        label: '权限', 
+                        table: false, 
+                        form: {
+                            is: 'el-tree-menu',
+                            list: {:json_encode($menu)}, 
+                            default: [],
+                        },
+                    }
+                ]
+            }
+        },
+    })
+</script>
+{include file="$footer"}

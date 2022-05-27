@@ -1,0 +1,126 @@
+{include file="$header"}
+<div id="app" v-cloak>
+    <div class="el-login-wrapper">
+        <div class="container">
+            <div class="side">
+                <div class="logo">
+                    <img src="/admin/images/logo.png">
+                </div>
+                <div class="comments">
+                框架易于功能扩展，代码维护，方便二次开发，帮助开发者简单高效降低二次开发成本，满足专注业务深度开发的需求。
+                架构科学，轻松支持上千万数据、千万PV；支持全站静态化，动态页面局部静态化等为您快速建站，也是企业级项目产品原型的良好选择。
+                插件应用与界面主题一键式开发程序，他将是您轻松建站的首选利器。
+                </div>
+                <div class="footer">
+                    <a href="{:config('app.api')}" target="_blank">©&nbsp;onekeyadmin.com&nbsp;</a>
+                    <a href="{:config('app.api')}/blog.html" target="_blank">论坛专区</a>
+                    <a href="{:config('app.api')}/api/system/docs.html" target="_blank">帮助文档</a>
+                    <a href="{:config('app.api')}/api/user/developer.html" target="_blank">认证成为开发者</a>
+                </div>
+            </div>
+            <div class="form">
+                <div class="title">管理员登录</div>
+                <div class="ctitle">ADMIN USER LOGIN</div>
+                <el-form :model="loginForm" :rules="rules" ref="loginForm" @submit.native.prevent>
+                    <template v-if="captchaShow">
+                        <el-form-item v-if="captcha !== '' " prop="captcha">
+                            <img :src="captcha" @click="getCaptcha()" />
+                            <el-input v-model="loginForm.captcha" placeholder="请输入上方的图形验证码" @keyup.enter.native="submitForm()"></el-input>
+                        </el-form-item>
+                        <el-button @click="submitForm()"  :loading="loading" plain :disabled="loginForm.captcha.length === 4 ? false : true">验证</el-button>
+                    </template>
+                    <template v-else>
+                        <el-form-item prop="loginAccount">
+                            <el-input v-model="loginForm.loginAccount" prefix-icon="el-icon-user" placeholder="请输入账号/邮箱号" @keyup.enter.native="getCaptcha()">
+                            </el-input>
+                        </el-form-item>
+                        <el-form-item prop="loginPassword">
+                            <el-input v-model="loginForm.loginPassword" prefix-icon="el-icon-key" placeholder="请输入密码" show-password @keyup.enter.native="getCaptcha()">
+                            </el-input>
+                        </el-form-item>
+                        <el-form-item prop="checked">
+                            <el-checkbox v-model="loginForm.checked">两周内自动登录</el-checkbox>
+                        </el-form-item>
+                        <el-button @click="getCaptcha()" :loading="loading" plain>
+                            登录
+                        </el-button>
+                        <div class="footer">
+                            <a href="password">已有账号，忘记密码？</a>
+                        </div>
+                    </template>
+                </el-form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                loading: false,
+                captcha: "",
+                captchaShow: false,
+                loginForm: {
+                    loginAccount: "",
+                    loginPassword: "",
+                    captcha: "",
+                    checked: false,
+                },
+                rules: {
+                    loginAccount: [
+                        { required: true, message: '请输入账号/邮箱号', trigger: 'blur' },
+                    ],
+                    loginPassword: [
+                        { required: true, message: '请输入密码', trigger: 'blur' },
+                    ],  
+                    captcha: [
+                        { min: 4, message: '验证码长度有误', trigger: 'blur' }
+                    ],  
+                },
+            }
+        },
+        methods: {
+            /**
+             * 准备登录
+             */
+            getCaptcha() {
+                let self = this;
+                request.post('login/isNeedVerification', {}, function(res){
+                    let link  = url('login/verify');
+                    let param = link.indexOf('?') === -1 ? '?' : '&';
+                    self.captcha = res.status === 'error' ? link + param + Math.random() : '';
+                    self.$refs.loginForm.validate((valid) => {
+                        if (valid) {
+                            if (self.captcha !== '') {
+                                self.captchaShow  = true;
+                            } else {
+                                self.submitForm();
+                            }
+                        } else {
+                            return false;
+                        }
+                    });
+                })
+            },
+            /**
+             * 登录
+             */
+            submitForm() {
+                let self = this;
+                self.loading = true;
+                request.post('login/index', self.loginForm, function (res){
+                    self.loading = false;
+                    if(res.status === 'success'){
+                        location.href = res.url;
+                    } else {
+                        self.captchaShow = false;
+                        self.loginForm.captcha = "";
+                        self.$message({ showClose: true, message: res.message, type: res.status});
+                    }
+                })
+            },
+        },
+    })
+</script>
+{include file="$footer"}

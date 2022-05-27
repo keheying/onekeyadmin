@@ -1,0 +1,20 @@
+<div id="footer" v-cloak>
+	<div class="el-footer">
+		<div class="el-warp">
+			<el-row :gutter="30">
+				<el-col :md="12" :sm="24">{$system.copyright}</el-col>
+				<el-col class="right" :md="12" :sm="24">{$system.icp|raw}</el-col>
+			</el-row>
+		</div>
+	</div>
+</div>
+<script>
+    new Vue({
+        el: '#footer',
+        data() {
+            return {}
+        },
+    })
+</script>
+</body>
+</html>

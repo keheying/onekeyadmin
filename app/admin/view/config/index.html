@@ -1,0 +1,328 @@
+{include file="$header"}
+<div id="app" v-cloak>
+	<div class="el-layout">
+		<el-tabs v-model="tabs" tab-position="left">
+			<el-tab-pane label="基础配置" name="system">
+			    <div class="el-pane-warp">
+					<el-form ref="systemForm" :model="systemForm" label-width="120px">
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.company}{/literal}"><div>公司名称：</div></el-tooltip></div>
+							</template>
+							<el-input v-model="systemForm.company"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.email}{/literal}"><div>公司邮箱：</div></el-tooltip></div>
+							</template>
+							<el-input v-model="systemForm.email"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.telephone}{/literal}"><div>公司电话：</div></el-tooltip></div>
+							</template>
+							<el-input v-model="systemForm.telephone"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.phone}{/literal}"><div>手机号码：</div></el-tooltip></div>
+							</template>
+							<el-input v-model="systemForm.phone"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.fax}{/literal}"><div>公司传真：</div></el-tooltip></div>
+							</template>
+							<el-input v-model="systemForm.fax"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.address}{/literal}"><div>公司地址：</div></el-tooltip></div>
+							</template>
+							<el-input v-model="systemForm.address"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.business_hours}{/literal}"><div>营业时间：</div></el-tooltip></div>
+							</template>
+							<el-input v-model="systemForm.business_hours"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.wechat}{/literal}"><div>网站微信号：</div></el-tooltip></div>
+							</template>
+							<el-input v-model="systemForm.wechat"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.qq}{/literal}"><div>网站QQ号：</div></el-tooltip></div>
+							</template>
+							<el-input v-model="systemForm.qq"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.ico}{/literal}"><div>地址栏ico：</div></el-tooltip></div>
+							</template>
+							<el-upload
+	                            :action="url('file/uploadAppoint')"
+	                            :data="{name: 'favicon', ext: 'ico'}"
+	                            :show-file-list="false"
+	                            :on-success="icoSuccess"
+	                            accept=".ico">
+	                            <el-image :src="systemForm.ico" style="width: 30px;height: 30px;">
+	                                <div slot="error" class="image-slot">
+	                                    <img class="error-image" src="/admin/images/error.png"/>
+	                                </div>
+	                            </el-image>
+	                        </el-upload>
+	                        <span>
+	                        	<div class="tips">建议尺寸 32 * 32 (像素)的.ico文件。<a href="https://www.baidu.com/s?wd=ico" target="_blank">点击制作ICO</a> 如果无法正常显示新上传图标，请空浏览器缓存后访问。</div>
+	                        </span>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.logo}{/literal}"><div>网站Logo：</div></el-tooltip></div>
+							</template>
+							<el-file-select v-model="systemForm.logo"></el-file-select>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.copy_logo}{/literal}"><div>网站Logo副本：</div></el-tooltip></div>
+							</template>
+							<el-file-select v-model="systemForm.copy_logo"></el-file-select>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.wechat_qrcode}{/literal}"><div>公众号二维码：</div></el-tooltip></div>
+							</template>
+							<el-file-select v-model="systemForm.wechat_qrcode"></el-file-select>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.seo_title}{/literal}"><div>网站标题：</div></el-tooltip></div>
+							</template>
+							<el-input v-model="systemForm.seo_title"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.seo_keywords}{/literal}"><div>网站关键词：</div></el-tooltip></div>
+							</template>
+							<el-input v-model="systemForm.seo_keywords" placeholder="关键词请用逗号(,)隔开"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.seo_description}{/literal}"><div>网站描述：</div></el-tooltip></div>
+							</template>
+							<el-input type="textarea" v-model="systemForm.seo_description"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.copyright}{/literal}"><div>版权信息：</div></el-tooltip></div>
+							</template>
+							<el-input v-model="systemForm.copyright"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<template slot="label">
+								<div><el-tooltip placement="top" content="{literal}{$system.icp|raw}{/literal}"><div>备案号：</div></el-tooltip></div>
+							</template>
+							<el-editor v-model="systemForm.icp"></el-editor>
+						</el-form-item>
+					</el-form>
+					<div class="el-bottom">
+						<el-button 
+							size="medium"
+							:loading="loading" 
+							type="primary" 
+							icon="el-icon-refresh-right" 
+							@click="saveConfig('基础配置', systemForm)">
+							保 存
+						</el-button>
+					</div>
+				</div>
+			</el-tab-pane>
+			<el-tab-pane label="主题配置" :name="themesForm.name">
+				<div class="el-pane-warp">
+					<el-form label-width="0">
+		                <el-form-item>
+		                    <el-field v-model="themesForm.config" label-position="top" variable="system" :repeat="systemForm"></el-field>
+		                </el-form-item>
+		            </el-form>
+		            <div class="el-bottom">
+						<el-button 
+							size="medium"
+							:loading="loading" 
+							type="primary" 
+							icon="el-icon-refresh-right" 
+							@click="saveConfig(themesForm.title + '主题配置', themesForm.config, 'theme')">
+							保 存
+						</el-button>
+					</div>
+				</div>
+			</el-tab-pane>
+			<el-tab-pane label="邮箱配置" name="email">
+				<div class="el-pane-warp">
+					<el-form ref="emailForm" :model="emailForm" label-width="150px">
+						<el-form-item label="SMTP服务器地址：" prop="smtp">
+							<el-input v-model="emailForm.smtp" placeholder="如：smtp.qq.com"></el-input>
+						</el-form-item>
+						<el-form-item label="发件人邮箱：" prop="email">
+							<el-input v-model="emailForm.email" placeholder="如：xxxx@qq.com"></el-input>
+						</el-form-item>
+						<el-form-item label="发件人名字：" prop="sender">
+							<el-input v-model="emailForm.sender" placeholder="如：OneKeyAdmin"></el-input>
+						</el-form-item>
+						<el-form-item label="客户端授权密码：" prop="password">
+							<el-input type="password" v-model="emailForm.password" show-password></el-input>
+							例：获取QQ邮箱客户端授权密码，登录<a href="https://mail.qq.com/" target="_blank">QQ邮箱</a>->点击首页左上角设置->账户->账户安全->生成授权码
+						</el-form-item>
+						<el-form-item label="协议方式：" prop="sendstyle">
+							<el-radio-group v-model="emailForm.sendstyle">
+								<el-radio label="ssl">ssl协议</el-radio>
+								<el-radio label="tls">tls协议</el-radio>
+							</el-radio-group>
+						</el-form-item>
+					</el-form>
+					<div class="el-bottom">
+						<el-button 
+							size="medium"
+							:loading="loading" 
+							type="primary" 
+							icon="el-icon-refresh-right" 
+							@click="saveConfig('邮箱配置', emailForm)">
+							保 存
+						</el-button>
+					</div>
+				</div>
+			</el-tab-pane>
+			<el-tab-pane label="会员配置" name="user">
+				<div class="el-pane-warp">
+					<el-form label-width="0">
+		                <el-form-item>
+		                    <el-field v-model="userForm" label-position="left" variable="system" label-width="150px" :ifset="false"></el-field>
+		                </el-form-item>
+		            </el-form>
+		            <div class="el-bottom">
+						<el-button 
+							size="medium"
+							:loading="loading" 
+							type="primary" 
+							icon="el-icon-refresh-right" 
+							@click="saveConfig('会员配置', userForm)">
+							保 存
+						</el-button>
+					</div>
+				</div>
+			</el-tab-pane>
+			<el-tab-pane label="上传限制" name="upload">
+				<div class="el-pane-warp">
+					<el-form ref="uploadForm" :model="uploadForm" label-width="170px">
+						<el-form-item label="管理员上传图片限制：">
+							<el-input style="max-width: 500px;" v-model="uploadForm.admin.ext.image" placeholder="支持上传的文件格式以逗号(,)隔开"></el-input>
+							<el-input style="max-width: 150px;" v-model="uploadForm.admin.size.image">
+								<template slot="append">MB</template>
+							</el-input>
+						</el-form-item>
+						<el-form-item label="管理员上传视频限制：">
+							<el-input style="max-width: 500px;" v-model="uploadForm.admin.ext.video" placeholder="支持上传的文件格式以逗号(,)隔开"></el-input>
+							<el-input style="max-width: 150px;" v-model="uploadForm.admin.size.video">
+								<template slot="append">MB</template>
+							</el-input>
+						</el-form-item>
+						<el-form-item label="管理员上传音频限制：">
+							<el-input style="max-width: 500px;" v-model="uploadForm.admin.ext.audio" placeholder="支持上传的文件格式以逗号(,)隔开"></el-input>
+							<el-input style="max-width: 150px;" v-model="uploadForm.admin.size.audio">
+								<template slot="append">MB</template>
+							</el-input>
+						</el-form-item>
+						<el-form-item label="管理员上传文档限制：">
+							<el-input style="max-width: 500px;" v-model="uploadForm.admin.ext.word" placeholder="支持上传的文件格式以逗号(,)隔开"></el-input>
+							<el-input style="max-width: 150px;" v-model="uploadForm.admin.size.word">
+								<template slot="append">MB</template>
+							</el-input>
+						</el-form-item>
+						<el-form-item label="管理员上传其它限制：">
+							<el-input style="max-width: 500px;" v-model="uploadForm.admin.ext.other" placeholder="支持上传的文件格式以逗号(,)隔开"></el-input>
+							<el-input style="max-width: 150px;" v-model="uploadForm.admin.size.other">
+								<template slot="append">MB</template>
+							</el-input>
+						</el-form-item>
+						<el-form-item label="会员上传图片限制：">
+							<el-input style="max-width: 500px;" v-model="uploadForm.index.ext.image" placeholder="支持上传的文件格式以逗号(,)隔开"></el-input>
+							<el-input style="max-width: 150px;" v-model="uploadForm.index.size.image">
+								<template slot="append">MB</template>
+							</el-input>
+						</el-form-item>
+					</el-form>
+					<div class="el-bottom">
+						<el-button 
+							size="medium"
+							:loading="loading" 
+							type="primary" 
+							icon="el-icon-refresh-right" 
+							@click="saveConfig('上传限制', uploadForm)">
+							保 存
+						</el-button>
+					</div>
+				</div>
+			</el-tab-pane>
+		</el-tabs>
+	</div>
+</div>
+<script>
+	new Vue({
+	    el: '#app',
+	    data() {
+	        return {
+	        	tabs: 'system',
+	        	editUrl: "config/update",
+	        	loading: false,
+	        	emailForm: {:json_encode($email)},
+	        	systemForm: {:json_encode($system)},
+	        	userForm: {:json_encode($user)},
+	        	uploadForm: {:json_encode($upload)},
+	        	themesForm: {:json_encode($theme)},
+	        }
+	    },
+        created() {
+        	this.uploadForm.index.size.image = this.uploadForm.index.size.image / 1024 / 1024;
+        	this.uploadForm.admin.size.image = this.uploadForm.admin.size.image / 1024 / 1024;
+        	this.uploadForm.admin.size.video = this.uploadForm.admin.size.video / 1024 / 1024;
+        	this.uploadForm.admin.size.audio = this.uploadForm.admin.size.audio / 1024 / 1024;
+        	this.uploadForm.admin.size.word  = this.uploadForm.admin.size.word  / 1024 / 1024;
+        	this.uploadForm.admin.size.other = this.uploadForm.admin.size.other / 1024 / 1024;
+        },
+	    methods: {
+	        /**
+             * 保存基础配置
+             */
+	        saveConfig(title, value) {
+	        	let self = this;
+	        	let row  = JSON.parse(JSON.stringify(value));
+	        	if (self.tabs === 'upload') {
+	        		row.index.size.image = row.index.size.image * 1024 * 1024;
+		        	row.admin.size.image = row.admin.size.image * 1024 * 1024;
+		        	row.admin.size.video = row.admin.size.video * 1024 * 1024;
+		        	row.admin.size.audio = row.admin.size.audio * 1024 * 1024;
+		        	row.admin.size.word  = row.admin.size.word  * 1024 * 1024;
+		        	row.admin.size.other = row.admin.size.other * 1024 * 1024;
+	        	}
+	        	self.loading = true;
+	        	request.post(self.editUrl, {title: title, name: self.tabs, value: row}, function(res){
+                    self.loading = false;
+                    self.$message({showClose: true, message: res.message, type: res.status});
+                });
+	        },
+	        /**
+	         * ico设置成功
+	         */
+	        icoSuccess(res, file) {
+	            if (res.status === 'success') {
+	            	this.systemForm = Object.assign({}, this.systemForm, {ico: res.url + '?' + Math.floor(Math.random()*10000000)});
+	            } else {
+	                this.$message.error(res.message);
+	            }
+	        },
+	    },
+	})
+</script>
+{include file="$footer"}

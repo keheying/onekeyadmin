@@ -1,0 +1,102 @@
+{include file="$header"}
+<div id="app" v-cloak>
+    <div class="el-personal">
+        <el-form
+            :model="formData" 
+            ref="formData" 
+            :rules="formRules" 
+            label-width="70px">
+            <el-form-item label="头像：" prop="cover">
+                <el-file-select v-model="formData.cover"></el-file-select>
+            </el-form-item>
+            <el-form-item label="昵称：" prop="nickname">
+                <el-input v-model="formData.nickname" placeholder="请输入管理员昵称" maxlength="40" show-word-limit></el-input>
+            </el-form-item>
+            <el-form-item label="邮箱：" prop="email">
+                <el-input v-model="formData.email" placeholder="请输入管理员邮箱"></el-input>
+            </el-form-item>
+            <el-form-item label="账号：" prop="account">
+                <el-input 
+                    v-model="formData.account" 
+                    placeholder="请输入管理员登录账号" 
+                    maxlength="40" 
+                    show-word-limit 
+                    :disabled="true">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="密码：" prop="password">
+                <el-input v-model="formData.password" placeholder="留空则为原密码"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button 
+                    type="primary" 
+                    size="small" 
+                    icon="el-icon-refresh-right"
+                    @click="saveForm()" 
+                    :loading="formLoading">
+                    保存资料
+                </el-button>
+            </el-form-item>
+        </el-form>
+        <iframe class="el-drawer-iframe" :src="url('adminLog/index', {id: userInfo.id})"></iframe>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                formData: userInfo,
+                formRules: {
+                    nickname: [
+                        { required: true, message: '请输入管理员昵称', trigger: 'blur' },
+                        { min: 2, max: 40, message: '长度在 2 到 40 个字符', trigger: 'blur' }
+                    ],
+                    email: [
+                        { required: true, message: '请输入管理员邮箱', trigger: 'blur' },
+                        { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+                    ],
+                    account: [
+                        { required: true, message: '请输入管理员登录账号', trigger: 'blur' },
+                        { min: 5, max: 40, message: '长度在 5 到 40 个字符', trigger: 'blur' }
+                    ],
+                },
+                formLoading: false,
+            }
+        },
+        created () {
+            this.formData.password = "";
+        },
+        methods: {
+            /**
+             * 保存表单
+             */
+            saveForm() {
+                let self = this;
+                self.$refs.formData.validate((valid) => {
+                    if (valid) {
+                        self.formLoading = true;
+                        request.post("admin/personal", self.formData, function(res){
+                            self.formLoading = false;
+                            self.$message({ showClose: true, message: res.message, type: res.status});
+                            if (res.status === 'success') {
+                                parent.parentVm.userInfo = JSON.parse(JSON.stringify(self.formData));
+                            } else {
+                                self.getData();
+                            }
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            /**
+             * 重置表单
+             */
+            resetForm() {
+                this.$refs.formData.resetFields();
+            },
+        },
+    })
+</script>
+{include file="$footer"}

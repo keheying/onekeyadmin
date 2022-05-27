@@ -1,0 +1,13 @@
+<div class="site">
+    {volist name="userSite" id="item"}
+    <a href="{$item.url}" class="item">
+        {if isset($item.count) && $item.count > 0}
+        <span class="el-badge"></span>
+        {/if}
+        <img class="cover" src="{$item.cover}">{$item.title}
+    </a>
+    {/volist}
+    <a href="{:url('login/logout')}" class="item">
+        <img class="cover" src="/themes/template/static/images/logout.png">{:lang('log out')}
+    </a>
+</div>

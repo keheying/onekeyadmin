@@ -1,0 +1,109 @@
+{include file="$header"}
+<div id="app" v-cloak>
+    <el-curd 
+        :field="field" 
+        :table-sort="{prop: 'create_time', order: 'desc'}"
+        :search-date="false" 
+        :search-status="[{label: '正常', value: 1}, {label: '屏蔽', value: 0}]">
+    </el-curd>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                field: [
+                    {
+                        label: '编号', 
+                        prop: 'id',
+                        table: false,
+                    },
+                    {
+                        prop: 'cover', 
+                        label: '头像', 
+                        table: {label: '资料', is: 'image',width: '70px'},
+                        form: {is: 'el-file-select',type: 'image'},
+                    },
+                    {
+                        prop: 'account', 
+                        label: '账号', 
+                        table: {label: '',width: '250px', bind: ['email']},
+                        form: {
+                            rules: [
+                                {required: true, message: '不能为空'},
+                                {pattern: /^[^\u4e00-\u9fa5]+$/, message: '不能包含中文字符'}
+                            ],
+                        },
+                    },
+                    {
+                        prop: 'email', 
+                        label: '邮箱', 
+                        table: false,
+                        form: {
+                            rules: [
+                                {required: true, message: '不能为空'},
+                            ],
+                        },
+                    },
+                    {
+                        prop: 'nickname', 
+                        label: '昵称', 
+                        table: false,
+                        form: {
+                            rules: [
+                                {required: true, message: '不能为空'},
+                            ],
+                        },
+                    },
+                    {
+                        prop: 'login_count', 
+                        label: '登录次数', 
+                        table:{sort: true},
+                        form: false,
+                    },
+                    {
+                        prop: 'group_id', 
+                        label: '所属组别',
+                        table: {prop: 'group_title', sort: true},
+                        form: {
+                            is: 'el-select', 
+                            child: {is: 'el-option',value: {:json_encode($group)}, props:{label: 'title', value: 'id'}},
+                            rules: [
+                                {required: true, message: '不能为空'},
+                            ],
+                        },
+                    },
+                    {
+                        prop: 'password', 
+                        label: '密码', 
+                        table: false, 
+                        form: {
+                            type: 'password',
+                            placeholder: '不修改密码则此处为空',
+                            rules: [
+                                {saveRequired: true, message: '新增管理员时，密码不能为空'},
+                                {pattern: /^[^\u4e00-\u9fa5]+$/, message: '不能包含中文字符'}
+                            ],
+                        },
+                    },
+                    {
+                        prop: 'status',
+                        label: '状态',  
+                        table: {sort: true, prop: 'c_status'}, 
+                        form: {
+                            is: 'el-switch',
+                            default: 1, 
+                        },
+                    },
+                    {
+                        prop: 'create_time', 
+                        label: '注册时间', 
+                        table:{label: '注册&登录时间',sort: true, bind: ['login_time'], width: '160px'},
+                        form: false,
+                    },
+                ],
+            }
+        },
+    })
+</script>
+{include file="$footer"}
