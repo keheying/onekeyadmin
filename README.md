@@ -1,7 +1,7 @@
 <p align="center">
     <img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/logo.png" />
 </p>
-<h2 align="center">:tw-1f525: OneKeyAdmin Pro 开源免费商用</h2>
+<h2 align="center">OneKeyAdmin Pro 开源免费商用</h2>
 <p align="center">
     <a href="http://www.onekeyadmin.com">
         <img src="https://img.shields.io/badge/OfficialWebsite-OneKeyAdmin-yellow.svg" />
