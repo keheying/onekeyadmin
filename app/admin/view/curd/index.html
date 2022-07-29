@@ -1,0 +1,500 @@
+{include file="$header"}
+<div id="app" v-cloak>
+    <div class="el-curd">
+        <el-form 
+            ref="search" 
+            class="el-curd-header" 
+            size="small"
+            :inline="true" 
+            :model="search" 
+            @submit.native.prevent>
+            <el-form-item>
+                <el-tooltip placement="bottom">
+                    <div slot="content">
+                        从数据库中获取最新的数据表、数据表字段
+                    </div>
+                    <el-button type="info" icon="el-icon-refresh" @click="location.href=location.href">同步数据库</el-button>
+                </el-tooltip>
+                <el-button 
+                    type="warning" 
+                    icon="el-icon-plus" 
+                    :disabled="rows.length === 0" 
+                    @click="code = true">
+                    生成应用
+                </el-button>
+                <a style="margin-left:10px" href="https://www.onekeyadmin.com/api/system/docs.html?id=61" target="_blank">
+                    <el-button icon="el-icon-question" size="small">帮助</el-button>
+                </a>
+            </el-form-item>
+            <el-form-item>
+                <el-input 
+                    style="width:300px" 
+                    placeholder="关键词搜索" 
+                    v-model="search.keyword" 
+                    @keyup.enter.native="getData()">
+                    <el-button slot="append" icon="el-icon-search" @click="getData()"></el-button>
+                </el-input>
+            </el-form-item>
+        </el-form>
+        <el-table
+            ref="table"
+            :data="table" 
+            :default-sort="{prop: search.prop, order: search.order}"
+            v-loading="loading"
+            @selection-change="selectionChange">
+            <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column prop="name" label="表名"></el-table-column>
+            <el-table-column prop="title" label="标题"></el-table-column>
+            <el-table-column prop="sort" label="排序"></el-table-column>
+            <el-table-column prop="plugin" label="插件目录"></el-table-column>
+            <el-table-column prop="number" label="生成次数"></el-table-column>
+            <el-table-column label="操作">
+                <template slot-scope="scope">
+                    <el-tooltip content="编辑" placement="top">
+                        <el-button type="warning" size="mini" icon="el-icon-edit" circle @click="openData(scope.row)"></el-button>
+                    </el-tooltip>
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+    <el-drawer :visible.sync="code" :with-header="false" size="100%">
+        <el-page-header @back="code=false" content="生成插件">
+            <template v-slot:title>Esc键返回</template>
+        </el-page-header>
+        <div class="el-pane-warp">
+            <el-form :model="codeData" :rules="codeRules" ref="codeData" label-width="100px">
+                <el-form-item label="菜单图标：" prop="cover">
+                    <el-file-select v-model="codeData.cover"></el-file-select>
+                    <div class="tips">请<a target="_blank" href="https://www.iconfont.cn/">点击此处</a>选择菜单图标，建议图片16*16像素PNG格式</div>
+                </el-form-item>
+                <el-form-item label="应用标识：" prop="name">
+                    <el-input v-model="codeData.name" placeholder="如：ceshi"></el-input>
+                    在public/plugins下生成{{codeData.name}}应用目录
+                </el-form-item>
+                <el-form-item label="应用名称：" prop="title">
+                    <el-input v-model="codeData.title" placeholder="如：测试"></el-input>
+                </el-form-item>
+                <el-form-item label="已选中表：" prop="table">
+                    <el-empty v-if="rows.length === 0" description="数据表空空如也~"></el-empty>
+                    <div v-for="(item, index) in rows">
+                        <el-tooltip content="点击取消关联" placement="top">
+                            <div style="cursor: pointer;display: inline-block;" @click="removeTable(item, index)">
+                                <i 
+                                    style="margin-right: 10px;font-size: 20px;vertical-align: middle;"
+                                    :class="item.name.indexOf('mk_app_' + codeData.name) == -1 ? 'el-icon-close' : 'el-icon-check'" 
+                                    :style="{color: item.name.indexOf('mk_app_' + codeData.name) == -1 ? '#F56C6C' : '#67C23A'}">
+                                </i>
+                                {{item.name}}
+                            </div>
+                        </el-tooltip>
+                        <div v-if="item.name.indexOf('mk_app_' + codeData.name) == -1" style="color: #F56C6C">
+                            表前缀不合格，表前缀应为mk_app_{{codeData.name}}{{rows.length > 1 ? '_' : ''}}
+                        </div>
+                    </div>
+                </el-form-item>
+                <el-form-item label="注意事项：">
+                    <p>1.根据单或多个表生成一个应用，包含控制器、模型、视图、菜单权限、API接口</p>
+                    <p>2.重复生成应用只会覆盖admin/view视图</p>
+                    <p>3.查看更多操作请阅读<a href="https://www.onekeyadmin.com/system-docs/115.html" target="_blank">《文档手册》</a></p>
+                </el-form-item>
+            <el-form>
+            <div class="el-bottom">
+                <el-button 
+                    size="medium" 
+                    type="primary" 
+                    icon="el-icon-refresh-right" 
+                    :loading="codeLoading" 
+                    :disabled="codeDisabled"
+                    @click="getCode()">
+                    生 成
+                </el-button>
+                <el-button size="medium" @click="code = false">取 消</el-button>
+            </div>
+        </div>
+    </el-drawer>
+    <el-drawer :visible.sync="drawer" :with-header="false" size="100%">
+        <el-page-header @back="drawer=false" content="表详情">
+            <template v-slot:title>Esc键返回</template>
+        </el-page-header>
+        <div class="el-layout">
+            <div class="el-pane-warp">
+                <div class="el-curd-field">
+                    <div class="tabs">
+                        {include file="curd/tabs"}
+                    </div>
+                    <div class="preview">
+                        {include file="curd/preview"}
+                    </div>
+                    <div class="set">
+                        {include file="curd/form"}
+                    </div>
+                </div>
+                <div class="el-bottom">
+                    <el-button size="medium" type="primary" icon="el-icon-refresh-right" @click="saveData()" :loading="drawerLoading">保 存</el-button>
+                    <el-button size="medium" @click="drawer = false">返 回</el-button>
+                </div>
+            </div>
+        </div>
+    </el-drawer>
+</div>
+<script>
+    var names = {:json_encode($names)};
+    new Vue({
+        el: '#app',
+        data() {
+            var validateRepeatName = (rule, value, callback) => {
+                if(names.indexOf(this.codeData.name) !== -1) {
+                    callback(new Error('应用标识已占用！请更换一个'));
+                } else {
+                    callback();
+                }
+            }
+            return {
+                set: 'form',
+                row: {},
+                rows: [],
+                table: [],
+                field: [
+                    {title: '输入框', is: 'el-input', icon: 'icon-danhangshurukuang'},
+                    {title: '编辑器', is: 'el-editor', icon: 'icon-fuwenbenbianjiqi_zhonghuaxian'},
+                    {title: '单选框', is: 'el-radio-group', icon: 'icon-danxuankuang'},
+                    {title: '多选框', is: 'el-checkbox-group', icon: 'icon-duoxuan_xuanzhong'},
+                    {title: '选择器', is: 'el-select', icon: 'icon-xuanzeqi'},
+                    {title: '文件选择', is: 'el-file-select', icon: 'icon-a-wenjianjiawenjian'},
+                    {title: '多文件选择', is: 'el-file-list-select', icon: 'icon-wenjian1'},
+                    {title: '开关', is: 'el-switch', icon: 'icon-kaiguan'},
+                    {title: '日期时间选择器', is: 'el-date-picker', icon: 'icon-riqi'},
+                    {title: '时间选择器', is: 'el-time-select', icon: 'icon-shijian1'},
+                    {title: '计数器', is: 'el-input-number', icon: 'icon-shuzishurukuang'},
+                    {title: '多级联动', is: 'el-cascader', icon: 'icon-cengji'},
+                    {title: '滑块', is: 'el-slider', icon: 'icon-huakuai'},
+                    {title: '评分', is: 'el-rate', icon: 'icon-pingfen'},
+                    {title: '颜色选择器', is: 'el-color-picker', icon: 'icon-yanse1'},
+                    {title: '链接选择', is: 'el-link-select', icon: 'icon-lianjie'},
+                    {title: '自定义参数', is: 'el-parameter', icon: 'icon-chanpincanshu'},
+                ],
+                code: false,
+                codeData: {
+                    name: '',
+                    title: '',
+                    cover: '',
+                },
+                codeRules: {
+                    name: [
+                        { required: true, message: '应用标识不能为空', trigger: 'blur' },
+                        { pattern: /^[a-zA-Z]+$/, message: '应用标识只能为纯英文', trigger: 'blur'},
+                        { validator: validateRepeatName, trigger: 'blur' },
+                    ],
+                    title: [
+                        { required: true, message: '应用名称不能为空', trigger: 'blur' },
+                    ],
+                    cover: [
+                        { required: true, message: '应用菜单图标不能为空', trigger: 'blur' },
+                    ],
+                },
+                codeLoading: false,
+                drawer:false, 
+                loading: false,
+                synchroLoading: false,
+                search:{
+                    keyword: '',
+                },
+                fieldForm: '',
+                drawerLoading: false,
+                drawerData: {},
+                drawerRules: {
+                    title: [
+                        { required: true, message: '表标题不能为空', trigger: 'blur' },
+                        { min: 2, max: 50, message: '在2-50个字符串之间', trigger: 'blur' }
+                    ],
+                    name: [
+                        { required: true, message: '表名称不能为空', trigger: 'blur' },
+                        { min: 2, max: 50, message: '在2-50个字符串之间', trigger: 'blur' },
+                    ],
+                    sort: [
+                        { required: true, message: '不能为空', trigger: 'blur' },
+                    ],
+                    field: [
+                        { required: true, message: '不能为空', trigger: 'blur' },
+                    ],
+                    form_label_width: [
+                        { required: true, message: '不能为空', trigger: 'blur' },
+                    ],
+                    form_col_md: [
+                        { required: true, message: '不能为空', trigger: 'blur' },
+                    ],
+                    table_tree: [
+                        { required: true, message: '不能为空', trigger: 'blur' },
+                    ],
+                    table_expand: [
+                        { required: true, message: '不能为空', trigger: 'blur' },
+                    ],
+                    table_export: [
+                        { required: true, message: '不能为空', trigger: 'blur' },
+                    ],
+                    table_page_size: [
+                        { required: true, message: '不能为空', trigger: 'blur' },
+                    ],
+                    table_operation_width: [
+                        { required: true, message: '不能为空', trigger: 'blur' },
+                    ],
+                    search_keyword: [
+                        { required: true, message: '不能为空', trigger: 'blur' },
+                    ],
+                    search_date: [
+                        { required: true, message: '不能为空', trigger: 'blur' },
+                    ],
+                    preview: [
+                        { required: true, message: '不能为空', trigger: 'blur' },
+                    ],
+                },
+                indexUrl: 'curd/index',
+                updateUrl: 'curd/update',
+                codeUrl: 'curd/code',
+                deleteFieldUrl: 'curd/deleteField',
+                saveFieldUrl: 'curd/saveField',
+                updateFieldUrl: 'curd/updateField',
+                addDraggable: {
+                    animation: 300,
+                    forceFallback: true,
+                    sort: false,
+                    group: {name: 'people', pull: 'clone', put: false},
+                },
+                draggable: {
+                    handle: '.rank',
+                    animation: 300,
+                    forceFallback: true,
+                    group:"people"
+                },
+            }
+        },
+        created () {
+            this.getData();
+        },
+        computed: {
+            codeDisabled() {
+                let self   = this;
+                let status = false;
+                self.rows.forEach(function (item, index) {
+                    if (item.name.indexOf('mk_app_' + self.codeData.name) == -1) {
+                        status = true;
+                    }
+                });
+                if (self.rows.length < 1) {
+                    return true;
+                }
+                return status;
+            }
+        },
+        methods: {
+            /**
+             * 打开字段
+             */
+            openField(item, index) {
+                this.fieldForm = item;
+            },
+            /**
+             * 生成字段
+             */
+            addField(item) {
+                item.prop       = common.id(6);
+                item.label      = '未命名';
+                item.colMd      = '';
+                if (item.is == 'el-checkbox-group' 
+                || item.is == 'el-file-list-select' 
+                || item.is == 'el-parameter'
+                || item.is == 'el-field') {
+                    item.default = [];
+                } else {
+                    item.default = '';
+                }
+                item.placeholder= '';
+                item.filterable = true;
+                item.multiple   = true;
+                item.type       = '';
+                if (item.is == 'el-file-select' || item.is == 'el-file-list-select') {
+                    item.type = 'image';
+                }
+                if (item.is == 'el-date-picker') {
+                    item.type = 'date';
+                }
+                if (item.is == 'el-time-select') {
+                    item.type = 'time';
+                }
+                item.child      = [];
+                item.tips       = '';
+                item.required   = false;
+                item.pattern    = '';
+                item.disabled   = false;
+                item.formShow   = true;
+                item.tableWidth = 0;
+                item.tableBind  = [];
+                item.tableSort  = true;
+                item.tableProp  = item.prop;
+                item.tableLabel = item.label;
+                item.tableShow  = true;
+                // request.post(this.saveFieldUrl, {table: this.drawerData.name, prop: item.prop}, function(res){});
+                return JSON.parse(JSON.stringify(item));
+            },
+            /**
+             * 修改字段
+             */
+            updateField(item, index) {
+                request.post(this.updateFieldUrl, {table: this.drawerData.name, prop: item.prop}, function(res){});
+            },
+            /**
+             * 删除字段
+             */
+            moveField(item, index) {
+                let self = this;
+                self.fieldForm  = '';
+                self.drawerData.field.splice(index, 1);
+                // self.$confirm('确定删除此字段吗？', '', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
+                //     request.post(self.deleteFieldUrl, {table: self.drawerData.name, prop: item.prop}, function(res){
+                //         if (res.status === 'success') {
+                //             self.fieldForm  = '';
+                //             self.drawerData.field.splice(index, 1);
+                //         } else {
+                //             self.$notify({ showClose: true, message: res.message, type: res.status});
+                //         }
+                //     });
+                // }).catch(() => {});
+            },
+            /**
+             * 生成代码
+             */
+            getCode() {
+                let self = this;    
+                self.$refs.codeData.validate((valid) => {
+                    if (valid) {
+                        let data = self.codeData;
+                        data['table'] = self.rows;
+                        self.codeLoading = true;
+                        request.post(self.codeUrl, data, function(res) {
+                            self.codeLoading = false;
+                            if (res.status === 'success') {
+                                self.getData();
+                                self.code = false;
+                            }
+                            self.$notify({ showClose: true, message: res.message, type: res.status});
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            /**
+             * 取消关联
+             */
+            removeTable(item, index) {
+                this.rows.splice(index, 1);
+                this.$refs.table.toggleRowSelection(item, false);
+            },
+            /**
+             * 获取数据
+             */
+            getData() {
+                let self = this;    
+                self.loading = true;
+                request.post(self.indexUrl, self.search, function(res) {
+                    self.loading = false;
+                    if (res.status === 'success') {
+                        res.data.forEach(function (item, index) {
+                            item.check = true;
+                        })
+                        self.table           = res.data;
+                        parent.parentVm.menu = res.publicMenu;
+                    } else {
+                        self.$notify({ showClose: true, message: res.message, type: res.status});
+                    }
+                });
+            },
+            /**
+             * 打开数据
+             */
+            openData(row) {
+                this.drawer     = true;
+                this.type       = 'form';
+                this.fieldForm  = '';
+                row.form_label_width = row.form_label_width < 100 ? 100 : row.form_label_width;
+                row.field.forEach(function (item, index){
+                    item.is         = typeof item.is == 'undefined' ? 'el-input' : item.is;
+                    item.prop       = typeof item.prop == 'undefined' ? common.id(6) : item.prop;
+                    item.label      = typeof item.label == 'undefined' ? item.prop : item.label;
+                    item.colMd      = typeof item.colMd == 'undefined' ? '' : item.colMd;
+                    item.default    = typeof item.default == 'undefined' ? '' : item.default;
+                    item.placeholder= typeof item.placeholder == 'undefined' ? '' : item.placeholder;
+                    item.filterable = typeof item.filterable == 'undefined' ? true : item.filterable;
+                    item.multiple   = typeof item.multiple == 'undefined' ? true : item.multiple;
+                    item.type       = typeof item.type == 'undefined' ? '' : item.type;
+                    item.child      = typeof item.child == 'undefined' ? [] : item.child;
+                    item.tips       = typeof item.tips == 'undefined' ? '' : item.tips;
+                    item.required   = typeof item.required == 'undefined' ? false : item.required;
+                    item.pattern    = typeof item.pattern == 'undefined' ? '' : item.pattern;
+                    item.disabled   = typeof item.disabled == 'undefined' ? false : item.disabled;
+                    item.formShow   = typeof item.formShow == 'undefined' ? true : item.formShow;
+                    item.tableWidth = typeof item.tableWidth == 'undefined' ? 0 : item.tableWidth;
+                    item.tableBind  = typeof item.tableBind == 'undefined' ? [] : item.tableBind;
+                    item.tableSort  = typeof item.tableSort == 'undefined' ? true : item.tableSort;
+                    item.tableProp  = typeof item.tableProp == 'undefined' ? item.prop : item.tableProp;
+                    item.tableLabel = typeof item.tableLabel == 'undefined' ? item.label : item.tableLabel;
+                    item.tableShow  = typeof item.tableShow == 'undefined' ? true : item.tableShow;
+                })
+                this.drawerData = JSON.parse(JSON.stringify(row));
+            },
+            /**
+             * 保存数据
+             */
+            saveData(formName) {
+                let self = this;
+                self.$refs.drawerData.validate((valid) => {
+                    if (valid) {
+                        self.drawerLoading = true;
+                        request.post(self.updateUrl, self.drawerData, function(res){
+                            self.drawerLoading = false;
+                            if (res.status === 'success') {
+                                self.getData();
+                                self.drawer = false;
+                            }
+                            self.$notify({ showClose: true, message: res.message, type: res.status});
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            /**
+             * 更换表单类型
+             */
+            isChange() {
+                if (this.fieldForm.is == 'el-checkbox-group' 
+                || this.fieldForm.is == 'el-file-list-select' 
+                || this.fieldForm.is == 'el-parameter'
+                || this.fieldForm.is == 'el-field') {
+                    this.fieldForm.default = [];
+                } else {
+                    this.fieldForm.default = '';
+                }
+                if (this.fieldForm.is == 'el-file-select' || this.fieldForm.is == 'el-file-list-select') {
+                    this.fieldForm.type = 'image';
+                }
+                if (this.fieldForm.is == 'el-date-picker') {
+                    this.fieldForm.type = 'date';
+                }
+                if (this.fieldForm.is == 'el-time-select') {
+                    this.fieldForm.type = 'time';
+                }
+                if (this.fieldForm.is == 'el-input') {
+                    this.fieldForm.type = '';
+                }
+            },
+            /**
+             * 选中行
+             */
+            selectionChange(rows) {
+                this.rows = rows;
+            },
+        }
+    })
+</script>
+{include file="$footer"}

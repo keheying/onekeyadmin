@@ -105,7 +105,7 @@ if (!function_exists('echo_value')) {
         }
         h1{
             margin: 10px 0 0;
-            font-size: 18px;
+            font-size: 28px;
             font-weight: 500;
             line-height: 32px;
         }
@@ -157,7 +157,6 @@ if (!function_exists('echo_value')) {
         /* Exception Info */
         .exception {
             margin-top: 20px;
-            text-align: center;
         }
         .exception .message{
             padding: 12px;
@@ -275,21 +274,9 @@ if (!function_exists('echo_value')) {
 
         /* Copyright Info */
         .copyright{
-            font-size: 16px;
             margin-top: 24px;
             padding: 12px 0;
-            text-align: center;
-        }
-
-        .copyright a{
-            color: #333;
-            text-decoration: none; 
-        }
-
-        .copyright a span{
-            color: #409EFF;
-            display: inline-block;
-            margin-left: 10px
+            border-top: 1px solid #eee;
         }
 
         /* SPAN elements with the classes below are added by prettyprint. */
@@ -356,7 +343,7 @@ if (!function_exists('echo_value')) {
         <?php } ?>
     <?php } else { ?>
     <div class="exception">
-        <div class="info"><h1>错误信息：<?php echo htmlentities($message); ?></h1></div>
+        <div class="info"><h1><?php echo htmlentities($message); ?></h1></div>
     </div>
     <?php } ?>
     
@@ -407,9 +394,10 @@ if (!function_exists('echo_value')) {
     <?php } ?>
 
     <div class="copyright">
-        <a title="官方网站" href="<?php echo config('app.api'); ?>" target="_blank">
-            OneKeyAdmin<span>版本号V<?php echo implode('.', str_split(str_replace('.', '', config('app.version')))) ?></span> 
-        </a> 
+        <a title="官方网站" href="http://www.thinkphp.cn">ThinkPHP</a> 
+        <span>V<?php echo \think\facade\App::version(); ?></span> 
+        <span>{ 十年磨一剑-为API开发设计的高性能框架 }</span>
+        <span>- <a title="官方手册" href="https://www.kancloud.cn/manual/thinkphp6_0/content">官方手册</a></span>
     </div>
     <?php if (\think\facade\App::isDebug()) { ?>
     <script>

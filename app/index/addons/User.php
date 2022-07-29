@@ -65,14 +65,14 @@ class User
      * @param 用户id
      * @param 是否自动登录
      */
-    public static function openAutomaticLogin(int $id, $open = true): void
+    public static function openAutomaticLogin(Object $userInfo, $open = true): void
     {
-        if ($open) {
-            $key = $id . self::$salt . request()->ip();
+        if ($open && $open != 'false') {
+            $key = $userInfo['email'] . $userInfo['password'] . self::$salt . request()->ip();
             $token = password_hash($key, PASSWORD_BCRYPT, ['cost' => 12]);
             $time = 14*24*3600;
             Db::name('user_token')->save([
-                'user_id'     => $id, 
+                'user_id'     => $userInfo['id'], 
                 'token'       => $token, 
                 'create_time' => date('Y-m-d H:i:s')
             ]);
@@ -81,7 +81,7 @@ class User
             cookie('index_token', null);
         }
     }
-
+    
     /**
      * 根据token自动登录
      */
@@ -91,11 +91,17 @@ class User
         if (empty($userInfo)) {
             $token = cookie('index_token');
             if ($token) {
-                $time   = 14*24;
+                $time = 14*24;
                 $userId = Db::name("user_token")->where("token", $token)->whereTime("create_time","-$time hours")->value('user_id');
-                $userInfo = UserModel::with(['group'])->where('status', 1)->where('id', $userId)->find();
-                if ($userId && $userInfo) {
-                    session('user',$userInfo);
+                $user = UserModel::with(['group'])->where('status', 1)->where('id', $userId)->find();
+                if ($user) {
+                    if (password_verify($user['email'] . $user['password'] . self::$salt . request()->ip(), $token)) {
+                        session('user',$user);
+                        $userInfo = $user;
+                    } else {
+                        // 曝光删除
+                        Db::name("user_token")->where("token", $token)->delete();
+                    }
                 }
             }
         }
@@ -148,11 +154,10 @@ class User
                 return ['status'=>'error','message' => lang('fetching too frequently, please wait a minute and try again')];
             }
         }
-        $aliSms = new \plugins\alisms\addons\AliSms;
         $code   = rand(1000,9999);
         // operation模板ID
-        $result = $aliSms->send($operation, $mobile, ['code' => $code]);
-        if ($result['status'] === 'success') {
+        $aliSms = \plugins\alisms\addons\AliSms::send($operation, $mobile, ['code' => $code]);
+        if ($aliSms['status'] === 'success') {
             $arr['code']   = $code;
             $arr['mobile'] = $mobile;
             $arr['time']   = time();

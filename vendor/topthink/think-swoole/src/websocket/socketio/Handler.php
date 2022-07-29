@@ -57,7 +57,6 @@ class Handler extends Websocket
         $this->event->trigger("swoole.websocket.Open", $request);
 
         if ($this->eio < 4) {
-            // 修改底层(不建议注释，会导致tcp连接一直存在，占用大量内存)
             $this->resetPingTimeout($this->pingInterval + $this->pingTimeout);
             $this->onConnect();
         } else {
@@ -73,8 +72,9 @@ class Handler extends Websocket
     public function onMessage(Frame $frame)
     {
         // 修改底层(监听消息回调)
-        $frameData = json_decode($frame->data);
+        $frameData = json_decode($frame->data); 
         $this->event->trigger('swoole.websocket.'.ucfirst($frameData->type), $frameData->data);
+        $this->resetPingTimeout($this->pingInterval + $this->pingTimeout);
     }
 
     /**

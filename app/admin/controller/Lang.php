@@ -14,6 +14,7 @@ use think\facade\Db;
 use think\facade\View;
 use app\addons\File;
 use app\admin\BaseController;
+use app\admin\model\Catalog;
 /**
  * 语言管理
  */
@@ -24,28 +25,16 @@ class Lang extends BaseController
      */
     public function index()
     {
-        $defaultParameter = include(root_path() . 'lang/' . config('lang.default_lang') . '.php');
         if ($this->request->isPost()) {
             $langList = config('lang.lang_list');
             foreach ($langList as $key => $val) {
-                $parameter = include(root_path() . 'lang/' . $val['name'] . '.php');
                 $langList[$key]['id']        = $key;
-                $langList[$key]['parameter'] = [];
                 $langList[$key]['c_default'] = $val['default'] === 1 ? '是' : '否';
                 $langList[$key]['c_status']  = $val['status'] === 1 ? '正常' : '屏蔽';
                 $langList[$key]['url']       = $val['default'] === 1 ? $this->request->domain() : $this->request->domain() . '/' . $val['name'];
-                // 根据默认语言显示参数
-                foreach ($defaultParameter as $k => $v) {
-                    array_push($langList[$key]['parameter'], ['title' => $k, 'value' => isset($parameter[$k]) ? $parameter[$k] : ""]);
-                }
             }
             return json(['status' => 'success', 'message' => '获取成功', 'data' => $langList]);
         } else {
-            $default = [];
-            foreach ($defaultParameter as $k => $v) {
-                array_push($default, ['title' => $k, 'value' => ""]);
-            }
-            View::assign('defaultParameter', $default);
             return View::fetch();
         }
     }
@@ -65,19 +54,41 @@ class Lang extends BaseController
                     $langList[$key]['default'] = 0;
                 }
             }
-            // 语言参数
-            $parameter = [];
-            foreach ($input['parameter'] as $key => $value) {
-                $parameter[$value['title']] = $value['value'];
-            }
-            File::create(root_path() . 'lang/' . $input['name'] . '.php', "<?php\nreturn ".var_export($parameter,true).";");
             // 修改数据
             array_push($langList, $input);
             foreach ($langList as $key => $value) {
-                unset($langList[$key]['id'],$langList[$key]['parameter'],$langList[$key]['c_default'],$langList[$key]['c_status']);
+                unset($langList[$key]['id'],$langList[$key]['theme'],$langList[$key]['c_default'],$langList[$key]['c_status']);
             }
             File::create(config_path().'langList.php', "<?php\nreturn ".var_export($langList,true).";");
-            return json(['status' => 'success', 'message' => '操作成功']);
+            // 自动同步分类数据
+            $lang    = $input['name'];
+            $default = Catalog::where('language', config('lang.default_lang'))->where('theme', theme())->select()->toArray();
+            $saveAll = [];
+            foreach ($default as $key => $val) {
+                $val['language'] = $lang;
+                unset($val['id']);
+                array_push($saveAll, $val);
+            }
+            Db::startTrans();
+            try {
+                Catalog::where('language', $lang)->delete();
+                $model = new Catalog;
+                $list  = $model->saveAll($saveAll)->toArray();
+                // 修改pid
+                foreach($default as $key => $val){
+                    if ($val['pid'] != 0) {
+                        $parent = array_search($val['pid'],array_column($default, 'id'));
+                        $pid = $list[$parent]['id'];
+                        $id  = $list[$key]['id'];
+                        Catalog::where('id', $id)->update(['pid' => $pid]);
+                    }
+                }
+                Db::commit();
+                return json(['status' => 'success', 'message' => '操作成功']);
+            } catch (\Exception $e) {
+                Db::rollback();
+                return json(['status' => 'error', 'message' => '同步失败']);
+            }
         }
     }
 
@@ -98,16 +109,10 @@ class Lang extends BaseController
                     $langList[$key]['default'] = 0;
                 }
             }
-            // 语言参数
-            $parameter = [];
-            foreach ($input['parameter'] as $key => $value) {
-                $parameter[$value['title']] = $value['value'];
-            }
-            File::create(root_path() . 'lang/' . $input['name'] . '.php', "<?php\nreturn ".var_export($parameter,true).";");
             // 修改数据
             $langList[$input['id']] = $input;
             foreach ($langList as $key => $value) {
-                unset($langList[$key]['id'],$langList[$key]['parameter'],$langList[$key]['c_default'],$langList[$key]['c_status']);
+                unset($langList[$key]['id'],$langList[$key]['theme'],$langList[$key]['c_default'],$langList[$key]['c_status']);
             }
             File::create(config_path().'langList.php', "<?php\nreturn ".var_export($langList,true).";");
             return json(['status' => 'success', 'message' => '操作成功']);
@@ -141,7 +146,7 @@ class Lang extends BaseController
             $input = input('post.');
             $langList = $input['table'];
             foreach ($langList as $key => $value) {
-                unset($langList[$key]['id'],$langList[$key]['parameter'],$langList[$key]['c_default'],$langList[$key]['c_status']);
+                unset($langList[$key]['id'],$langList[$key]['theme'],$langList[$key]['c_default'],$langList[$key]['c_status']);
             }
             File::create(config_path().'langList.php', "<?php\nreturn ".var_export($langList,true).";");
             return json(['status' => 'success', 'message' => '操作成功']);

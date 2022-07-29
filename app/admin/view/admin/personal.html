@@ -78,7 +78,7 @@
                         self.formLoading = true;
                         request.post("admin/personal", self.formData, function(res){
                             self.formLoading = false;
-                            self.$message({ showClose: true, message: res.message, type: res.status});
+                            self.$notify({ showClose: true, message: res.message, type: res.status});
                             if (res.status === 'success') {
                                 parent.parentVm.userInfo = JSON.parse(JSON.stringify(self.formData));
                             } else {

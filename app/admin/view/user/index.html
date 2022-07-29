@@ -48,12 +48,14 @@
                             rules: [
                                 {required: true, message: '邮箱不能为空'},
                             ],
+                            colMd: 12
                         },
                     },
                     {
                         prop: 'mobile', 
                         label: '手机', 
                         table: false,
+                        form: {colMd: 12}
                     },
                     {
                         prop: 'nickname', 
@@ -63,6 +65,7 @@
                             rules: [
                                 {required: true, message: '昵称不能为空'},
                             ],
+                            colMd: 12
                         },
                     },
                     {
@@ -81,6 +84,7 @@
                             rules: [
                                 {required: true, message: '请选择组别'},
                             ],
+                            colMd: 12
                         },
                     },
                     {
@@ -94,6 +98,7 @@
                                 {saveRequired: true, message: '新增用户时，密码不能为空'},
                                 {pattern: /^[^\u4e00-\u9fa5]+$/, message: '不能包含中文字符'}
                             ],
+                            colMd: 12
                         },
                     },
                     {
@@ -103,32 +108,33 @@
                         form: {
                             is: 'el-select',
                             default: 0, 
-                            child: {is: 'el-option', value:[{label:'男', value:0},{label:'女',value:1}]}                       
+                            child: {is: 'el-option', value:[{label:'男', value:0},{label:'女',value:1}]},
+                            colMd: 12
                         }
+                    },
+                    {
+                        prop: 'balance', 
+                        label: '余额',  
+                        table:{sort: true},
+                        form: {type: 'number',default: 0.00,colMd: 8}
+                    },
+                    {
+                        prop: 'now_integral', 
+                        label: '积分',  
+                        table:{sort: true},
+                        form: {type: 'number',default: 0,colMd: 8}
+                    },
+                    {
+                        prop: 'birthday', 
+                        label: '生日',
+                        table: false,
+                        form: {is: 'el-date-picker', type: 'date', format: 'yyyy-MM-dd', valueFormat: 'yyyy-MM-dd',colMd: 8},
                     },
                     {
                         prop: 'describe', 
                         label: '签名', 
                         table: false,
                         form: {type: 'textarea'},
-                    },
-                    {
-                        prop: 'balance', 
-                        label: '余额',  
-                        table:{sort: true},
-                        form: {type: 'number',default: 0.00}
-                    },
-                    {
-                        prop: 'now_integral', 
-                        label: '积分',  
-                        table:{sort: true},
-                        form: {type: 'number',default: 0}
-                    },
-                    {
-                        prop: 'birthday', 
-                        label: '生日',
-                        table: false,
-                        form: {is: 'el-date-picker', type: 'date', format: 'yyyy-MM-dd', valueFormat: 'yyyy-MM-dd'},
                     },
                     {
                         prop: 'status',

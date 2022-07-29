@@ -7,7 +7,7 @@
         :search-date="false"
         :search-status="[{label: '正常', value: 1}, {label: '屏蔽', value: 0}]"
         :table-operation-width="250"
-        form-label-width="150px"
+        form-label-width="100px"
         variable="catalog"
         table-tree
         table-export
@@ -27,7 +27,11 @@
                                 prop: 'cover', 
                                 label: '封面',
                                 table: false,
-                                form: {is: 'el-file-select',type: 'image'},
+                                form: {
+                                    is: 'el-file-select',
+                                    type: 'image',
+                                    colMd: 24,
+                                },
                             },
                             {
                                 prop: 'title', 
@@ -36,7 +40,8 @@
                                 form: {
                                     rules: [
                                         {required: true,message: '标题不能为空'},
-                                    ]
+                                    ],
+                                    colMd: 12,
                                 }
                             },
                             {
@@ -45,11 +50,12 @@
                                 table: false, 
                                 form: {
                                     is: 'el-select',
-                                    child: {is: 'el-option', value: 'this'},
+                                    child: {value: 'this'},
                                     filterable: true,
                                     rules: [
                                         {required: true,message: '请选择父级'},
-                                    ]
+                                    ],
+                                    colMd: 12,
                                 },
                             },
                             {
@@ -60,7 +66,6 @@
                                     is: 'el-select',
                                     default: 1, 
                                     child: {
-                                        is: 'el-option', 
                                         value:[
                                             {label:'不显示',value:0},
                                             {label:'都显示',value:1},
@@ -70,18 +75,23 @@
                                     },
                                     rules: [
                                         {required: true,message: '请选择显示方式'},
-                                    ]                       
+                                    ],
+                                    colMd: 12,
                                 }
                             },
                             {
                                 prop: 'type', 
                                 label: '类型', 
-                                table: {sort: true, prop: 'c_type'},
+                                table: {sort: true, prop: 'c_type',bind: ['type']},
                                 form: {
                                     is: 'el-select',
                                     default: 'page',
-                                    child: {is: 'el-option',value: {:json_encode($type)}, props:{label: 'title', value: 'catalog'}},
+                                    child: {
+                                        value: {:json_encode($type)}, 
+                                        props:{label: 'title', value: 'catalog'}
+                                    },
                                     relation: [{prop: 'links_type', value: 0}],
+                                    colMd: 12,
                                 },
                             },
                             {
@@ -94,6 +104,7 @@
                                     ],
                                     relation: [{prop: 'links_type', value: 0}],
                                     placeholder: '当类型为页面时，会自动生成模板文件',
+                                    colMd: 12,
                                 }
                             },
                             {
@@ -104,6 +115,7 @@
                                     default: '',
                                     relation: [{prop: 'type', value: 'page', where: '<>'},{prop: 'links_type', value: 0}],
                                     placeholder: '留空代表默认，例："cnews"则新闻列表页和详情页自动加载到cnews.html文件',
+                                    colMd: 12,
                                 }
                             },
                             {
@@ -113,11 +125,15 @@
                                 table: false,
                                 form: {
                                     is: 'el-select', 
-                                    child: {is: 'el-option',value: {:json_encode($group)}, props:{label: 'title', value: 'id'}},
+                                    child: {
+                                        value: {:json_encode($group)}, 
+                                        props:{label: 'title', value: 'id'}
+                                    },
                                     default: [],
                                     multiple: true,
                                     relation: [{prop: 'links_type', value: 0}],
                                     placeholder: '不设置权限则留空',
+                                    colMd: 12,
                                 },
                             },
                             {
@@ -127,7 +143,8 @@
                                 form: {
                                     type: 'number',
                                     default: 0, 
-                                    placeholder: '降序排序，值越大越靠前'
+                                    placeholder: '降序排序，值越大越靠前',
+                                    colMd: 12,
                                 },
                             },
                             {
@@ -139,6 +156,7 @@
                                 prop: 'num', 
                                 label: '标识', 
                                 table: {sort: true},
+                                form: {colMd: 12,}
                             },
                             {
                                 prop: 'links_type', 
@@ -147,7 +165,9 @@
                                 form: {
                                     is: 'el-select',
                                     default: 0, 
-                                    child: {is: 'el-option', value:[{label:'默认', value: 0}, {label:'指定',value: 1}]},              
+                                    child: {
+                                        value:[{label:'默认', value: 0}, {label:'指定',value: 1}]
+                                    },              
                                 }
                             },
                             {
@@ -161,13 +181,14 @@
                                 },
                             },
                             {
-                                prop: 'blank', 
-                                label: '新窗口',  
-                                table: false,
+                                prop: 'status',
+                                label: '状态',  
+                                table: {prop: 'c_status', sort: true},
                                 form: {
                                     is: 'el-switch',
-                                    default: 0,
-                                }
+                                    default: 1, 
+                                    colMd: 8,
+                                },
                             },
                             {
                                 prop: 'mobile', 
@@ -176,16 +197,18 @@
                                 form: {
                                     is: 'el-switch',
                                     default: 1,
+                                    colMd: 8,
                                 }
                             },
                             {
-                                prop: 'status',
-                                label: '状态',  
-                                table: {prop: 'c_status', sort: true},
+                                prop: 'blank', 
+                                label: '新窗口',  
+                                table: false,
                                 form: {
                                     is: 'el-switch',
-                                    default: 1, 
-                                },
+                                    default: 0,
+                                    colMd: 8,
+                                }
                             },
                             {
                                 prop: 'description', 

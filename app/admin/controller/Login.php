@@ -46,9 +46,9 @@ class Login  extends BaseController
                             // 清除登录错误次数
                             UserAddons::clearLoginErrorNum();
                             // 勾选两周内自动登录
-                            UserAddons::openAutomaticLogin($userInfo->id, $input['checked']);
+                            UserAddons::openAutomaticLogin($userInfo, $input['checked']);
                             // 钩子
-                            event('LoginEnd');
+                            event('LoginEnd',$userInfo);
                             return json(['status' => 'success', 'message' => '登录成功', 'url'=> $this->request->adminLastUrl()]);
                         } else {
                             $error = ['status' => 'error', 'message' => '账号正在审核'];

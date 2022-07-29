@@ -21,7 +21,10 @@ class Plugins extends BaseController
     {
         $plugin = input("plugin");
         $action = input('action');
-        $namespace = "plugins\\$plugin\index\controller\\".ucfirst(input('class'));
+        $class  = ucwords(str_replace('_', ' ', input('class')));
+        $class  = str_replace(' ','',lcfirst($class));
+        $class = ucfirst($class);
+        $namespace = "plugins\\$plugin\index\controller\\".$class;
         return method_exists($namespace, $action) ? app($namespace)->$action() : abort(404);
     }
 }

@@ -668,7 +668,7 @@
         },
         {
             "name": "topthink/framework",
-            "version": "v6.0.7",
+            "version": "v6.0.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/top-think/framework.git",

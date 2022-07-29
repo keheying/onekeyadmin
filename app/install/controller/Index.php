@@ -48,7 +48,7 @@ class Index extends BaseController
 				// 创建数据库
 			    $connect = new PDO("mysql:host=$hostname", $username, $password);
 			    $connect->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-			    $create = "CREATE DATABASE $database DEFAULT CHARSET utf8 COLLATE utf8_general_ci";
+			    $create = "CREATE DATABASE $database DEFAULT CHARSET utf8mb4 COLLATE utf8mb4_general_ci";
 			    $connect->exec($create);
 			    // 创建数据表
 			    $db  = new PDO($dsn, $username, $password);
@@ -61,7 +61,7 @@ class Index extends BaseController
 			    $init = file_put_contents(root_path() . '.env',"APP_DEBUG = false\nAPP_TOKEN = $token\nMAP_ADMIN = $adminmap\n\n[DATABASE]\nHOSTNAME = localhost\nDATABASE = $database\nUSERNAME = $username\nPASSWORD = $password");
 			    return json(['status' => 'success', 'message' => '安装成功']);
 			} catch(\PDOException $e) {
-			    return json(['status' => 'error', 'message' => $e->getMessage()]);
+			    return json(['status' => 'error', 'message' => $e->getMessage() . '，如果您遇到问题请加官方Q群反馈：648788102']);
 			}
         } else {
         	View::assign([

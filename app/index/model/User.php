@@ -28,7 +28,6 @@ class User extends Model
         $user->follow_count  = UserLog::where('user_id', $user->id)->where('type', 'fans')->count();
         $user->fans_count    = UserLog::where('to_id', $user->id)->where('type', 'fans')->count();
         $user->is_follow     = $user->id == $userId ? null : UserLog::where('user_id', $userId)->where('to_id', $user->id)->where('type', 'fans')->count();
-        $user->cover         = request()->domain() . $user->cover;
         $user->url           = url('userpage', ['id' =>  $user->id]);
         // 钩子
         event('UserAfterRead', $user);

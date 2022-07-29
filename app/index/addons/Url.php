@@ -37,7 +37,7 @@ class Url
                 $param .= $str . $key . '=' . $val;
             }
         }
-        return empty($url) || $url == 'index' ? $domain . $langx . $param : $domain . $langx . $url . $suffix . $param; 
+        return empty($url) || $url == 'index' ? $domain . $langx . $param : $domain . $langx . $url. $suffix . $param; 
     }
 
     /**

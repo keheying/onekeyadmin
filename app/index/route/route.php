@@ -30,12 +30,14 @@ Route::rule("$lang/fansPage", "page/fansPage");
 Route::rule("fansPage", "page/fansPage");
 Route::rule("$lang/messagePage", "page/messagePage");
 Route::rule("messagePage", "page/messagePage");
-// 登录/注册
+// 登录/注册/修改密码
 Route::rule("$lang/login/:name", "login/:name");
 Route::rule("login/:name", "login/:name");
 // 会员中心
 Route::rule("$lang/user/:name", "user/:name")->middleware([\app\index\middleware\Login::class]);
 Route::rule("user/:name", "user/:name")->middleware([\app\index\middleware\Login::class]);
+Route::rule("$lang/user", "user/index")->middleware([\app\index\middleware\Login::class]);
+Route::rule("user", "user/index")->middleware([\app\index\middleware\Login::class]);
 // 插件页面
 foreach (plugin_list() as $key => $val) {
 	// 路由(插件名/类/方法)
@@ -70,18 +72,19 @@ switch ($type) {
 				if ($type === $v["catalog"]) $append["plugin"] = $vv["name"];
 			}
 		}
-		// 详情/列表类型
-		if (count($pathinfo) === request()->singleRouteLength) {
+		// 详情
+		if (request()->singleRoute) {
 			$append["action"] = "single";
 			Route::rule("$lang/$name/:param", "plugins/index")->append($append);
 			Route::rule("$name/:param", "plugins/index")->append($append);
-		} else {
+		}
+		// 列表
+		if (request()->catalogRoute || request()->PageRoute) {
 			$append["action"] = "catalog";
 			Route::rule("$lang/$name", "plugins/index")->append($append);
 			Route::rule("$name", "plugins/index")->append($append);
 		}
 		break;
 }
-// 首页(优先级问题，防止覆盖)
 Route::rule("/", "page/index");
 Route::rule("/$lang", "page/index");

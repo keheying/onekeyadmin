@@ -1,15 +1,68 @@
 {include file="$header"}
 {empty name="html"}
 <div id="app" v-cloak>
-    <el-empty description="亲亲，控制台空空如也，快去安装一个流量统计插件吧~">
-        <el-button type="primary" @click="parent.parentVm.clickMenu('plugins/list')">安装插件</el-button>
-    </el-empty>
+    <div class="el-console">
+        <el-row :gutter="20">
+            <el-col :sm="16">
+                <el-row :gutter="20">
+                    <el-col :sm="12" :xs="24">
+            			<div class="web" @click="parent.parentVm.clickMenu('plugins/list')">
+            				<div class="title"><i class="el-icon-monitor"></i>控制台</div>
+            				<div class="desc">亲亲，可以安装流量统计插件填充内容~</div>
+            				<div class="btn">
+            				    <el-button size="small" plain>去安装</el-button>
+            				</div>
+            			</div>
+        			</el-col>
+        			<el-col :sm="12" :xs="24">
+                		<a class="domain" :href="domain" target="_blank">
+                			<div class="title">我的网站</div>
+                			<div class="bind">{{domain}}</div>
+                			<el-button size="small" plain>去看看</el-button>
+                		</a>
+            		</el-col>
+            	</el-row>
+        	</el-col>
+        	<el-col :sm="8">
+        	    <el-card class="box-card box-card1">
+                    <div slot="header" class="clearfix">
+                        <el-carousel height="130px" direction="vertical">
+                            <el-carousel-item>
+                                <a href="{:config('app.api')}" target="_blank"><img src="/admin/images/adv_fast.png"></a>
+                            </el-carousel-item>
+                            <el-carousel-item>
+                                <a href="{:config('app.api')}" target="_blank"><img src="/admin/images/adv_fast.png"></a>
+                            </el-carousel-item>
+                        </el-carousel>
+                    </div>
+                    <div class="title">即将上线功能</div>
+                    <div class="item">【功能】自由拖拽布局页面</div>
+                    <div class="item">【插件】商城、付费知识、系统竞价即将上线</div>
+                    <div class="item">【主题】多款免费主题即将上线</div>
+                </el-card>
+        	    <el-card class="box-card box-card2">
+                    <div slot="header" class="clearfix">
+                        <span>帮助中心</span>
+                        <a href="{:config('app.api')}/api/system/docs" target="_blank" style="float: right;">查看更多</a>
+                    </div>
+                    <a href="{:config('app.api')}/api/system/docs?id=55" target="_blank"><el-button size="mini" plain>开发指南</el-button></a>
+                    <a href="{:config('app.api')}/api/system/docs?id=62" target="_blank"><el-button size="mini" plain>一键CRUD</el-button></a>
+                    <a href="{:config('app.api')}/api/system/docs?id=61" target="_blank"><el-button size="mini" plain>crud参数</el-button></a>
+                    <a href="{:config('app.api')}/api/system/docs?id=72" target="_blank"><el-button size="mini" plain>系统安全</el-button></a>
+                    <a href="{:config('app.api')}/api/system/docs?id=56" target="_blank"><el-button size="mini" plain>插件开发</el-button></a>
+                    <a href="{:config('app.api')}/api/system/docs?id=57" target="_blank"><el-button size="mini" plain>主题开发</el-button></a>
+                </el-card>
+        	</el-col>
+    	</el-row>
+	</div>
 </div>
 <script>
 new Vue({
     el: '#app',
     data() {
-        return {}
+        return {
+            menu: {:json_encode($menu)},
+        }
     },
 })
 </script>

@@ -39,7 +39,6 @@ class Login  extends BaseController
                     $password = UserModel::where('id', $userInfo['id'])->value('password');
                     if (password_verify($input['loginPassword'], $password)) {
                         if ($userInfo['status'] === 1) {
-                            $userInfo->cover       = str_replace(request()->domain(), '', $userInfo->cover);
                             $userInfo->login_count = $userInfo->login_count + 1;
                             $userInfo->login_ip    = $this->request->ip();
                             $userInfo->login_time  = date('Y-m-d H:i:s');
@@ -49,9 +48,9 @@ class Login  extends BaseController
                             // 清除登录错误次数
                             UserAddons::clearLoginErrorNum();
                             // 勾选两周内自动登录
-                            UserAddons::openAutomaticLogin($userInfo->id, $input['checked']);
+                            UserAddons::openAutomaticLogin($userInfo, $input['checked']);
                             // 钩子
-                            event('LoginEnd');
+                            event('LoginEnd',$userInfo);
                             return json(['status' => 'success', 'message' => lang('login successful'), 'url'=> $this->request->indexLastUrl()]);
                         } else {
                             $error = ['status' => 'error', 'message' => lang('account under review')];
@@ -155,6 +154,7 @@ class Login  extends BaseController
                 $registerInfo = UserModel::create([
                     'group_id'         => $group_id,
                     'nickname'         => '未命名',
+                    'cover'            => '/upload/avatar.jpg',
                     'sex'              => 0,
                     'email'            => $input['email'],
                     'mobile'           => $input['mobile'],

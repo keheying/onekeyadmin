@@ -176,14 +176,7 @@ class File extends SplFileInfo
                         $this->hashName = call_user_func($rule);
                         break;
                     default:
-                        $arr = array_merge(range(0, 9), range('a', 'z'), range('A', 'Z'));
-                        $str = '';
-                        $arr_len = count($arr);
-                        for ($i = 0; $i < 32; $i++){
-                            $rand = mt_rand(0, $arr_len-1);
-                            $str.=$arr[$rand];
-                        }
-                        $this->hashName = date('Ymd') . DIRECTORY_SEPARATOR . md5((string) microtime(true) . $str);
+                        $this->hashName = date('Ymd') . DIRECTORY_SEPARATOR . md5(microtime(true) . $this->getPathname());
                         break;
                 }
             }

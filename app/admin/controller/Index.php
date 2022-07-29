@@ -11,6 +11,7 @@
 namespace app\admin\controller;
 
 use PDO;
+use think\facade\Db;
 use think\facade\View;
 use think\facade\Cache;
 use app\addons\File;

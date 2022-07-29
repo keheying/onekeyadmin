@@ -262,7 +262,7 @@ class File
             file_put_contents($file, $string);
             return true;
         } else {
-            return flase;
+            return false;
         }
     }
 }

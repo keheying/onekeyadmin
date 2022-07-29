@@ -2,7 +2,7 @@
 <div id="app" v-cloak>
     <el-container class="el-layout el-plugin">
         <el-aside width="192px">
-            <el-tabs v-model="search.install" @tab-click="getData" tab-position="left">
+            <el-tabs v-model="search.install" @tab-click="getData" :tab-position="document.body.clientWidth > 768 ? 'left' : 'top'">
                 <el-tab-pane label="插件中心" name="0"></el-tab-pane>
                 <el-tab-pane label="已安装" name="1"></el-tab-pane>
                 <el-tab-pane label="开发中" name="2"></el-tab-pane>
@@ -300,7 +300,7 @@
                         self.total = res.count;
                         parent.parentVm.menu = res.publicMenu;
                     } else {
-                        self.$message({ showClose: true, message: res.message, type: res.status});
+                        self.$notify({ showClose: true, message: res.message, type: res.status});
                     }
                 });
             },

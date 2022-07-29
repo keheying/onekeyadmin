@@ -53,6 +53,7 @@
 					<div class="tip"><p>数据库配置</p></div>
 					<el-form-item label="数据库名：" prop="sql_database">
 						<el-input v-model="form.sql_database" placeholder="例：onekeyadmin"></el-input>
+						<div style="color: #50bfff">OneKeyAdmin会自动创建数据库，防止重复</div>
 					</el-form-item>
 					<el-form-item label="数据库用户名：" prop="sql_username">
 						<el-input v-model="form.sql_username" placeholder="例：root"></el-input>
@@ -86,26 +87,6 @@
 						</el-form-item>
 						<el-form-item label="超级管理员密码：">
 							{{form.admin_password}}
-						</el-form-item>
-						<div class="tip"><p>以phpstudy集成环境为例</p></div>
-						<el-form-item label="运行目录：">
-							public
-						</el-form-item>
-						<el-form-item label="Apache伪静态：">
-							<div v-text="apacheHead"></div>
-								<div>&nbsp;&nbsp;&nbsp;&nbsp;Options +FollowSymlinks -Multiviews</div>
-								<div>&nbsp;&nbsp;&nbsp;&nbsp;RewriteEngine on</div>
-								<div>&nbsp;&nbsp;&nbsp;&nbsp;RewriteCond %{REQUEST_FILENAME} !-d</div>
-								<div>&nbsp;&nbsp;&nbsp;&nbsp;RewriteCond %{REQUEST_FILENAME} !-f</div>
-								<div>&nbsp;&nbsp;&nbsp;&nbsp;RewriteRule ^(.*)$ index.php [L,E=PATH_INFO:$1]</div>
-							<div v-text="apacheFoot"></div>
-							<div>请将以上代码复制到<span style="color: #E6A23C">public/.htaccess</span>文件中</div>
-						</el-form-item>
-						<el-form-item label="Nginx伪静态：">
-                        	<div>if (!-e $request_filename){</div>
-	                        	<div>&nbsp;&nbsp;&nbsp;&nbsp;rewrite ^(.*)$ /index.php?s=$1 last; break;</div>
-	                        <div>}</div>
-                        	<div>请将以上代码复制到<span style="color: #E6A23C">public/nginx.htaccess</span>文件中</div>
 						</el-form-item>
 					</el-form>
 			    </el-card>

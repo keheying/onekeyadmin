@@ -58,7 +58,7 @@
                     {
                         prop: 'login_count', 
                         label: '登录次数', 
-                        table:{sort: true},
+                        table:{sort: true, is: 'el-input'},
                         form: false,
                     },
                     {
@@ -89,7 +89,7 @@
                     {
                         prop: 'status',
                         label: '状态',  
-                        table: {sort: true, prop: 'c_status'}, 
+                        table: {is: 'el-switch', sort: true}, 
                         form: {
                             is: 'el-switch',
                             default: 1, 

@@ -2,7 +2,7 @@
 <div id="app" v-cloak>
     <el-container class="el-layout el-theme">
         <el-aside width="192px">
-            <el-tabs v-model="search.install" @tab-click="getData" tab-position="left">
+            <el-tabs v-model="search.install" @tab-click="getData" :tab-position="document.body.clientWidth > 768 ? 'left' : 'top'">
                 <el-tab-pane label="主题中心" name="0"></el-tab-pane>
                 <el-tab-pane label="已安装" name="1"></el-tab-pane>
             </el-tabs>
@@ -45,15 +45,19 @@
                             </ul>
                         </div>
                         <div class="el-theme-catalog-item" style="margin-top: 10px">
-                            切换主题：
+                            主题：
                             <el-select size="small" v-model="theme" @change="themeChange()">
                                 <el-option v-for="(item, index) in install" :label="item.title" :value="item.name">
                                     {{item.title}}<span style="float: right;color: #999">{{item.name}}</span>
                                 </el-option>
                             </el-select>
+                            切换
+                            <el-tooltip content="安装主题后可自由切换主题，主题标签在系统配置里，修改内容无需修改代码！" placement="top">
+                                <i style="color:#F56C6C;font-size:18px;margin-left: 5px;" class="el-icon-question"></i>
+                            </el-tooltip>
                         </div>
                     </el-card>
-                    <div v-loading="loading">
+                    <div style="margin: 0 -20px" v-loading="loading">
                         <el-empty v-if="table.length == 0" description="暂无模板"></el-empty>
                         <div class="el-themes-item" v-for="(item, index) in table">
                             <img v-if="item.use" class="use" src="/admin/images/use.png">
@@ -264,8 +268,9 @@
                         self.table   = res.data;
                         self.total   = res.count;
                         self.install = res.list;
+                        parent.parentVm.menu = res.publicMenu;
                     } else {
-                        self.$message({ showClose: true, message: res.message, type: res.status});
+                        self.$notify({ showClose: true, message: res.message, type: res.status});
                     }
                 });
             },

@@ -68,14 +68,14 @@ class User
      * @param 用户id
      * @param 是否自动登录
      */
-    public static function openAutomaticLogin(int $id, $open = true): void
+    public static function openAutomaticLogin(Object $userInfo, $open = true): void
     {
-        if ($open) {
-            $key = $id . self::$salt . request()->ip();
+        if ($open && $open != 'false') {
+            $key = $userInfo['email'] . $userInfo['password'] . self::$salt . request()->ip();
             $token = password_hash($key, PASSWORD_BCRYPT, ['cost' => 12]);
             $time = 14*24*3600;
             Db::name('admin_token')->save([
-                'user_id'     => $id, 
+                'user_id'     => $userInfo['id'], 
                 'token'       => $token, 
                 'create_time' => date('Y-m-d H:i:s')
             ]);
@@ -84,11 +84,11 @@ class User
             cookie('admin_token', null);
         }
     }
-
+    
     /**
      * 判断自动登录的token
      */
-    public static function checkAutomaticLogin(): void
+    public static function checkAutomaticLogin()
     {
         $userInfo = session('admin');
         if (empty($userInfo)) {
@@ -96,12 +96,19 @@ class User
             if ($token) {
                 $time = 14*24;
                 $userId = Db::name("admin_token")->where("token", $token)->whereTime("create_time","-$time hours")->value('user_id');
-                $userInfo = Admin::with(['group'])->where('status', 1)->where('id', $userId)->find();
-                if ($userId && $userInfo) {
-                    session('admin',$userInfo);
+                $user = Admin::with(['group'])->where('status', 1)->where('id', $userId)->find();
+                if ($user) {
+                    if (password_verify($user['email'] . $user['password'] . self::$salt . request()->ip(), $token)) {
+                        session('admin',$user);
+                        $userInfo = $user;
+                    } else {
+                        // 曝光删除
+                        Db::name("admin_token")->where("token", $token)->delete();
+                    }
                 }
             }
         }
+        return $userInfo;
     }
 
     /**

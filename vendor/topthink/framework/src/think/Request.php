@@ -13,6 +13,7 @@ declare (strict_types = 1);
 namespace think;
 
 use ArrayAccess;
+use think\facade\Lang;
 use think\file\UploadedFile;
 use think\route\Rule;
 
@@ -408,7 +409,8 @@ class Request implements ArrayAccess
             $rootDomain = $this->rootDomain();
 
             if ($rootDomain) {
-                $this->subDomain = rtrim(stristr($this->host(), $rootDomain, true), '.');
+                $sub             = stristr($this->host(), $rootDomain, true);
+                $this->subDomain = $sub ? rtrim($sub, '.') : '';
             } else {
                 $this->subDomain = '';
             }
@@ -868,6 +870,26 @@ class Request implements ArrayAccess
     }
 
     /**
+     * 获取包含文件在内的请求参数
+     * @access public
+     * @param  string|array $name 变量名
+     * @param  string|array $filter 过滤方法
+     * @return mixed
+     */
+    public function all($name = '', $filter = '')
+    {
+        $data = array_merge($this->param(), $this->file() ?: []);
+
+        if (is_array($name)) {
+            $data = $this->only($name, $data, $filter);
+        } elseif ($name) {
+            $data = $data[$name] ?? null;
+        }
+
+        return $data;
+    }
+
+    /**
      * 设置路由变量
      * @access public
      * @param  Rule $rule 路由对象
@@ -1127,7 +1149,6 @@ class Request implements ArrayAccess
     {
         $files = $this->file;
         if (!empty($files)) {
-
             if (strpos($name, '.')) {
                 [$name, $sub] = explode('.', $name);
             }
@@ -1205,7 +1226,7 @@ class Request implements ArrayAccess
             7 => 'file write error',
         ];
 
-        $msg = $fileUploadErrors[$error];
+        $msg = Lang::get($fileUploadErrors[$error]);
         throw new Exception($msg, $error);
     }
 
@@ -1287,12 +1308,12 @@ class Request implements ArrayAccess
 
     /**
      * 强制类型转换
-     * @access public
+     * @access protected
      * @param  mixed  $data
      * @param  string $type
      * @return mixed
      */
-    private function typeCast(&$data, string $type)
+    protected function typeCast(&$data, string $type)
     {
         switch (strtolower($type)) {
             // 数组
@@ -1324,7 +1345,7 @@ class Request implements ArrayAccess
 
     /**
      * 获取数据
-     * @access public
+     * @access protected
      * @param  array  $data 数据源
      * @param  string $name 字段名
      * @param  mixed  $default 默认值
@@ -2128,19 +2149,23 @@ class Request implements ArrayAccess
     }
 
     // ArrayAccess
+    #[\ReturnTypeWillChange]
     public function offsetExists($name): bool
     {
         return $this->has($name);
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetGet($name)
     {
         return $this->param($name);
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetSet($name, $value)
     {}
 
+    #[\ReturnTypeWillChange]
     public function offsetUnset($name)
     {}
 

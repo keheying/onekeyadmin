@@ -125,6 +125,8 @@ class File extends BaseController
                     }
                 }
             }
+            // 钩子
+            event('UploadEnd', $save);
             return json(['status' => 'success', 'message' => '上传成功', 'data' => $save]);
         } catch (ValidateException $e) {
             return json(['status' => 'error', 'message' => $e->getMessage()]);

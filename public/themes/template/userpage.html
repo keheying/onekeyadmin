@@ -4,140 +4,130 @@
         <div class="el-user">
             <el-card class="box-card content" style="width: 100%">
                 <div slot="header" class="clearfix">
-                    <span>{:lang('personal center')}</span> 
+                    <span>TA的资料</span> 
                 </div>
                 <div class="page">
-                    <el-row :gutter="20">
-                        <el-col :md="24" :sm="24">
-                            <div class="header">
-                                <el-avatar style="float: left;" :size="145" src="{$pageUserInfo.cover}"></el-avatar>
-                                <div class="info">
-                                    <div class="nickname">
-                                        {$pageUserInfo.nickname}
-                                    </div>
-                                    <div class="describe">{$pageUserInfo.describe}</div>
-                                    <div class="medal"></div>
-                                    <div class="labels">
-                                        <div class="item">
-                                            <span class="label">Lv</span>
-                                            <span class="value">{$pageUserInfo.group_title}</span>
-                                        </div>
-                                        <div class="item">
-                                            <span class="label">{:lang('registration time')}</span>
-                                            <span class="value">{$pageUserInfo.create_time}</span>
-                                        </div>
-                                        <div class="item">
-                                            <span class="label">
-                                                <el-button 
-                                                    :type="pageUserInfo.is_follow === 0 ? 'danger' : ''" 
-                                                    size="mini" 
-                                                    @click="follow(pageUserInfo)">
-                                                    {{pageUserInfo.is_follow === 0 ? lang('follow') : lang('paid attention to')}}
-                                                </el-button>
-                                            </span>
-                                        </div>
-                                    </div>
+                    <div class="header">
+                        <el-avatar style="float: left;" :size="145" src="{$pageUserInfo.cover}">{:substr($pageUserInfo.nickname,0,1)}</el-avatar>
+                        <div class="info">
+                            <div class="nickname">
+                                {$pageUserInfo.nickname}
+                                <el-button 
+                                    :type="pageUserInfo.is_follow === 0 ? 'danger' : ''" 
+                                    size="mini" 
+                                    @click="follow(pageUserInfo)">
+                                    {{pageUserInfo.is_follow === 0 ? lang('follow') : lang('paid attention to')}}
+                                </el-button>
+                            </div>
+                            <div class="describe">{$pageUserInfo.describe}</div>
+                            <div class="labels">
+                                <div class="item">
+                                    <span class="label">Lv</span>
+                                    <span class="value">{$pageUserInfo.group_title}</span>
                                 </div>
                             </div>
-                            <el-tabs v-model="tabs" class="tabs" type="card">
-                                <el-tab-pane :label="lang('ta follow') + '（' + pageUserInfo.follow_count + '）'" name="follow">
-                                    <div class="tab" v-infinite-scroll="followList" :infinite-scroll-disabled="followDisabled">
-                                        <div class="item" v-for="item in followData">
-                                            <a :href="item.to.url" target="_blank">
-                                                <img :src="item.to.cover">
-                                                <div class="details">
-                                                    <div class="title">{{item.to.nickname}}</div>
-                                                    <div class="describe">{{item.to.describe}}</div>
-                                                </div>
-                                            </a>
-                                            <div class="follow">
-                                                <el-button :type="item.to.is_follow === 0 ? 'danger': '' " size="mini" @click="follow(item.to)">
-                                                    {{item.to.is_follow === 0 ? lang('follow') : lang('paid attention to')}}
-                                                </el-button>
-                                            </div>
+                        </div>
+                    </div>
+                    {if $pageUserInfo.hide == 1}
+                    <el-tabs v-model="tabs" class="tabs" type="card">
+                        <el-tab-pane :label="lang('ta follow') + '（' + pageUserInfo.follow_count + '）'" name="follow">
+                            <div v-if="tabs === 'follow'" class="tab" v-infinite-scroll="followList" :infinite-scroll-disabled="followDisabled">
+                                <div class="item" v-for="item in followData">
+                                    <a :href="item.to.url" target="_blank">
+                                        <img :src="item.to.cover">
+                                        <div class="details">
+                                            <div class="title">{{item.to.nickname}}</div>
+                                            <div class="describe">{{item.to.describe}}</div>
                                         </div>
-                                        <div v-if="followLoading" class="el-loader">{:lang('loading')}</div>
-                                        <div v-if="followNoMore && followLoading === false" class="el-nomore">{:lang('no more')}</div>
-                                    </div>
-                                </el-tab-pane>
-                                <el-tab-pane :label="lang('ta fans') + '（' + pageUserInfo.fans_count + '）'" name="fans">
-                                    <div v-if="tabs === 'fans'" class="tab" v-infinite-scroll="fansList" :infinite-scroll-disabled="fansDisabled">
-                                        <div class="item" v-for="item in fansData">
-                                            <a :href="item.user.url" target="_blank">
-                                                <img :src="item.user.cover">
-                                                <div class="details">
-                                                    <div class="title">{{item.user.nickname}}</div>
-                                                    <div class="describe">{{item.user.describe}}</div>
-                                                </div>
-                                            </a>
-                                            <div class="follow">
-                                                <el-button v-if="item.user.is_follow != null" :type="item.user.is_follow === 0 ? 'danger' : ''" size="mini" @click="follow(item.user)">
-                                                    {{item.user.is_follow === 0 ? lang('follow') : lang('paid attention to')}}
-                                                </el-button>
-                                            </div>
-                                        </div>
-                                        <div v-if="fansLoading" class="el-loader">{:lang('loading')}</div>
-                                        <div v-if="fansNoMore && fansLoading === false" class="el-nomore">{:lang('no more')}</div>
-                                    </div>
-                                </el-tab-pane>
-                                <el-tab-pane :label="lang('ta message') + '（' + pageUserInfo.message_count + '）'" name="message">
-                                   <el-form >
-                                        <el-input type="textarea" v-model="messageContent" :placeholder="lang('please enter')"></el-input>
-                                        <el-button type="primary" @click="message(pageUserInfo)" size="mini" style="margin-top: 10px">{{lang('message')}}
+                                    </a>
+                                    <div class="follow">
+                                        <el-button :type="item.to.is_follow === 0 ? 'danger': '' " size="mini" @click="follow(item.to)">
+                                            {{item.to.is_follow === 0 ? lang('follow') : lang('paid attention to')}}
                                         </el-button>
-                                    </el-form>
-                                    <div 
-                                        v-if="tabs === 'message'" 
-                                        class="tab" 
-                                        v-infinite-scroll="messageList" 
-                                        :infinite-scroll-disabled="messageDisabled">
-                                        <div class="item" v-for="item in messageData">
-                                            <a :href="item.user.url" target="_blank">
-                                                <img :src="item.user.cover">
-                                                <div class="details">
-                                                    <div class="title">{{item.user.nickname}}</div>
-                                                    <div class="describe">{{item.explain}}</div>
-                                                </div>
-                                            </a>
-                                            <div class="follow">
-                                                <el-button v-if="item.user.is_follow != null" :type="item.user.is_follow === 0 ? 'danger' : ''" size="mini" @click="follow(item.user)">
-                                                    {{item.user.is_follow === 0 ? lang('follow') : lang('paid attention to')}}
-                                                </el-button>
-                                            </div>
-                                        </div>
-                                        <div v-if="messageLoading" class="el-loader">{:lang('loading')}</div>
-                                        <div v-if="messageNoMore && messageLoading === false" class="el-nomore">{:lang('no more')}</div>
                                     </div>
-                                </el-tab-pane>
-                            </el-tabs>
-                        </el-col>
-                        <el-col :md="24" :sm="24">
-                            <el-card class="box-card">
-                                <div slot="header" class="clearfix">
-                                    <span>{:lang('recent visitors')}</span>
                                 </div>
-                                <div class="visitor" v-infinite-scroll="visitorList" :infinite-scroll-disabled="visitorDisabled">
-                                    <div class="item" v-for="item in visitorData">
-                                        <a :href="item.user.url" target="_blank">
-                                            <img :src="item.user.cover">
-                                            <div class="details">
-                                                <div class="title">{{item.user.nickname}}</div>
-                                                <div class="describe">{{item.user.describe}}</div>
-                                            </div>
-                                        </a>
-                                        <div class="follow">
-                                            <el-button v-if="item.user.is_follow != null" :type="item.user.is_follow === 0 ? 'danger' : ''" size="mini" @click="follow(item.user)">
-                                                {{item.user.is_follow === 0 ? lang('follow') : lang('paid attention to')}}
-                                            </el-button>
-                                            <div class="time">{{common.diaplayTime(item.create_time)}}</div>
+                                <div v-if="followLoading" class="el-loader">{:lang('loading')}</div>
+                                <div v-if="followNoMore && followLoading === false" class="el-nomore">{:lang('no more')}</div>
+                            </div>
+                        </el-tab-pane>
+                        <el-tab-pane :label="lang('ta fans') + '（' + pageUserInfo.fans_count + '）'" name="fans">
+                            <div v-if="tabs === 'fans'" class="tab" v-infinite-scroll="fansList" :infinite-scroll-disabled="fansDisabled">
+                                <div class="item" v-for="item in fansData">
+                                    <a :href="item.user.url" target="_blank">
+                                        <img :src="item.user.cover">
+                                        <div class="details">
+                                            <div class="title">{{item.user.nickname}}</div>
+                                            <div class="describe">{{item.user.describe}}</div>
                                         </div>
+                                    </a>
+                                    <div class="follow">
+                                        <el-button v-if="item.user.is_follow != null" :type="item.user.is_follow === 0 ? 'danger' : ''" size="mini" @click="follow(item.user)">
+                                            {{item.user.is_follow === 0 ? lang('follow') : lang('paid attention to')}}
+                                        </el-button>
                                     </div>
-                                    <div v-if="visitorLoading" class="el-loader">{:lang('loading')}</div>
-                                    <div v-if="visitorNoMore && visitorLoading === false" class="el-nomore">{:lang('no more')}</div>
                                 </div>
-                            </el-card>
-                        </el-col>
-                    </el-row>
+                                <div v-if="fansLoading" class="el-loader">{:lang('loading')}</div>
+                                <div v-if="fansNoMore && fansLoading === false" class="el-nomore">{:lang('no more')}</div>
+                            </div>
+                        </el-tab-pane>
+                        <el-tab-pane :label="lang('ta message') + '（' + pageUserInfo.message_count + '）'" name="message">
+                           <el-form >
+                                <el-input type="textarea" v-model="messageContent" :placeholder="lang('please enter')"></el-input>
+                                <el-button type="primary" @click="message(pageUserInfo)" size="mini" style="margin-top: 10px">{{lang('message')}}
+                                </el-button>
+                            </el-form>
+                            <div 
+                                v-if="tabs === 'message'" 
+                                class="tab" 
+                                v-infinite-scroll="messageList" 
+                                :infinite-scroll-disabled="messageDisabled">
+                                <div class="item" v-for="item in messageData">
+                                    <a :href="item.user.url" target="_blank">
+                                        <img :src="item.user.cover">
+                                        <div class="details">
+                                            <div class="title">{{item.user.nickname}}</div>
+                                            <div class="describe">{{item.explain}}</div>
+                                        </div>
+                                    </a>
+                                    <div class="follow">
+                                        <el-button v-if="item.user.is_follow != null" :type="item.user.is_follow === 0 ? 'danger' : ''" size="mini" @click="follow(item.user)">
+                                            {{item.user.is_follow === 0 ? lang('follow') : lang('paid attention to')}}
+                                        </el-button>
+                                    </div>
+                                </div>
+                                <div v-if="messageLoading" class="el-loader">{:lang('loading')}</div>
+                                <div v-if="messageNoMore && messageLoading === false" class="el-nomore">{:lang('no more')}</div>
+                            </div>
+                        </el-tab-pane>
+                        <el-tab-pane label="{:lang('recent visitors')}" name="visitors">
+                            <div 
+                                v-if="tabs === 'visitors'" 
+                                class="tab" 
+                                v-infinite-scroll="visitorList" 
+                                :infinite-scroll-disabled="visitorDisabled">
+                                <div class="item" v-for="item in visitorData">
+                                    <a :href="item.user.url" target="_blank">
+                                        <img :src="item.user.cover">
+                                        <div class="details">
+                                            <div class="title">{{item.user.nickname}}</div>
+                                            <div class="describe">{{item.user.describe}}</div>
+                                        </div>
+                                    </a>
+                                    <div class="follow">
+                                        <el-button v-if="item.user.is_follow != null" :type="item.user.is_follow === 0 ? 'danger' : ''" size="mini" @click="follow(item.user)">
+                                            {{item.user.is_follow === 0 ? lang('follow') : lang('paid attention to')}}
+                                        </el-button>
+                                        <div class="time">{{common.diaplayTime(item.create_time)}}</div>
+                                    </div>
+                                </div>
+                                <div v-if="visitorLoading" class="el-loader">{:lang('loading')}</div>
+                                <div v-if="visitorNoMore && visitorLoading === false" class="el-nomore">{:lang('no more')}</div>
+                            </div>
+                        </el-tab-pane>
+                    </el-tabs>
+                    {else/}
+                    <el-empty description="TA设置了隐私"></el-empty>
+                    {/if}
                 </div>
             </el-card>
         </div>
@@ -177,9 +167,24 @@
                     page: 1,
                 },
                 messageLoading: false,
+                blogData: [],
+                blogSearch:{
+                    id: locationUrl.get('id'),
+                    page: 1,
+                },
+                blogLoading: false,
             }
         },
         computed: {
+            userInfo() {
+                if (userInfo == null) {
+                    userInfo = {};
+                    userInfo.cover = '';
+                    userInfo.nickname = '';
+                    userInfo.describe = '';
+                }
+                return userInfo;
+            },
             visitorNoMore() {
                 return this.visitorCount <= this.visitorData.length;
             },
@@ -204,6 +209,12 @@
             messageDisabled() {
                 return this.messageLoading || this.messageNoMore;
             },
+            blogNoMore() {
+                return this.blogCount <= this.blogData.length;
+            },
+            blogDisabled() {
+                return this.blogLoading || this.blogNoMore;
+            },
         },
         methods: {
             message(item) {
@@ -214,7 +225,12 @@
                             self.messageData.unshift({
                                 create_time: common.dateTime(),
                                 explain: self.messageContent,
-                                user: {cover: userInfo.cover, nickname: userInfo.nickname,describe: userInfo.describe,is_follow: 0},
+                                user: {
+                                    cover: self.userInfo.cover, 
+                                    nickname: self.userInfo.nickname,
+                                    describe: self.userInfo.describe,
+                                    is_follow: 0
+                                },
                             });
                             self.messageContent = "";
                         } else {
@@ -327,6 +343,29 @@
                 this.messageSearch.page = 1;
                 this.messageData = [];
                 this.messageList();
+            },
+            /**
+             * 加载列表
+             */
+            blogList() {
+                let self = this;
+                self.blogLoading = true;
+                request.post('blog/blog/blogPage', self.blogSearch, function (res) {
+                    if (res.status === 'success') {
+                        self.blogSearch.page++;
+                        self.blogData  = self.blogData.concat(res.data);
+                        self.blogCount = res.count;
+                    }
+                    self.blogLoading = false;
+                })
+            },
+            /**
+             * 搜索
+             */
+            blogSearchList() {
+                this.blogSearch.page = 1;
+                this.blogData = [];
+                this.blogList();
             },
         },
     });

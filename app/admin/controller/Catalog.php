@@ -70,7 +70,10 @@ class Catalog extends BaseController
                     return json(['status' => 'error', 'message' => '页面类型必须请输入路由！']);
                 }
                 $file = theme_now_path() . str_replace('-', '_', $input['seo_url']) . '.html';
-                if (! is_file($file)) File::create($file);
+                if (! is_file($file)) {
+                    $fileContent = '{include file="$header"}'."\n\t".'{$catalog.content|raw}'."\n".'{include file="$footer"}';
+                    File::create($file, $fileContent);
+                }
             }
             // 绑定模板
             if ($input['type'] !== 'page' && $input['links_type'] === 0 && $input['bind_html'] !== '') {
@@ -111,7 +114,7 @@ class Catalog extends BaseController
             }
             $old = CatalogModel::where('id', $input['id'])->value('seo_url');
             if ($old === 'index') {
-                if ($input['seo_url'] !== 'index' || $input['links_type'] == 1) {
+                if ($input['seo_url'] !== 'index') {
                     return json(['status' => 'error', 'message' => '首页路由是固定的，不能修改！']);
                 }
             }
@@ -122,7 +125,8 @@ class Catalog extends BaseController
                 }
                 $file = theme_now_path() . str_replace('-', '_', $input['seo_url']) . '.html';
                 $oldfile = theme_now_path() . str_replace('-', '_', $old) . '.html';
-                is_file($oldfile) ? rename($oldfile, $file) : File::create($file);
+                $fileContent = '{include file="$header"}'."\n\t".'{$catalog.content|raw}'."\n".'{include file="$footer"}';
+                is_file($oldfile) ? rename($oldfile, $file) : File::create($file,$fileContent);
             }
             // 绑定模板
             if ($input['type'] !== 'page' && $input['links_type'] === 0 && $input['bind_html'] !== "") {
@@ -131,7 +135,7 @@ class Catalog extends BaseController
                 if (! is_file($singleFile)) File::create($singleFile);
                 if  (! is_file($catalogFile)) File::create($catalogFile);
             }
-            $input['level'] = $input['pid'] === 0 ? 1 : CatalogModel::where('id', $input['pid'])->value('level') + 1;
+            $input['level']    = $input['pid'] === 0 ? 1 : CatalogModel::where('id', $input['pid'])->value('level') + 1;
             CatalogModel::update($input);
             // 清除缓存
             cache('catalog_' . theme() . $this->request->lang, NULL);

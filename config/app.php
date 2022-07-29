@@ -34,7 +34,7 @@ return [
     // 请求地址
     'api' => 'https://www.onekeyadmin.com',
     // 版本号
-    'version' => '105',
+    'version' => '127',
     // 当前主题
     'theme' => 'template',
 ];

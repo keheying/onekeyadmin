@@ -11,6 +11,7 @@
 namespace app\admin\controller;
 
 use PDO;
+use think\facade\Db;
 use think\facade\View;
 use app\addons\File;
 use app\admin\BaseController;
@@ -50,13 +51,14 @@ class Plugins extends BaseController
                 }
                 foreach ($data as $key => $value) {
                     $data[$key]['user']          = ['nickname' => '本站作者'];
-                    $data[$key]['describe']      = '如果您想和TA人分享此插件可上传到官网：<a href="'.config('app.api').'/api/user/pluginsList.html" target="_blank">点击此处上传</a>';
+                    $createUrl = url('plugins/create', ["name" => $value["name"]]);
+                    $data[$key]['describe']      = '如果您想和TA人分享此插件，可<a href="'.$createUrl.'" target="_blank">一键打包</a>生成zip，<a href="'.config('app.api').'/api/user/pluginsList.html" target="_blank">上传到官方平台</a>';
                     $data[$key]['price']         = 0;
                     $data[$key]['install_count'] = 0;
                 }
                 $count = count($data);
             } else {
-                $list = plugin_list();
+                $list = plugin_list('');
                 // 插件中心/已安装
                 if ($input['install'] == 1) {
                     if (empty($list)) {
@@ -94,7 +96,6 @@ class Plugins extends BaseController
                 'count'      => $count, 
                 'publicMenu' => $this->request->publicMenu
             ]);
-            
         } else {
             // 分类
             $result = api_post('token/pluginsClass');
@@ -112,6 +113,17 @@ class Plugins extends BaseController
             File::delDirAndFile(plugin_path() . input('post.name'));
             return json(['status' => 'success', 'message' => '插件卸载成功']);
         }
+    }
+    
+    /**
+     * 插件打包
+     */
+    public function create()
+    {
+        $input = input();
+        $file  = plugin_path() . $input['name'];
+        File::createZip($file, $file . '.zip');
+        return download($file . '.zip', $input['name'] . '.zip');
     }
 
     /**
@@ -169,6 +181,10 @@ class Plugins extends BaseController
     {
         if ($this->request->isPost()) {
             $input  = input('post.');
+            $exits = array_search($input['name'],array_column(plugin_list(''), 'name'));
+            if ($exits !== false) {
+                return json(['status' => 'success', 'message' => '插件已安装']);
+            }
             $result = api_post('token/pluginsInstall', $input);
             if ($result['status'] === 'success') {
                 $zip = base64_decode($result['data']['zip']);

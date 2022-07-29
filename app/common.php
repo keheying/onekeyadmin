@@ -25,7 +25,7 @@ function plugin_list($status = 1): array
                     $nowPluginPath = $pluginPath . $path;
                     $nowPluginInfo = is_file($nowPluginPath . '/info.php') ? include($nowPluginPath . '/info.php') : [];
                     if ($nowPluginInfo) {
-                        if ($nowPluginInfo['status'] == $status) {
+                        if ($nowPluginInfo['status'] == $status || $status == '') {
                             $nowPluginInfo['route'] = is_file($nowPluginPath.'/route.php') ? include($nowPluginPath.'/route.php') : [];
                             array_push($pluginList, $nowPluginInfo);
                         }
@@ -157,6 +157,15 @@ function theme_now_view(): string
 }
 
 /**
+ * 当前语言参数
+ */
+function lang(string $name) :string
+{
+    $name = strtolower($name);
+    return !empty(request()->langParameter[$name]) ? request()->langParameter[$name] : $name;
+}
+
+/**
  * api发起POST请求
  * @param 请求api方法
  * @param 请求api数据
@@ -166,6 +175,9 @@ function api_post(string $func, $data = []): array
     $data['token'] = env('app_token');
     $url    = config('app.api').'/api/' . $func;
     $output = curl($url, $data);
+    if (is_array($output)) {
+        return $output;
+    }
     $result = json_decode($output, true);
     return is_array($result) ? $result : ['status' => 'error', 'message' => '连接错误'];
 }

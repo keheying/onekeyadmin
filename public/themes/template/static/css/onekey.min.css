@@ -147,9 +147,10 @@ img{max-width:100%}
 .el-user .site .item{display: block;padding: 14px;font-size: 14px;color: #333}
 .el-user .site .cover{width: 18px;height: 18px;vertical-align: middle;margin-right: 10px;float: left;}
 .el-search{margin: 100px 0px 20px 0px;position: relative;background-color: #fff;padding: 20px}
-.el-search .list{overflow: auto;padding: 0 20px;}
+.el-search .list{overflow: auto;min-height: 60vh}
 .el-search .list .item .title{margin: 10px 0;}
-.el-search .list .item .time{font-size: 14px;color: #666}
+.el-search .list .item .description{font-size:14px}
+.el-search .list .item .time{font-size: 14px;margin: 10px 0;color: #666}
 .el-pagination{margin: 50px 0; text-align: center; font-size: 12px; clear:both}
 .el-loader{margin-top: 20px;height: 42px;font-size: 14px;text-align: center;line-height: 42px;color: #626675;background: #f5f5f6;border-radius: 6px;cursor: pointer;}
 .el-nomore{margin-top: 20px;height: 42px;font-size: 14px;text-align: center;line-height: 42px;color: #626675;}
@@ -203,4 +204,10 @@ img{max-width:100%}
 .el-index-warp .marketing{padding:20px;padding-bottom:20px}
 .el-footer{padding: 20px}
 .el-footer .right{text-align: left;}
+.login-wrapper{padding:0;padding-top: 80px;}
+.login-container{width: 95%;}
+.login-body{display: block;}
+.login-side{display: none;}
+.login-form-warp{width:100%;}
+.login-form-content{padding: 20px;}
 }

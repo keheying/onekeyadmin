@@ -65,6 +65,7 @@ class Config extends BaseController
             'system' => $system,
             'user'   => $object->userConfig,
             'theme'  => $theme,
+            'themes' => Themes::select(),
             'upload' => [
                 'admin' => include(root_path().'app/admin/config/upload.php'),
                 'index' => include(root_path().'app/index/config/upload.php')

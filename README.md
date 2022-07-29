@@ -1,18 +1,18 @@
 <p align="center">
     <img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/logo.png" />
 </p>
-<h2 align="center">OneKeyAdmin Pro 开源免费商用</h2>
+<h2 align="center">:tw-1f525: OneKeyAdmin 开源免费商用</h2>
 <p align="center">
-    <a href="http://www.onekeyadmin.com">
+    <a href="http://www.onekeyadmin.com" target="_blank">
         <img src="https://img.shields.io/badge/OfficialWebsite-OneKeyAdmin-yellow.svg" />
     </a>
-    <a href="http://www.onekeyadmin.com">
+    <a href="http://www.onekeyadmin.com" target="_blank">
         <img src="https://img.shields.io/badge/Licence-Apache2.0-green.svg?style=flat" />
     </a>
-    <a href="http://www.onekeyadmin.com">
-        <img src="https://img.shields.io/badge/Edition-1.0.5-blue.svg" />
+    <a href="http://www.onekeyadmin.com" target="_blank">
+        <img src="https://img.shields.io/badge/Edition-1.2.7-blue.svg" />
     </a>
-     <a href="http://www.onekeyadmin.com/version.html">
+     <a href="http://www.onekeyadmin.com/version.html" target="_blank">
         <img src="https://img.shields.io/badge/download-7.0m-red.svg" />
     </a>
 </p>
@@ -23,104 +23,106 @@
 ## 导航栏目
 =========================================================
 
-   [开发文档](http://www.onekeyadmin.com/api/system/docs)
- | [论坛地址](http://www.onekeyadmin.com/blog.html)
- | [官网地址](http://www.onekeyadmin.com)
- | [演示地址](http://demo.onekeyadmin.com/mk_admin)
- | [立即下载](http://www.onekeyadmin.com/api/system/version.html)
- | [TP6开发手册](http://www.kancloud.cn/manual/thinkphp6_0/content)
+<a href="http://www.onekeyadmin.com/docs" target="_blank">开发文档&nbsp;&nbsp;</a>
+<a href="http://www.onekeyadmin.com/question.html" target="_blank">社区地址&nbsp;&nbsp;</a>
+<a href="http://www.onekeyadmin.com" target="_blank">官网地址&nbsp;&nbsp;</a>
+<a href="http://gitee.onekeyadmin.com/mk_admin" target="_blank">演示地址&nbsp;&nbsp;</a>
+<a href="http://www.onekeyadmin.com/api/system/version.html" target="_blank">立即下载</a>
 
 =========================================================
 
-## 项目介绍
+OneKeyAdmin基于ThinkPHP+Element的低代码后台开发框架，开箱即用无需配置。填写参数即可完成CRUD，拥有开发助手选择单或多个数据表生成一个完整应用，包含控制器、模型、视图、菜单权限、API接口，让你的开发效率翻倍。
 
-OneKeyAdmin是基于Thinkphp6+Element编写的一套后台管理系统。安装包7MB大小，拥有一键生成代码功能、无需写页面快速增删改查、资源管理、权限管理、通用的会员模块、系统分类、多语言配置、基础配置、系统日志、钩子事件、应用插件扩展功能，在线安装卸载升级应用插件。目前插件有cms系统、博客论坛系统、swoole客服系统、丰富的采集爬虫插件、竞价系统、流量统计、tinymce编辑器、表单可视化管理、电子画册、SEO网站优化、支付等等。用户可上传插件免费或付费给予TA人使用，互帮互助，建立一个友好的社区环境。还有多套主题模板随时安装切换且全部免费使用哦~
+## 开发助手
+
+<img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/curd.gif"/>
+
+## 代码格式
+
+<img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/curd.png"/>
+
+## 主要特性
+
+* php7.1+环境
+* 基于Auth验证的权限管理系统
+
+* 支持无限级父子级权限继承，父级的管理员可任意增删改子级管理员及权限设置
+* 支持单管理员多角色
+* 支持管理子级数据或个人数据
+* 强大的开发助手
+
+* 选择单或多个数据表一键生成完整应用插件，包含控制器、模型、视图、菜单权限、API接口，让你的开发效率翻倍
+* 一键生成代码只需配置组件参数，json格式代码清晰易读
+* 一键生成控制器菜单和规则
+* 一键生成API接口
+* 完善的前端功能组件开发
+
+* 基于ELment.ui开发，自适应手机、平板、PC
+* 基于Vue.js进行组件化管理，按需调用
+* 强大的应用插件扩展功能，在线安装卸载升级应用插件
+* 强大的主题模板功能，在线安装卸载，随心切换心仪模板
+* 通用的会员模块和API模块
+* 强大的路由机制，让搜索引擎快速收录
+* 多语言数据独立、路由优雅
+* 支持文件上传、水印、回收站、下载、检索、排序、编辑、列表切换、滚动加载
+* 支持无限级分类、TDK设置、自定义字段、自定义路由、自定义页面、会员权限控制等等；
+* 支持手机端访问后台管理系统，界面优雅，体验丝滑
+* 强大的应用模块支持(CMS系统、博客系统、tinymce编辑器、流量统计、表单可视化管理、客服系统、电子画册、阿里云短信、支付（微信支付宝）、本地代码编辑、数据库备份、SEO网站优化、禁* 止指定IP访问、微信公众号登录、会员签到、CSDN采集、PHP中文网采集)
+* 整合第三方阿里云短信接口
+* 无缝整合第三方阿里云OSS云存储功能
+* 第三方富文本编辑器支持
+* 第三方登录(QQ、微信、微博)整合
+* 第三方支付(微信、支付宝)无缝整合，微信支持PC端扫码支付
+* 丰富的插件应用市场
+
+## 在线演示
+
+* <a href="http://gitee.onekeyadmin.com/mk_admin" target="_blank">无插件演示</a>
+* <a href="http://cms.onekeyadmin.com/mk_admin" target="_blank">cms应用插件演示</a>
+* <a href="http://blog.onekeyadmin.com/mk_admin" target="_blank">博客应用插件演示</a>
+* <a href="http://swoole.onekeyadmin.com/mk_admin" target="_blank">swoole客服应用插件演示</a>
 
 ## 一键安装
 
 * 运行环境要求PHP7.1+；
-* gitee下载或[官网下载](http://www.onekeyadmin.com/api/system/version.html)；
-* 访问localhost/onekeyadmin/public，系统会提醒你输入数据库信息以完成安装；
-* linux系统目录权限/public /runtime 设置为 777；
-
-## 在线演示
-
-* [无插件演示](http://gitee.onekeyadmin.com/mk_admin)
-* [含插件演示](http://demo.onekeyadmin.com/mk_admin)
-
-## 应用市场
-
-* [插件应用服务市场](http://www.onekeyadmin.com/plugins.html)
-* [主题模板服务市场](http://www.onekeyadmin.com/themes.html)
+* 访问localhost/onekeyadmin/public输入数据库信息以完成安装；
 
 ## 系统截图
 
-![控制台](https://gitee.com/keheying/onekeyadmin/raw/master/readme/1.png)
-![资源库](https://gitee.com/keheying/onekeyadmin/raw/master/readme/2.png)
-![菜单规则](https://gitee.com/keheying/onekeyadmin/raw/master/readme/3.png)
-![插件商店](https://gitee.com/keheying/onekeyadmin/raw/master/readme/4.png)
-![分类管理](https://gitee.com/keheying/onekeyadmin/raw/master/readme/5.png)
-## 主要特性
+<table>
+    <tr>
+        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/1.jpg"/></td>
+        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/2.jpg"/></td>
+    </tr>
+    <tr>
+        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/3.jpg"/></td>
+        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/4.jpg"/></td>
+    </tr>
+    <tr>
+        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/6.jpg"/></td>
+        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/7.jpg"/></td>
+    </tr>
+    <tr>
+        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/8.jpg "/></td>
+        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/9.jpg"/></td>
+    </tr>
+    <tr>
+        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/10.jpg"/></td>
+        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/11.jpg"/></td>
+    </tr>   
+    <tr>
+        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/12.jpg"/></td>
+        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/13.jpg"/></td>
+    </tr>
+    <tr>
+        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/15.jpg"/></td>
+        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/16.jpg"/></td>
+    </tr>
+</table>
 
-### 开源无加密
-    源码开源无加密，有详细的代码注释，有完整系统手册；
-### 系统框架    
-    使用最新的 ThinkPHP6.0 + Mysql + Element；
-### 一键生成
-    一键生成CRUD,包括控制器、模型、视图、增删改查权限菜单；
-    一键生成表格表单，一键调用无需写页面快速增删改查；
-    一键导出表格数据，CSV/JSON/TXT/XHTML；
-    一键生成控制器菜单和规则；
-    一键安装主题模板；
-    一键安装插件应用；
-### 权限管理
-    支持无限级父子级；
-    支持单管理员多角色；
-    支持管理子级数据、个人数据；
-    支持自定义菜单规则；
-    支持自定义系统日志；
-    细分到每一个步骤；
-### 资源管理
-    支持各种文件上传，进度条显示；
-    支持新建文件夹；
-    支持剪切文件文件夹；
-    支持滚动式加载；
-    数据不重复加载；
-    支持系统选择文件；
-### 常规管理
-    基础配置管理；
-    系统分类管理；
-    会员配置管理；
-    邮箱配置管理；
-    多语言配置，参数管理；
-    系统日志管理；
-### 应用插件
-    在线安装；
-    在线卸载；
-    在线升级；
-    用户可上传插件给予TA人使用；
-### 主题模板
-    在线安装；
-    在线卸载；
-    在线切换；
-    用户可上传主题给予TA人使用；；
-### 通用的会员模块
-    注册登陆；
-    修改密码；
-    个人中心；
-    资料设置；
-    可安装插件解锁更多玩法；
-### 丰富的钩子
-    钩子事件调用方式简单，让代码变更灵活、易读；
-### 路由机制
-    自定义路由方便搜索引擎抓取，页面收录率更高；    
-## 在线文档
+## 兼容手机端
 
-请参阅 [OneKeyAdmin开发文档](http://www.onekeyadmin.com/api/system/docs.html)｜ [TP6开发手册](https://www.kancloud.cn/manual/thinkphp6_0/content)
-
-## 申请成为开发者
-
-[申请成为开发者](http://www.onekeyadmin.com/api/user/developer.html)，申请成功后可上传插件/主题，免费或付费给予TA人使用
+![截图](https://gitee.com/keheying/onekeyadmin/raw/master/readme/17.png)
 
 ## 开源版使用须知
 
@@ -138,8 +140,12 @@ OneKeyAdmin是基于Thinkphp6+Element编写的一套后台管理系统。安装�
 
 未经版权所有者明确授权，禁止发行本文档及其被实质上修改的版本。 
 
-本项目包含的第三方源码和二进制文件之版权信息另行标注。
+未经版权所有者明确授权，禁止去除后台管理系统版权标识。
 
 版权所有Copyright © 2020-2023 by OneKeyAdmin (http://www.onekeyadmin.com)
 
 All rights reserved。
+
+## 官方QQ群
+
+加入QQ交流群：648788102

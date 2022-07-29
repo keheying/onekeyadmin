@@ -1,0 +1,137 @@
+<el-form v-if="set == 'form'" :label-width="drawerData.form_label_width + 'px'">
+<el-row>
+    <draggable v-model="drawerData.field" v-bind="draggable">
+        <template v-for="(item, index) in drawerData.field">
+            <el-col
+                v-if="item.prop != 'id'"
+                class="block"
+                :key="index" 
+                :md="item.colMd === '' ? drawerData.form_col_md : item.colMd"
+                :class="{active: item.prop == fieldForm.prop}">
+                <div class="curd-icon">
+                    <i class="el-icon-edit" @click="openField(item, index)" title="编辑"></i>
+                    <i class="rank el-icon-rank" title="移动"></i>
+                    <i class="el-icon-delete" @click="moveField(item, index)" title="删除"></i>
+                </div>
+                <el-form-item 
+                    :prop="item.prop" 
+                    :label="item.label"
+                    :rules="item.required ? [{ required: true, message: '不能为空'}] : []">
+                    <div v-if="item.child.length == 0 && (item.is === 'el-radio-group' || item.is === 'el-checkbox-group')">
+                        请配置表单选项
+                    </div>
+                    <component 
+                        v-else
+                        v-model="item.default"
+                        :is="item.is"
+                        :key="item.id"
+                        :type="item.type"
+                        :options="item.options"
+                        :disabled="item.disabled"
+                        :placeholder="item.placeholder"
+                        :filterable="item.filterable"
+                        :multiple="item.multiple"
+                        :active-value="1"
+                        :inactive-value="0"
+                        :style="{opacity: item.formShow ? 1 : 0.2}"
+                        format="yyyy-MM-dd HH:mm:ss"
+                        value-format="yyyy-MM-dd HH:mm:ss"
+                        start-placeholder="开始日期"
+                        range-separator="至"
+                        end-placeholder="结束日期">
+                        <template v-if="item.is == 'el-radio-group' || item.is == 'el-checkbox-group' || item.is == 'el-select'">
+                            <template v-if="item.is == 'el-radio-group' || item.is == 'el-checkbox-group'">
+                                <component 
+                                    v-for="(val, key) in item.child"
+                                    :is="item.is == 'el-radio-group' ? 'el-radio' : 'el-checkbox'"
+                                    :key="val.value"
+                                    :label="val.value">
+                                    {{ val.title }}
+                                </component>
+                            </template>
+                            <template v-else>
+                                <el-option 
+                                    v-for="(val, key) in item.child"
+                                    :key="val.value"
+                                    :value="val.value"
+                                    :label="val.title">
+                                    {{ val.title }}
+                                </el-option>
+                            </template>
+                        </template>
+                    </component>
+                    <div class="el-tips" v-if="item.tips !== ''" v-html="item.tips"></div>
+                </el-form-item> 
+            </el-col>
+        </template>
+    </draggable>
+</el-row>
+</el-form>
+<template v-else>
+    <div class="el-curd">
+        <el-form ref="search" class="el-curd-header" size="small" :inline="true">
+            <el-form-item class="el-button-form">
+                <el-button type="info" icon="el-icon-refresh">刷新</el-button>
+                <el-button v-if="drawerData.table_expand == 1 && drawerData.table_tree == 1" icon="el-icon-arrow-down">展开</el-button>
+                <el-button type="danger" icon="el-icon-delete" disabled>删除</el-button>
+                <el-button type="primary" icon="el-icon-plus">添加</el-button>
+                <el-dropdown v-if="drawerData.table_export == 1">
+                    <el-button type="success" icon="el-icon-download">导出</el-button>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item command="csv">CSV</el-dropdown-item>
+                        <el-dropdown-item command="json">JSON</el-dropdown-item>
+                        <el-dropdown-item command="xhtml">XHTML</el-dropdown-item>
+                        <el-dropdown-item command="txt">TXT</el-dropdown-item>
+                    </el-dropdown-menu>
+                </el-dropdown>
+            </el-form-item>
+            <el-form-item prop="date" v-if="drawerData.search_date == 1">
+                <el-date-picker 
+                    type="daterange" 
+                    align="right" 
+                    unlink-panels 
+                    range-separator="至" 
+                    start-placeholder="开始日期" 
+                    end-placeholder="结束日期" 
+                    format="yyyy-MM-dd" 
+                    value-format="yyyy-MM-dd">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item prop="keyword" v-if="drawerData.search_keyword == 1">
+                <el-input placeholder="根据关键词搜索">
+                    <el-button slot="append" icon="el-icon-search"></el-button>
+                </el-input>
+            </el-form-item>
+            <el-form-item prop="catalog" v-if="drawerData.search_catalog.length > 0">
+                <el-select placeholder="查看所有分类目录" filterable>
+                    <el-option label="全部分类" value=""></el-option>
+                    <el-option v-for="(item, index) in drawerData.search_catalog" :key="index" :label="item.title" :value="item.value"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item prop="status" v-if="drawerData.search_status.length > 0">
+                <el-select placeholder="查看所有状态">
+                    <el-option label="全部状态" value=""></el-option>
+                    <el-option v-for="(item, index) in drawerData.search_status" :key="index" :label="item.title" :value="item.value"></el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <el-table>
+            <el-table-column type="selection" width="55"></el-table-column>
+            <template v-for="(item, index) in drawerData.field" >
+                <el-table-column
+                    v-if="item.tableShow && item.prop != 'id'"
+                    :prop="item.tableProp"
+                    :sortable="item.tableSort"
+                    :width="item.tableWidth > 0 ? item.tableWidth + 'px' : ''">
+                    <template slot="header" slot-scope="scope">
+                        <div class="column" :class="{active: item.prop == fieldForm.prop}">
+                            {{item.tableLabel}}
+                            <i class="el-icon-edit" title="编辑" @click="openField(item, index)"></i>
+                            <i class="el-icon-delete" title="删除" @click="moveField(item, index)"></i>
+                        </div>
+                    </template>
+                </el-table-column>
+            </template>
+        </el-table>
+    </div>
+</template>

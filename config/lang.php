@@ -14,6 +14,7 @@ foreach ($langList as $key => $val) {
 // 插件扩展包
 $extend_list = [];
 foreach ($info['allow'] as $key => $val) {
+    $array   = [];
     $array[] = root_path() . 'lang/' . $val['name'] . ".php";
     foreach (plugin_list() as $key => $plugin) {
         $file = plugin_path() . $plugin['name'] . '/lang/' .  $val['name'] . ".php";
@@ -24,15 +25,12 @@ foreach ($info['allow'] as $key => $val) {
     $extend_list[$val['name']] = $array;
 }
 return [
+    // 语言列表
     'lang_list'    => $langList,
     // 允许语言
     'lang_allow'   => $info['allow'],
     // 默认语言
     'default_lang' => $info['default'],
-    // 多语言自动侦测变量名
-    'detect_var'   => 'lang',
     // 扩展语言包
     'extend_list'  => $extend_list,
-    // 是否支持语言分组
-    'allow_group'  => true,
 ];

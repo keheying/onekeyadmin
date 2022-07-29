@@ -14,7 +14,7 @@
                 <div class="footer">
                     <a href="{:config('app.api')}" target="_blank">©&nbsp;onekeyadmin.com&nbsp;</a>
                     <a href="{:config('app.api')}/blog.html" target="_blank">论坛专区</a>
-                    <a href="{:config('app.api')}/api/system/docs.html" target="_blank">帮助文档</a>
+                    <a href="{:config('app.api')}/docs.html" target="_blank">帮助文档</a>
                     <a href="{:config('app.api')}/api/user/developer.html" target="_blank">认证成为开发者</a>
                 </div>
             </div>
@@ -116,7 +116,7 @@
                     } else {
                         self.captchaShow = false;
                         self.loginForm.captcha = "";
-                        self.$message({ showClose: true, message: res.message, type: res.status});
+                        self.$notify({ showClose: true, message: res.message, type: res.status});
                     }
                 })
             },

@@ -61,6 +61,17 @@ class EndCheck
         }
         // 水印设置
         $request->watermark = Config::getVal('watermark');
+        // 语言参数
+        $langParameter = [];
+        if (config('lang.extend_list')) {
+            if (isset(config('lang.extend_list')[$request->lang])) {
+                foreach (config('lang.extend_list')[$request->lang] as $key => $val) {
+                    $parameter = is_file($val) ? include($val) : [];
+                    $langParameter = array_merge($langParameter, $parameter);
+                }
+            }
+        }
+        $request->langParameter = $langParameter;
         // 绑定内容
         $response = $next($request);
         $content  = $response->getContent();
@@ -80,15 +91,6 @@ class EndCheck
     public function header($request) 
     {
         $config = config('lang');
-        $langParameter = [];
-        if ($config['extend_list']) {
-            if (isset($config['extend_list'][$request->lang])) {
-                foreach ($config['extend_list'][$request->lang] as $key => $val) {
-                    $parameter = is_file($val) ? include($val) : [];
-                    $langParameter = array_merge($langParameter, $parameter);
-                }
-            }
-        }
         $admin = request()->root(true) .'/'. env('map_admin');
         $controller = empty($request->pluginPath) ? $request->class : $request->pluginName.'/'.$request->pluginClass;
         $bind = "\n".'<script type="text/javascript">';
@@ -112,8 +114,8 @@ class EndCheck
         $bind .= "\n\t\t".'return splUrl + "?lang=" + "'.$request->lang.'" + param;';
         $bind .= "\n\t".'}';
         $bind .= "\n\t".'function lang(name) {';
-        $bind .= "\n\t\t".'let langParameter = '.json_encode($langParameter,JSON_UNESCAPED_UNICODE).';';
-        $bind .= "\n\t\t".'return typeof langParameter[name] === "undefined" || langParameter[name] === "" ? name : langParameter[name];';
+        $bind .= "\n\t\t".'let langParameter = '.json_encode($request->langParameter,JSON_UNESCAPED_UNICODE).';';
+        $bind .= "\n\t\t".'return typeof langParameter[name.toLowerCase()] === "undefined" || langParameter[name.toLowerCase()] === "" ? name : langParameter[name.toLowerCase()];';
         $bind .= "\n\t".'}';
         $bind .= "\n".'</script>';
         return $bind;

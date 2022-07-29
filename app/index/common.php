@@ -28,24 +28,16 @@ function url($url = "", $parameter = []): string
  */
 function get_prev_next_page(Object $model, Object $single): Object
 {
-    $npWhere[] = ['status', '=', 1];
-    $npWhere[] = ['language', '=', request()->lang];
+    if (isset($single['language'])) {
+        $npWhere[] = ['language', '=', request()->lang];
+    }
+    $npWhere[] = ['id', '<>', $single['id']];
     $npWhere[] = ['catalog_id', 'find in set', request()->catalog['id']];
+    $npWhere[] = ['status', '=', 1];
     $field = 'id,catalog_id,title,seo_url';
-    $single->prev = $model::where('sort','<',$single->sort)->field($field)->where($npWhere)->order('sort','desc')->find();
-    $single->next = $model::where('sort','>',$single->sort)->field($field)->where($npWhere)->order('sort','asc')->find();
-    if (empty($single->prev)) {
-        $single->prev = $model::where('create_time','<',$single->create_time)->field($field)->where($npWhere)->order('create_time','desc')->find();
-    }
-    if (empty($single->prev)) {
-        $single->prev = $model::where('id','<',$single->id)->field($field)->where($npWhere)->order('id','desc')->find();
-    }
-    if (empty($single->next)) {
-        $single->next = $model::where('create_time','>',$single->create_time)->field($field)->where($npWhere)->order('create_time','asc')->find();
-    }
-    if (empty($single->next)) {
-        $single->next = $model::where('id','>',$single->id)->field($field)->where($npWhere)->order('id','asc')->find();
-    }
+    $order = ['sort'=>'desc', 'id' => 'asc'];
+    $single->prev = $model::where('sort','<=',$single->sort)->field($field)->where($npWhere)->order($order)->find();
+    $single->next = $model::where('sort','>=',$single->sort)->field($field)->where($npWhere)->order($order)->find();
     return $single;
 }
 

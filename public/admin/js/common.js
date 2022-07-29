@@ -107,6 +107,7 @@ var tree = {
  * 公共函数
  */
 var common = {
+    // 随机字符串
 	id(len = 16) {
 		var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
 		var id = '';
@@ -115,6 +116,28 @@ var common = {
 		}
 		return id;
 	},
+    // 	json字符串转json对象
+	parseJson(jsonStr){
+        return JSON.parse(jsonStr, (k, v) => {
+            try{
+                if (eval(v) instanceof RegExp) {
+                    return eval(v);
+                }
+            }catch(e){
+                // nothing
+            }
+            return v;
+        });
+    },
+    // json对象转json字符串
+    stringifyJson(json){
+        return JSON.stringify(json, (k, v) => {
+            if(v instanceof RegExp){
+                return v.toString();
+            }
+            return v;
+        });
+    },
 	// 二维数组根据某字段返回一维数组
 	arrayColumn(arr, name) {
 		let val = [];
@@ -174,18 +197,19 @@ var common = {
 	// 自定义字段类型
 	formType() {
 		return [
-	        {label: "文本", is: "el-input", value: ""},
-	        {label: "文本域", is: "el-input", type: "textarea", value: ""},
-	        {label: "编辑器", is: "el-editor", value: ""},
-	        {label: "链接设置", is: "el-link-select", value: {}},
-	        {label: "数组列表", is: "el-array", value: {}},
-	        {label: "图片上传", is: "el-file-select", type: "image", value: ""},
-	        {label: "图片列表", is: "el-file-list-select", type:"image", value: []},
-	        {label: "文件上传", is: "el-file-select", type: "all", value: ""},
-	        {label: "文件列表", is: "el-file-list-select", type:"all", value: []},
-	        {label: "参数设置", is: "el-parameter", value: []},
-	        {label: "颜色选择", is: "el-color-picker", value: ""},
-	        {label: "开关", is: "el-switch", value: false},
+	        {label: "文本", is: "el-input", value: "", icon: "icon-danhangshurukuang"},
+	        {label: "文本域", is: "el-input", type: "textarea", value: "", icon: "icon-duohangshurukuang"},
+	        {label: "编辑器", is: "el-editor", value: "", icon: "icon-fuwenbenbianjiqi_zhonghuaxian"},
+	        {label: "链接设置", is: "el-link-select", value: {}, icon: "icon-lianjie"},
+	        {label: "自定义数组", is: "el-array", value: {}, icon: "icon-shuzu"},
+	        {label: "图片上传", is: "el-file-select", type: "image", value: "", icon: "icon-tupianpic"},
+	        {label: "图片列表", is: "el-file-list-select", type:"image", value: [], icon: "icon-huadongduotu"},
+	        {label: "文件上传", is: "el-file-select", type: "all", value: "", icon: "icon-a-wenjianjiawenjian"},
+	        {label: "文件列表", is: "el-file-list-select", type:"all", value: [], icon: "icon-wenjian1"},
+	        {label: "分类编号", is: "el-catalog-select", value: 0, icon: "icon-bianhaodanhao"},
+	        {label: "参数设置", is: "el-parameter", value: [], icon: "icon-chanpincanshu"},
+	        {label: "颜色选择", is: "el-color-picker", value: "", icon: "icon-yanse1"},
+	        {label: "开关", is: "el-switch", value: false, icon: "icon-kaiguan"},
 	    ];
 	},
 	// 日期时间格式
@@ -238,6 +262,7 @@ var common = {
         }
         return result;
     },
+    // 友好时间显示
     stampTime(data) {
         var currentTime = Math.round((new Date()).valueOf());
         var nowTime = new Date(currentTime);

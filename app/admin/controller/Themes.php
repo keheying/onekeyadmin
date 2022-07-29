@@ -46,7 +46,14 @@ class Themes extends BaseController
                     $data[$key]['status']           = $themeInfo ? $themeInfo['status'] : '';
                     $data[$key]['use']              = theme() == $value['name'];
                 }
-                return json(['status' => 'success', 'message' => '获取成功', 'data' => $data, 'count' => $count, 'list' => $list]);
+                return json([
+                    'status'     => 'success', 
+                    'message'    => '获取成功', 
+                    'data'       => $data, 
+                    'count'      => $count, 
+                    'list'       => $list, 
+                    'publicMenu' => $this->request->publicMenu
+                ]);
             } else {
                 return json($result);
             }
@@ -147,11 +154,33 @@ class Themes extends BaseController
                     // 删除资源
                     File::delDirAndFile($path . 'upload');
                 }
-                // 创建主题
-                ThemesModel::create($result['data']['info']);
                 // 创建分类
+                $default = $result['data']['catalog'];
+                $saveAll = [];
+                foreach ($default as $key => $val) {
+                    unset($val['id']);
+                    array_push($saveAll, $val);
+                }
                 $model = new Catalog;
-                $model->saveAll($result['data']['catalog']);
+                $list  = $model->saveAll($saveAll)->toArray();
+                // 修改分类pid && 主题分类id
+                foreach($default as $key => $val){
+                    if ($val['pid'] != 0) {
+                        $parent = array_search($val['pid'],array_column($default, 'id'));
+                        $pid = $list[$parent]['id'];
+                        $id  = $list[$key]['id'];
+                        Catalog::where('id', $id)->update(['pid' => $pid]);
+                    }
+                }
+                // 创建主题
+                $info = $result['data']['info'];
+                foreach ($info['config'] as $key => $val) {
+                    if ($val['type']['is'] == 'el-catalog-select') {
+                        $Nkey = array_search($val['type']['value'],array_column($default, 'id'));
+                        $info['config'][$key]['type']['value'] = (int) $list[$Nkey]['id'];
+                    }
+                }
+                ThemesModel::create($info);
                 return json(['status' => 'success', 'message' => '安装成功']);
             } else {
                 return json($result);

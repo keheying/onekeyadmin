@@ -39,7 +39,7 @@ class Page extends BaseController
         $modular  = isset($input['modular']) ? $input['modular'] : '';
         $keyword  = isset($input['keyword']) ? $input['keyword'] : '';
         $page     = isset($input['page']) ? $input['page'] : 1;
-        $field    = 'id,cover,title,seo_url,catalog_id,seo_description,create_time,status,language';
+        $field    = 'id,catalog_id,cover,title,seo_url,seo_description,description,create_time,status,language';
         $modulars = [];
         foreach (plugin_list() as $key => $value) {
             foreach ($value['route'] as $k => $route) {
@@ -63,7 +63,7 @@ class Page extends BaseController
             $union = "";
             $where[] = ['status', '=', 1];
             $where[] = ['language', '=', $this->request->lang];
-            $where[] = ['title|seo_description', 'like', '%'.$keyword.'%'];
+            $where[] = ['title|description', 'like', '%'.$keyword.'%'];
             foreach ($modulars as $key => $route) {
                 if (! empty($keyword)) {
                     if (empty($modular) || $modular === $route['catalog']) {
@@ -83,16 +83,15 @@ class Page extends BaseController
             if (! empty($union)) {
                 $data = $union->page($page, 10)->select()->toArray();
                 foreach ($data as $index => $item) {
-                    $data[$index]['title'] = str_ireplace($keyword, '<b style="color:#016aac">'.$keyword.'</b>', $item['title']);
-                    $data[$index]['type'] = $item['catalog'];
-                    $data[$index]['url'] = Url::getSingleUrl($item);
+                    $data[$index]['title']       = str_ireplace($keyword, '<b style="color:#016aac">'.$keyword.'</b>', $item['title']);
+                    $data[$index]['description'] = str_ireplace($keyword, '<b style="color:#016aac">'.$keyword.'</b>', $item['description']);
+                    $data[$index]['type']        = $item['catalog'];
+                    $data[$index]['url']         = Url::getSingleUrl($item);
                 }
             }
             return json(['status' => 'success', 'message' => lang('successful operation'), 'data' => $data, 'count' => $count]);
         } else {
             View::assign([
-                'modular'  => $modular,
-                'keyword'  => $keyword,
                 'modulars' => $modulars,
             ]);
             return View::fetch('search');
@@ -113,23 +112,25 @@ class Page extends BaseController
         if (! $pageUserInfo) {
             return abort(404);
         }
-        if ($this->request->userInfo->id != $input['id']) {
-            // 记录访客
-            $visitor = UserLog::where('user_id', $this->request->userInfo->id)->where('to_id',$input['id'])->where('type','visitor')->find();
-            if ($visitor) {
-                $visitor->create_time = date('Y-m-d H:i:s');
-                $visitor->number = $visitor->number + 1;
-                $visitor->save();
-            } else {
-                UserLog::create([
-                    'user_id'     => $this->request->userInfo->id,
-                    'explain'     => 'visitor',
-                    'number'      => 0,
-                    'inc'         => 1,
-                    'to_id'       => $input['id'],
-                    'type'        => 'visitor',
-                    'create_time' => date('Y-m-d H:i:s'),
-                ]);
+        if ($this->request->userInfo) {
+            if ($this->request->userInfo->id != $input['id']) {
+                // 记录访客
+                $visitor = UserLog::where('user_id', $this->request->userInfo->id)->where('to_id',$input['id'])->where('type','visitor')->find();
+                if ($visitor) {
+                    $visitor->create_time = date('Y-m-d H:i:s');
+                    $visitor->number = $visitor->number + 1;
+                    $visitor->save();
+                } else {
+                    UserLog::create([
+                        'user_id'     => $this->request->userInfo->id,
+                        'explain'     => 'visitor',
+                        'number'      => 0,
+                        'inc'         => 1,
+                        'to_id'       => $input['id'],
+                        'type'        => 'visitor',
+                        'create_time' => date('Y-m-d H:i:s'),
+                    ]);
+                }
             }
         }
         event('UserPage', $pageUserInfo);

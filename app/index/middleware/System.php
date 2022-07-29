@@ -52,10 +52,10 @@ class System
         foreach ($themeConfigDefault as $k => $v) { 
             switch ($v['type']['is']) {
                 case 'el-link-select':
-                    $system[$v['field']] = isset($themeConfig[$v['field']]) ? Url::getLinkUrl($themeConfig[$v['field']]) : '';
+                    $system[$v['field']] = isset($themeConfig[$v['field']]) ? Url::getLinkUrl($themeConfig[$v['field']]) : Url::getLinkUrl($v['type']['value']);
                     break;
                 case 'el-array':
-                    $system[$v['field']] = isset($themeConfig[$v['field']]) ? mk_array($themeConfig[$v['field']]['table']) : '';
+                    $system[$v['field']] = isset($themeConfig[$v['field']]) ? mk_array($themeConfig[$v['field']]['table']) : mk_array($v['type']['value']['table']);
                     break;
                 default:
                     $system[$v['field']] = isset($themeConfig[$v['field']]) ? $themeConfig[$v['field']] : $v['type']['value'];
@@ -82,9 +82,20 @@ class System
             $langAllow[$key]['url'] = config('lang.default_lang') == $val['name'] ? '/' : '/'.$val['name'];
         }
         $request->langAllow = $langAllow; 
+        // 语言参数
+        $langParameter = [];
+        if (config('lang.extend_list')) {
+            if (isset(config('lang.extend_list')[$request->lang])) {
+                foreach (config('lang.extend_list')[$request->lang] as $key => $val) {
+                    $parameter = is_file($val) ? include($val) : [];
+                    $langParameter = array_merge($langParameter, $parameter);
+                }
+            }
+        }
+        $request->langParameter = $langParameter;
+        // 绑定内容
         $response = $next($request);
         if ($request->isGet()) {
-            // 绑定内容
             $content = $response->getContent();
             preg_match("/<head>(.*)<\/head>/si",$content,$match);
             if (! empty($match)) {
@@ -94,7 +105,7 @@ class System
             }
             // 记录登录跳转
             if ($request->route !== 'login') {
-                cookie('index_last_url', url(str_replace('.html', '', $request->pathinfo())));
+                cookie('index_last_url', url(str_replace('.html', '', $request->pathinfo()),$_GET));
             }
             // 钩子
             event('System', $response);
@@ -107,16 +118,6 @@ class System
      */
     public function header($request) 
     {
-        $config = config('lang');
-        $langParameter = [];
-        if ($config['extend_list']) {
-            if (isset($config['extend_list'][$request->lang])) {
-                foreach ($config['extend_list'][$request->lang] as $key => $val) {
-                    $parameter = is_file($val) ? include($val) : [];
-                    $langParameter = array_merge($langParameter, $parameter);
-                }
-            }
-        }
         // 搜索分类
         $searchCatalog = [];
         foreach (plugin_list() as $key => $value) {
@@ -133,8 +134,8 @@ class System
         $bind .= "\n\t\t".'return link';
         $bind .= "\n\t".'}';
         $bind .= "\n\t".'function lang(name) {';
-        $bind .= "\n\t\t".'let langParameter = '.json_encode($langParameter,JSON_UNESCAPED_UNICODE).';';
-        $bind .= "\n\t\t".'return typeof langParameter[name] === "undefined" || langParameter[name] === "" ? name : langParameter[name];';
+        $bind .= "\n\t\t".'let langParameter = '.json_encode($request->langParameter,JSON_UNESCAPED_UNICODE).';';
+        $bind .= "\n\t\t".'return typeof langParameter[name.toLowerCase()] === "undefined" || langParameter[name.toLowerCase()] === "" ? name : langParameter[name.toLowerCase()];';
         $bind .= "\n\t".'}';
         $bind .= "\n".'</script>';
         return $bind;

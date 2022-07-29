@@ -37,7 +37,7 @@ class AdminMenu extends BaseController
                 }
             }
             foreach ($data as $key => $value) {
-                $data[$key]['c_ifshow'] = $value['ifshow'] == 1 ? '显示' : '隐藏';
+                $data[$key]['c_ifshow']     = $value['ifshow'] == 1 ? '显示' : '隐藏';
                 $data[$key]['c_logwriting'] = $value['logwriting'] == 1 ? '开启' : '关闭';
             }
             return json(['status' => 'success', 'message' => '请求成功', 'data' => $data, 'publicMenu' => $this->request->publicMenu]);
@@ -52,7 +52,44 @@ class AdminMenu extends BaseController
     public function update()
     {
         if ($this->request->isPost()) {
-            MenuModel::update(input('post.'));
+            $input = input('post.');
+            if (is_numeric($input['id'])) {
+                MenuModel::update($input);
+            } else {
+                $arr    = explode('_', $input['id']);
+                $plugin = $arr[0];
+                $pluginPath = plugin_path() . $plugin . '/';
+                // 修改菜单图片
+                if ($arr[1] == 0 && is_file(public_path() . $input['icon'])) {
+                    File::create($pluginPath.'menu.png', file_get_contents(public_path() . $input['icon']));
+                }
+                // 修改菜单信息
+                $menu   = include(plugin_path() . $plugin . '/menu.php');
+                switch (count($arr)) {
+                    case 4:
+                        $menu[$arr[1]]['children'][$arr[2]]['children'][$arr[3]]['title']      = $input['title'];
+                        $menu[$arr[1]]['children'][$arr[2]]['children'][$arr[3]]['sort']       = $input['sort'];
+                        $menu[$arr[1]]['children'][$arr[2]]['children'][$arr[3]]['path']       = str_replace($plugin . '/', '', $input['path']);
+                        $menu[$arr[1]]['children'][$arr[2]]['children'][$arr[3]]['ifshow']     = $input['ifshow'];
+                        $menu[$arr[1]]['children'][$arr[2]]['children'][$arr[3]]['logwriting'] = $input['logwriting'];
+                        break;
+                    case 3:
+                        $menu[$arr[1]]['children'][$arr[2]]['title']      = $input['title'];
+                        $menu[$arr[1]]['children'][$arr[2]]['sort']       = $input['sort'];
+                        $menu[$arr[1]]['children'][$arr[2]]['path']       = str_replace($plugin . '/', '', $input['path']);
+                        $menu[$arr[1]]['children'][$arr[2]]['ifshow']     = $input['ifshow'];
+                        $menu[$arr[1]]['children'][$arr[2]]['logwriting'] = $input['logwriting'];
+                        break;
+                    case 2:
+                        $menu[$arr[1]]['title']      = $input['title'];
+                        $menu[$arr[1]]['sort']       = $input['sort'];
+                        $menu[$arr[1]]['path']       = str_replace($plugin . '/', '', $input['path']);
+                        $menu[$arr[1]]['ifshow']     = $input['ifshow'];
+                        $menu[$arr[1]]['logwriting'] = $input['logwriting'];
+                        break;    
+                }
+                File::create($pluginPath.'menu.php', "<?php\nreturn ".var_export($menu,true).";");
+            }
             return json(['status' => 'success', 'message' => '修改成功']);
         }
     }
@@ -63,7 +100,30 @@ class AdminMenu extends BaseController
     public function delete()
     {
         if ($this->request->isPost()) {
-            MenuModel::recursiveDestroy(input('post.ids'));
+            $input = input('post.');
+            foreach ($input['ids'] as $key => $id){
+                if (is_numeric($id)) {
+                    MenuModel::recursiveDestroy((string)$id);
+                } else {
+                    $arr        = explode('_', $id);
+                    $plugin     = $arr[0];
+                    $pluginPath = plugin_path() . $plugin . '/';
+                    // 修改菜单信息
+                    $menu = include(plugin_path() . $plugin . '/menu.php');
+                    switch (count($arr)) {
+                        case 4:
+                            unset($menu[$arr[1]]['children'][$arr[2]]['children'][$arr[3]]);
+                            break;
+                        case 3:
+                            unset($menu[$arr[1]]['children'][$arr[2]]);
+                            break;
+                        case 2:
+                            unset($menu[$arr[1]]);
+                            break;    
+                    }
+                    File::create($pluginPath.'menu.php', "<?php\nreturn ".var_export($menu,true).";");
+                }
+            }
             return json(['status' => 'success', 'message' => '删除成功']);
         }
     }
@@ -75,55 +135,35 @@ class AdminMenu extends BaseController
     {
         if ($this->request->isPost()) {
             $input = input('post.');
-            if ($input['curd'] != 1) {
-                $parent = MenuModel::create($input);
+            if (is_numeric($input['pid'])) {
+                MenuModel::create($input);
             } else {
-                $viewPath = str_replace('mk_','', $input['path']);
-                $path  = ucwords(str_replace('_', ' ', $viewPath));
-                $path  = str_replace(' ','',lcfirst($path));
-                $class = ucfirst($path);
-                $exist = Db::query("SHOW TABLES LIKE '".$input['path']."'");
-                if (empty($exist)) return json(['status' => 'error', 'message' => '数据表不存在！']);
-                $field = Db::query("SHOW FULL COLUMNS FROM ".$input['path']."");
-                $curd  = include(app_path() . "addons/Curd.php");
-                File::create(app_path() . "view/$viewPath/index.html", $view);
-                File::create(app_path() . "controller/$class.php", $controller);
-                File::create(app_path() . "model/$class.php", $model);
-                $curd = [
-                    ['title' => '编辑', 'path' => $path . '/update'],
-                    ['title' => '删除', 'path' => $path . '/delete'],
-                    ['title' => '新增', 'path' => $path . '/save'],
-                    ['title' => '查看', 'path' => $path . '/index'],
-                ];
-                Db::startTrans();
-                try {
-                    $parent = MenuModel::create([
-                        'pid'        => $input['pid'],
-                        'title'      => $input['title'],
-                        'icon'       => $input['icon'],
-                        'path'       => $path.'/index',
-                        'sort'       => $input['sort'],
-                        'ifshow'     => $input['ifshow'],
-                        'logwriting' => $input['logwriting'],
-                    ]);
-                    foreach ($curd as $key => $val) {
-                        MenuModel::create([
-                            'pid'        => $parent->id,
-                            'title'      => $val['title'],
-                            'icon'       => '',
-                            'path'       => $val['path'],
-                            'sort'       => $key,
-                            'ifshow'     => 0,
-                            'logwriting' => $input['logwriting'],
-                        ]);
-                    }
-                    Db::commit();
-                } catch (\Exception $e) {
-                    Db::rollback();
-                    return json(['status' => 'error', 'message' => '创建数据失败！']);
+                $arr    = explode('_', $input['pid']);
+                if (count($arr) > 3) {
+                    return json(['status' => 'error', 'message' => '亲，插件菜单最多三级哦']);
                 }
+                $plugin = $arr[0];
+                $menu   = include(plugin_path() . $plugin . '/menu.php');
+                $new    = [
+                    'title'      => $input['title'],
+                    'sort'       => $input['sort'],
+                    'path'       => str_replace('/' . $plugin, '', $input['path']),
+                    'ifshow'     => $input['ifshow'],
+                    'logwriting' => $input['logwriting'],
+                    'children'   => [],
+                ];
+                switch (count($arr)) {
+                    case 3:
+                        array_push($menu[$arr[1]]['children'][$arr[2]]['children'], $new);
+                        break;
+                    case 2:
+                        array_push($menu[$arr[1]]['children'], $new);
+                        break;    
+                }
+                $pluginPath = plugin_path() . $plugin . '/';
+                File::create($pluginPath.'menu.php', "<?php\nreturn ".var_export($menu,true).";");
             }
-            return json(['status' => 'success', 'message' => '新增成功']);
+            return json(['status' => 'success', 'message' => '新增成功']);   
         }
     }
 }

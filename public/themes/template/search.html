@@ -18,12 +18,13 @@
                     <el-button type="primary" @click="searchList()">{:lang('search')}</el-button>
                 </el-form-item>
             </el-form>
-            <div class="list" v-infinite-scroll="list" :infinite-scroll-disabled="disabled" :style="{height: height + 'px'}">
-                <el-row :gutter="20">
-                    <el-col :md="8" :sm="12" v-for="(item, index) in data" style="margin-bottom: 20px">
+            <div class="list">
+                <el-empty v-if="count === 0" description="没有找到匹配的结果"></el-empty>
+                <el-row>
+                    <el-col :span="24" v-for="(item, index) in data" style="margin-bottom: 20px">
                         <el-card class="item">
-                            <img :src="item.cover">
                             <div class="title" v-html="item.title"></div>
+                            <div class="description" v-html="item.description"></div>
                             <div class="time">
                                 <span>{{item.create_time}}</span>
                                 <a :href="item.url">{{lang('read more')}}</a>
@@ -31,8 +32,15 @@
                         </el-card>
                     </el-col>
                 </el-row>
-                <div v-if="loading" class="el-loader">{:lang('loading')}</div>
-                <div v-if="noMore && loading === false" class="el-nomore">{:lang('no more')}</div>
+                <el-pagination
+                    @current-change="pageChange"
+                    :current-page="search.page"
+                    :page-size="10"
+                    :total="count"
+                    layout="total,prev, pager, next, jumper"
+                    background
+                    :hide-on-single-page="true">
+                </el-pagination>
             </div>
         </div>
     </div>
@@ -43,22 +51,17 @@
         data() {
             return {
                 data: [],
+                count: 0,
                 search:{
                     page: 1,
-                    keyword: "{$keyword}",
-                    modular: "{$modular}",
+                    keyword:  locationUrl.get('keyword'),
+                    modular:  locationUrl.get('modular'),
                 },
-                height: (document.body.clientHeight || document.documentElement.clientHeight) - 340,
                 loading: false,
             }
         },
-        computed: {
-            noMore() {
-                return this.count <= this.data.length;
-            },
-            disabled() {
-                return this.loading || this.noMore;
-            }
+        created() {
+            this.list();  
         },
         methods: {
             /**
@@ -69,22 +72,24 @@
                 self.loading = true;
                 request.post('search', self.search, function (res) {
                     if (res.status === 'success') {
-                        self.search.page++;
-                        self.data  = self.data.concat(res.data);
+                        self.data  = res.data;
                         self.count = res.count;
                     }
                     self.loading = false;
                 })
             },
+            pageChange(page) {
+                this.search.page = page;
+                this.list();
+            },
             /**
              * 搜索
              */
             searchList() {
-                this.search.page = 1;
-                this.data = [];
-                this.list();
+                location.href = url('search', {keyword: this.search.keyword, modular: this.search.modular});
             },
         }
     });
 </script>
-{include file="$footer"}
+</body>
+</html>

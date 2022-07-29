@@ -149,7 +149,7 @@ if (!function_exists('cookie')) {
     {
         if (is_null($value)) {
             // 删除
-            Cookie::delete($name);
+            Cookie::delete($name, $option ?: []);
         } elseif ('' === $value) {
             // 获取
             return 0 === strpos($name, '?') ? Cookie::has(substr($name, 1)) : Cookie::get($name);
@@ -326,19 +326,20 @@ if (!function_exists('jsonp')) {
     }
 }
 
-if (!function_exists('lang')) {
-    /**
-     * 获取语言变量值
-     * @param string $name 语言变量名
-     * @param array  $vars 动态变量值
-     * @param string $lang 语言
-     * @return mixed
-     */
-    function lang(string $name, array $vars = [], string $lang = '')
-    {
-        return Lang::get($name, $vars, $lang);
-    }
-}
+// 修改底层（重写获取当前语言参数方式）
+// if (!function_exists('lang')) {
+//     /**
+//      * 获取语言变量值
+//      * @param string $name 语言变量名
+//      * @param array  $vars 动态变量值
+//      * @param string $lang 语言
+//      * @return mixed
+//      */
+//     function lang(string $name, array $vars = [], string $lang = '')
+//     {
+//         return Lang::get($name, $vars, $lang);
+//     }
+// }
 
 if (!function_exists('parse_name')) {
     /**
@@ -488,16 +489,17 @@ if (!function_exists('trace')) {
         Log::record($log, $level);
     }
 }
-// 修改底层（获取url注释）
+
+// 修改底层（重写获取取url方式）
 // if (!function_exists('url')) {
-//     *
+//     /**
 //      * Url生成
 //      * @param string      $url    路由地址
 //      * @param array       $vars   变量
 //      * @param bool|string $suffix 生成的URL后缀
 //      * @param bool|string $domain 域名
 //      * @return UrlBuild
-     
+//      */
 //     function url(string $url = '', array $vars = [], $suffix = true, $domain = false): UrlBuild
 //     {
 //         return Route::buildUrl($url, $vars)->suffix($suffix)->domain($domain);

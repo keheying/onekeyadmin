@@ -26,8 +26,6 @@ $pluginListen = [
     'RegisterView'  => [],
     // 注册结束
     'RegisterEnd'   => [],
-    // 会员设置
-    'UserSet'       => [],
     // 会员侧边
     'UserSite'      => [],
     // 会员中心

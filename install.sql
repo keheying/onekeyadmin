@@ -1,4 +1,29 @@
-CREATE TABLE `mk_admin` (
+CREATE TABLE IF NOT EXISTS `mk_curd` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL COMMENT '表标题',
+  `name` varchar(255) NOT NULL COMMENT '表名称',
+  `field` text NOT NULL COMMENT '表字段',
+  `sort` int NOT NULL COMMENT '排序',
+  `plugin` varchar(255) NOT NULL COMMENT '生成插件',
+  `number` int NOT NULL COMMENT '生成次数',
+  `form_label_width` int NOT NULL,
+  `form_col_md` int NOT NULL,
+  `table_tree` tinyint(1) NOT NULL,
+  `table_expand` tinyint(1) NOT NULL,
+  `table_export` tinyint(1) NOT NULL,
+  `table_sort` varchar(255) NOT NULL,
+  `table_page_size` int NOT NULL,
+  `table_operation_width` int NOT NULL,
+  `search_catalog` varchar(255) NOT NULL,
+  `search_status` varchar(255) NOT NULL,
+  `search_keyword` tinyint(1) NOT NULL,
+  `search_date` tinyint(1) NOT NULL,
+  `preview` tinyint(1) NOT NULL,
+  `create_time` datetime NOT NULL COMMENT '生成时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `mk_admin` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `admin_id` int(11) NOT NULL,
   `group_id` int(11) NOT NULL,
@@ -13,20 +38,20 @@ CREATE TABLE `mk_admin` (
   `create_time` datetime NOT NULL,
   `status` tinyint(1) NOT NULL COMMENT '0屏蔽 1正常',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `mk_admin_group` (
+CREATE TABLE IF NOT EXISTS `mk_admin_group` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `admin_id` int(11) NOT NULL,
   `title` varchar(255) NOT NULL,
   `status` tinyint(1) NOT NULL COMMENT '0屏蔽 1正常',
   `role` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 insert  into `mk_admin_group`(`id`,`admin_id`,`title`,`status`,`role`) values 
 (1,0,'超级管理员',1,'*');
 
-CREATE TABLE `mk_admin_log` (
+CREATE TABLE IF NOT EXISTS `mk_admin_log` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '管理员日志',
   `admin_id` int(11) NOT NULL,
   `title` varchar(255) NOT NULL,
@@ -36,9 +61,9 @@ CREATE TABLE `mk_admin_log` (
   `language` varchar(255) NOT NULL,
   `create_time` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `mk_admin_menu` (
+CREATE TABLE IF NOT EXISTS `mk_admin_menu` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `pid` int(11) NOT NULL,
   `title` varchar(255) NOT NULL,
@@ -48,7 +73,7 @@ CREATE TABLE `mk_admin_menu` (
   `ifshow` tinyint(1) NOT NULL COMMENT '左侧菜单是否显示',
   `logwriting` tinyint(1) NOT NULL COMMENT '0不写入 1写入日志',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=272 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=272 DEFAULT CHARSET=utf8mb4;
 insert  into `mk_admin_menu`(`id`,`pid`,`title`,`icon`,`path`,`sort`,`ifshow`,`logwriting`) values 
 (1,0,'控制台','/upload/image/20220211/b48a37cf8f30d842ef9803507a5df885.png','console/index',9,1,0),
 (2,0,'常规管理','/upload/image/20220211/8d46a221fa0c28b5cf0990dae6bac26d.png','config',7,1,0),
@@ -135,17 +160,29 @@ insert  into `mk_admin_menu`(`id`,`pid`,`title`,`icon`,`path`,`sort`,`ifshow`,`l
 (268,15,'订单查询','','plugins/statusOrder',0,0,1),
 (269,191,'订单查询','','themes/statusOrder',0,0,1),
 (270,191,'评论','','themes/comment',0,0,1),
-(271,5,'下载','','file/download',7,0,1);
+(271,5,'下载','','file/download',7,0,1),
+(297,0,'开发助手','/upload/image/20220215/e4c5c91f707df300ec49860df7eb92d2.png','curd/index',2,1,0),
+(299,297,'查看','','curd/index',2,0,0),
+(298,297,'生成','','curd/code',1,0,1),
+(302,150,'参数编辑','','langParameter/update',0,0,1),
+(303,150,'添加参数','','langParameter/save',0,0,1),
+(304,150,'删除参数','','langParameter/delete',0,0,1),
+(305,150,'查看参数','','langParameter/index',1,0,0),
+(306,15,'打包','','plugins/create',0,0,1),
+(307,297,'编辑','','curd/update',1,0,1),
+(308,297,'删除字段','','curd/deleteField',1,0,1),
+(309,297,'新增字段','','curd/saveField',1,0,1),
+(310,297,'修改字段','','curd/updateField',1,0,1);
 
-CREATE TABLE `mk_admin_token` (
+CREATE TABLE IF NOT EXISTS `mk_admin_token` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `token` varchar(60) NOT NULL,
   `create_time` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `mk_catalog` (
+CREATE TABLE IF NOT EXISTS `mk_catalog` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `pid` int(11) NOT NULL,
   `num` int(11) NOT NULL COMMENT '栏目标识,区分多语言',
@@ -172,25 +209,25 @@ CREATE TABLE `mk_catalog` (
   `mobile` tinyint(1) NOT NULL COMMENT '手机栏目',
   `theme` varchar(255) NOT NULL COMMENT '当前主题',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 insert  into `mk_catalog`(`id`,`pid`,`num`,`level`,`group_id`,`title`,`cover`,`content`,`description`,`field`,`bind_html`,`seo_url`,`seo_title`,`seo_keywords`,`seo_description`,`links_type`,`links_value`,`sort`,`type`,`blank`,`show`,`status`,`language`,`mobile`,`theme`) values 
 (1,0,0,1,'','首页','/upload/image/20220215/0be8a040d6db1b91d8ef0584dab5cd28.jpg','','','[]','','index','','','',0,'[]',0,'page',0,1,1,'cn',1,'template');
 
-CREATE TABLE `mk_config` (
+CREATE TABLE IF NOT EXISTS `mk_config` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL COMMENT '名称',
   `name` varchar(255) NOT NULL COMMENT '别名',
   `value` text NOT NULL COMMENT '值',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
 insert  into `mk_config`(`id`,`title`,`name`,`value`) values 
 (1,'邮箱配置','email','{\"email\":\"\",\"password\":\"\",\"sender\":\"onekeyadmin\",\"smtp\":\"smtp.qq.com\",\"sendstyle\":\"ssl\"}'),
 (2,'默认模板模板配置','theme_template_cn','{\"characteristic\":\"使用最新的 ThinkPHP6.0 + Mysql + Element，代码开源无加密，有详细的代码注释，有完整系统手册。\",\"frame\":\"支持移动网站建设、小程序开发、微信平台开发、APP应用程序\",\"frame_list\":{\"column\":[{\"label\":\"标题\",\"field\":\"title\",\"type\":{\"label\":\"文本\",\"is\":\"el-input\",\"value\":\"\"}}],\"table\":[{\"title\":\"一键生成\"},{\"title\":\"资源管理\"},{\"title\":\"配置管理\"},{\"title\":\"分类管理\"},{\"title\":\"语言管理\"},{\"title\":\"权限管理\"},{\"title\":\"会员管理\"},{\"title\":\"应用插件\"},{\"title\":\"主题模板\"},{\"title\":\"钩子事件\"},{\"title\":\"路由机制\"}]},\"project\":\"OneKeyAdmin是基于Thinkphp6+Element编写的一套后台管理系统。安装包只有5MB大小，却拥有一键生成代码功能、无需写页面快速增删改查、资源管理、权限管理、通用的会员模块、系统分类、多语言配置、基础配置、系统日志、钩子事件。\",\"project_desc\":\"用户可上传插件免费或付费给予TA人使用，互帮互助，建立一个友好的社区环境。还有多套主题模板随时安装切换且全部免费使用哦\",\"project_list\":{\"column\":[{\"label\":\"图标\",\"field\":\"icon\",\"type\":{\"label\":\"文本\",\"is\":\"el-input\",\"width\":\"200px\",\"value\":\"\"}},{\"label\":\"标题\",\"field\":\"title\",\"type\":{\"label\":\"文本\",\"is\":\"el-input\",\"width\":\"200px\",\"value\":\"\"}},{\"label\":\"内容\",\"field\":\"content\",\"type\":{\"label\":\"文本\",\"is\":\"el-input\",\"width\":\"200px\",\"value\":\"\"}}],\"table\":[{\"icon\":\"el-icon-reading\",\"title\":\"一键生成\",\"content\":\"CURD、插件、模板\"},{\"icon\":\"el-icon-mouse\",\"title\":\"应用插件\",\"content\":\"安装、卸载、升级\"},{\"icon\":\"el-icon-brush\",\"title\":\"主题模板\",\"content\":\"安装、卸载、切换\"}]}}'),
-(3,'基础配置','system_cn','{\"company\":\"信息科技有限公司\",\"email\":\"\",\"telephone\":\"\",\"phone\":\"\",\"fax\":\"\",\"address\":\"浙江省\",\"business_hours\":\"\",\"ico\":\"\\/upload\\/favicon.ico?5874802\",\"logo\":\"\\/upload\\/image\\/20220215\\/e4c5c91f707df300ec49860df7eb92df.png\",\"copyright\":\"信息科技有限公司\",\"seo_title\":\"信息科技有限公司\",\"seo_keywords\":\"\",\"seo_description\":\"\",\"icp\":\"<p>Copyright &copy; 2021-2024 onekeyadmin.com All rights reserved 温州市万旗信息科技有限公司 版权所有 &nbsp;浙江省 ICP备案号2021005285<\\/p>\",\"copy_logo\":\"\\/upload\\/image\\/20220215\\/e4c5c91f707df300ec49860df7eb92df.png\"}'),
+(3,'基础配置','system_cn','{"company":"温州万旗信息科技有限公司","email":"513038996@qq.com","telephone":"0577-010101","phone":"157573963XX","fax":"0577-010101","address":"浙江省温州市洞头区北岙街道89号","business_hours":"早上8:30-下午17:30","ico":"\/upload\/favicon.ico?5874802","logo":"\/upload\/image\/20220215\/e4c5c91f707df300ec49860df7eb92df.png","copyright":"温州万旗信息科技有限公司","seo_title":"温州万旗信息科技有限公司","seo_keywords":"OneKeyAdmin","seo_description":"温州万旗信息科技有限公司","icp":"<p>Copyright &copy; 2021-2024 onekeyadmin.com All rights reserved 温州市万旗信息科技有限公司 版权所有 &nbsp;浙江省 ICP备案号2021005285<\/p>","copy_logo":"\/upload\/image\/20220420\/3ee6d6771233863c2f6957b05ace9b2b.png","qq":"513038996","wechat":"157573963XX","wechat_qrcode":"\/upload\/image\/20220521\/8408e90f09bc6761db4d4a780a8d2492.png"}'),
 (4,'图片水印','watermark','{\"open\":0,\"type\":\"font\",\"sizeType\":\"actual\",\"scale\":\"15\",\"position\":\"5\",\"opacity\":\"100\",\"image\":\"\\/upload\\/watermark.png?4476064\",\"fontText\":\"OneKeyAdmin\",\"fontFamily\":\"\\/admin\\/css\\/fonts\\/FZHTJW.ttf\",\"fontSize\":\"28\",\"fontAngle\":0,\"fontColor\":\"#C91818\"}'),
 (5,'会员配置','user','[{\"label\":\"允许邮箱注册会员\",\"field\":\"register_email\",\"type\":{\"label\":\"开关\",\"is\":\"el-switch\",\"value\":true}},{\"label\":\"允许短信注册会员\",\"field\":\"register_mobile\",\"type\":{\"label\":\"开关\",\"is\":\"el-switch\",\"value\":true}},{\"label\":\"邀请好友赠送积分\",\"field\":\"invite_integral\",\"type\":{\"is\":\"el-input\",\"value\":\"6\"}},{\"label\":\"每日签到赠送积分\",\"field\":\"signin_integral\",\"type\":{\"is\":\"el-input\",\"value\":5}}]');
 
-CREATE TABLE `mk_file` (
+CREATE TABLE IF NOT EXISTS `mk_file` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL,
   `url` varchar(255) NOT NULL,
@@ -200,7 +237,7 @@ CREATE TABLE `mk_file` (
   `status` tinyint(1) NOT NULL COMMENT '0回收站 1正常',
   `theme` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4;
 insert  into `mk_file`(`id`,`title`,`url`,`size`,`type`,`create_time`,`status`,`theme`) values 
 (1,'英文.png','/upload/image/20220211/a30d38ed39f14fbec51df4d1b00cb7bf.png',699,'image','2022-02-11 10:59:04',1,'template'),
 (2,'中文.png','/upload/image/20220211/e7a0f46979cd6330bc58ee0d47792ac9.png',1005,'image','2022-02-11 10:59:04',1,'template'),
@@ -217,7 +254,7 @@ insert  into `mk_file`(`id`,`title`,`url`,`size`,`type`,`create_time`,`status`,`
 (13,'ny_bj2.jpeg','/upload/image/20220215/97965eb16edf667a733f2f73882174db.jpeg',161588,'image','2022-02-15 16:43:31',1,'template'),
 (14,'微信图片_20220105090834.jpg','/upload/image/20220215/b04161a415bc3cc4281920e2acac6ac3.jpg',108124,'image','2022-02-15 16:58:04',1,'template');
 
-CREATE TABLE `mk_themes` (
+CREATE TABLE IF NOT EXISTS `mk_themes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `title` varchar(255) NOT NULL,
@@ -225,11 +262,11 @@ CREATE TABLE `mk_themes` (
   `price` decimal(12,2) NOT NULL,
   `config` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4;
 insert  into `mk_themes`(`id`,`name`,`title`,`cover`,`price`,`config`) values 
 (1,'template','默认模板','',10.00,'[{\"label\":\"\\u4e3b\\u8981\\u7279\\u6027\",\"field\":\"characteristic\",\"type\":{\"label\":\"\\u6587\\u672c\\u57df\",\"is\":\"el-input\",\"type\":\"textarea\",\"value\":\"\\u4f7f\\u7528\\u6700\\u65b0\\u7684 ThinkPHP6.0 + Mysql + Element\\uff0c\\u4ee3\\u7801\\u5f00\\u6e90\\u65e0\\u52a0\\u5bc6\\uff0c\\u6709\\u8be6\\u7ec6\\u7684\\u4ee3\\u7801\\u6ce8\\u91ca\\uff0c\\u6709\\u5b8c\\u6574\\u7cfb\\u7edf\\u624b\\u518c\\u30021\"}},{\"label\":\"\\u7cfb\\u7edf\\u6846\\u67b6\",\"field\":\"frame\",\"type\":{\"label\":\"\\u6587\\u672c\\u57df\",\"is\":\"el-input\",\"type\":\"textarea\",\"value\":\"\\u652f\\u6301\\u79fb\\u52a8\\u7f51\\u7ad9\\u5efa\\u8bbe\\u3001\\u5c0f\\u7a0b\\u5e8f\\u5f00\\u53d1\\u3001\\u5fae\\u4fe1\\u5e73\\u53f0\\u5f00\\u53d1\\u3001APP\\u5e94\\u7528\\u7a0b\\u5e8f\"}},{\"label\":\"\\u7cfb\\u7edf\\u6846\\u67b6\\u5217\\u8868\",\"field\":\"frame_list\",\"type\":{\"label\":\"\\u6570\\u7ec4\\u5217\\u8868\",\"is\":\"el-array\",\"value\":{\"column\":[{\"label\":\"\\u6807\\u9898\",\"field\":\"title\",\"type\":{\"label\":\"\\u6587\\u672c\",\"is\":\"el-input\",\"value\":\"\"}}],\"table\":[{\"title\":\"\\u4e00\\u952e\\u751f\\u6210\"},{\"title\":\"\\u8d44\\u6e90\\u7ba1\\u7406\"},{\"title\":\"\\u914d\\u7f6e\\u7ba1\\u7406\"},{\"title\":\"\\u5206\\u7c7b\\u7ba1\\u7406\"},{\"title\":\"\\u8bed\\u8a00\\u7ba1\\u7406\"},{\"title\":\"\\u6743\\u9650\\u7ba1\\u7406\"},{\"title\":\"\\u4f1a\\u5458\\u7ba1\\u7406\"},{\"title\":\"\\u5e94\\u7528\\u63d2\\u4ef6\"},{\"title\":\"\\u4e3b\\u9898\\u6a21\\u677f\"},{\"title\":\"\\u94a9\\u5b50\\u4e8b\\u4ef6\"},{\"title\":\"\\u8def\\u7531\\u673a\\u5236\"}]}}},{\"label\":\"\\u9879\\u76ee\\u4ecb\\u7ecd\",\"field\":\"project\",\"type\":{\"label\":\"\\u6587\\u672c\\u57df\",\"is\":\"el-input\",\"type\":\"textarea\",\"value\":\"OneKeyAdmin\\u662f\\u57fa\\u4e8eThinkphp6+Element\\u7f16\\u5199\\u7684\\u4e00\\u5957\\u540e\\u53f0\\u7ba1\\u7406\\u7cfb\\u7edf\\u3002\\u5b89\\u88c5\\u5305\\u53ea\\u67095MB\\u5927\\u5c0f\\uff0c\\u5374\\u62e5\\u6709\\u4e00\\u952e\\u751f\\u6210\\u4ee3\\u7801\\u529f\\u80fd\\u3001\\u65e0\\u9700\\u5199\\u9875\\u9762\\u5feb\\u901f\\u589e\\u5220\\u6539\\u67e5\\u3001\\u8d44\\u6e90\\u7ba1\\u7406\\u3001\\u6743\\u9650\\u7ba1\\u7406\\u3001\\u901a\\u7528\\u7684\\u4f1a\\u5458\\u6a21\\u5757\\u3001\\u7cfb\\u7edf\\u5206\\u7c7b\\u3001\\u591a\\u8bed\\u8a00\\u914d\\u7f6e\\u3001\\u57fa\\u7840\\u914d\\u7f6e\\u3001\\u7cfb\\u7edf\\u65e5\\u5fd7\\u3001\\u94a9\\u5b50\\u4e8b\\u4ef6\\u3002\"}},{\"label\":\"\\u9879\\u76ee\\u4ecb\\u7ecd\",\"field\":\"project_desc\",\"type\":{\"label\":\"\\u6587\\u672c\\u57df\",\"is\":\"el-input\",\"type\":\"textarea\",\"value\":\"\\u7528\\u6237\\u53ef\\u4e0a\\u4f20\\u63d2\\u4ef6\\u514d\\u8d39\\u6216\\u4ed8\\u8d39\\u7ed9\\u4e88TA\\u4eba\\u4f7f\\u7528\\uff0c\\u4e92\\u5e2e\\u4e92\\u52a9\\uff0c\\u5efa\\u7acb\\u4e00\\u4e2a\\u53cb\\u597d\\u7684\\u793e\\u533a\\u73af\\u5883\\u3002\\u8fd8\\u6709\\u591a\\u5957\\u4e3b\\u9898\\u6a21\\u677f\\u968f\\u65f6\\u5b89\\u88c5\\u5207\\u6362\\u4e14\\u5168\\u90e8\\u514d\\u8d39\\u4f7f\\u7528\\u54e6\"}},{\"label\":\"\\u9879\\u76ee\\u4ecb\\u7ecd\\u5217\\u8868\",\"field\":\"project_list\",\"type\":{\"label\":\"\\u6570\\u7ec4\\u5217\\u8868\",\"is\":\"el-array\",\"value\":{\"column\":[{\"label\":\"\\u56fe\\u6807\",\"field\":\"icon\",\"type\":{\"label\":\"\\u6587\\u672c\",\"is\":\"el-input\",\"width\":\"200px\",\"value\":\"\"}},{\"label\":\"\\u6807\\u9898\",\"field\":\"title\",\"type\":{\"label\":\"\\u6587\\u672c\",\"is\":\"el-input\",\"width\":\"200px\",\"value\":\"\"}},{\"label\":\"\\u5185\\u5bb9\",\"field\":\"content\",\"type\":{\"label\":\"\\u6587\\u672c\",\"is\":\"el-input\",\"width\":\"200px\",\"value\":\"\"}}],\"table\":[{\"icon\":\"el-icon-reading\",\"title\":\"\\u4e00\\u952e\\u751f\\u6210\",\"content\":\"CURD\\u3001\\u63d2\\u4ef6\\u3001\\u6a21\\u677f\"},{\"icon\":\"el-icon-mouse\",\"title\":\"\\u5e94\\u7528\\u63d2\\u4ef6\",\"content\":\"\\u5b89\\u88c5\\u3001\\u5378\\u8f7d\\u3001\\u5347\\u7ea7\"},{\"icon\":\"el-icon-brush\",\"title\":\"\\u4e3b\\u9898\\u6a21\\u677f\",\"content\":\"\\u5b89\\u88c5\\u3001\\u5378\\u8f7d\\u3001\\u5207\\u6362\"}]}}}]');
 
-CREATE TABLE `mk_user` (
+CREATE TABLE IF NOT EXISTS `mk_user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `group_id` int(11) NOT NULL,
   `nickname` varchar(255) NOT NULL,
@@ -253,21 +290,21 @@ CREATE TABLE `mk_user` (
   `reason` varchar(255) DEFAULT NULL COMMENT '屏蔽原因',
   `hide` int(11) NOT NULL COMMENT '0隐藏 1正常',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `mk_user_group` (
+CREATE TABLE IF NOT EXISTS `mk_user_group` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(20) NOT NULL,
   `status` tinyint(1) NOT NULL COMMENT '0屏蔽 1正常',
   `integral` int(11) NOT NULL COMMENT '需要多少积分才能到达',
   `default` tinyint(1) NOT NULL COMMENT '1默认（会员注册默认）',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
 insert  into `mk_user_group`(`id`,`title`,`status`,`integral`,`default`) values 
 (1,'VIP1',1,0,1),
 (2,'VIP2',1,100,0);
 
-CREATE TABLE `mk_user_log` (
+CREATE TABLE IF NOT EXISTS `mk_user_log` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '用户积分',
   `user_id` int(11) NOT NULL COMMENT '用户id',
   `to_id` int(11) NOT NULL COMMENT '对方id',
@@ -277,12 +314,12 @@ CREATE TABLE `mk_user_log` (
   `type` varchar(255) NOT NULL COMMENT '操作类型',
   `create_time` datetime NOT NULL COMMENT '操作时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `mk_user_token` (
+CREATE TABLE IF NOT EXISTS `mk_user_token` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `token` varchar(60) NOT NULL,
   `create_time` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

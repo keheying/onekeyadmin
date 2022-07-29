@@ -76,23 +76,39 @@ class Catalog
         $footer = new Tree($catalogHeader);
         $request->catalogHeader = $header->leaf(0); 
         $request->catalogFooter = $footer->leaf(0);
-        // 当前分类信息
+        // 当前路由
         $catalog = [];
         $route = isset($request->pathinfo[1]) ? $request->pathinfo[1] : '';
         $route = $request->lang === $request->pathinfo[0] ? $route : $request->pathinfo[0];
         $request->route = empty($route) ? 'index' : $route;
-        $request->singleRouteLength = $request->lang === $request->pathinfo[0] ? 3 : 2;
         // 列表分类
+        $catalogRouteLen = $request->lang === $request->pathinfo[0] ? 2 : 1;
+        $singleRouteLen  = $request->lang === $request->pathinfo[0] ? 3 : 2;
+        // 分类路由
+        $request->catalogRoute = count($request->pathinfo) === $catalogRouteLen || $request->route === 'index';
+        // 分页路由
+        $request->singleRoute  = count($request->pathinfo) === $singleRouteLen;
+        // 详情路由
+        $request->PageRoute    = array_search('page', $request->pathinfo) !== false && isset($request->pathinfo[$singleRouteLen]) && is_numeric($request->pathinfo[$singleRouteLen]);
+        // 当前分类
         foreach ($catalogList as $key => $val) {
             if ($val['seo_url'] == $request->route || $val['id'] == $request->route) {
-                $catalog = $val;
+                if ($request->catalogRoute || $request->singleRoute || $request->PageRoute) {
+                    $catalog = $val;
+                    // 指定链接
+                    if ($catalog['links_type'] == 1) {
+                        return redirect($catalog['url']);
+                    }
+                }
             }
         }
-        // 自定义链接
+        // 站内链接
         if (empty($catalog)) {
             foreach ($catalogList as $key => $val) {
-                if ($val['links_type'] == 1 && $val['url'] == $request->domain() . '/' . $request->pathinfo()) {
-                    $catalog = $val;
+                if ($val['links_type'] == 1) {
+                    if (strstr($val['url'],$request->domain() . '/' . implode('/',$request->pathinfo)) !== false) {
+                        $catalog = $val;
+                    }
                 }
             }
         }

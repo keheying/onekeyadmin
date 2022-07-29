@@ -1,7 +1,7 @@
 {include file="$header"}
 <div id="app" v-cloak>
 	<div class="el-layout">
-		<el-tabs v-model="tabs" tab-position="left">
+		<el-tabs v-model="tabs" :tab-position="document.body.clientWidth > 768 ? 'left' : 'top'">
 			<el-tab-pane label="基础配置" name="system">
 			    <div class="el-pane-warp">
 					<el-form ref="systemForm" :model="systemForm" label-width="120px">
@@ -142,6 +142,18 @@
 			</el-tab-pane>
 			<el-tab-pane label="主题配置" :name="themesForm.name">
 				<div class="el-pane-warp">
+				    <div style="margin-bottom:22px">
+                        当前主题：
+                        <el-select size="small" v-model="theme" @change="themeChange()">
+                            <el-option v-for="(item, index) in themes" :label="item.title" :value="item.name">
+                                {{item.title}}<span style="float: right;color: #999">{{item.name}}</span>
+                            </el-option>
+                        </el-select>
+                        <el-button size="small" type="primary" style="margin:0 10px" @click="themeInstall()">安装更多主题</el-button>
+                        <el-tooltip content="安装主题后可自由切换主题，修改配置即可" placement="top">
+                            <i style="color:#F56C6C;font-size:18px;margin-left: 5px;" class="el-icon-question"></i>
+                        </el-tooltip>
+                    </div>
 					<el-form label-width="0">
 		                <el-form-item>
 		                    <el-field v-model="themesForm.config" label-position="top" variable="system" :repeat="systemForm"></el-field>
@@ -276,6 +288,8 @@
 	        	tabs: 'system',
 	        	editUrl: "config/update",
 	        	loading: false,
+	        	theme: theme,
+                themes: {:json_encode($themes)},
 	        	emailForm: {:json_encode($email)},
 	        	systemForm: {:json_encode($system)},
 	        	userForm: {:json_encode($user)},
@@ -309,7 +323,7 @@
 	        	self.loading = true;
 	        	request.post(self.editUrl, {title: title, name: self.tabs, value: row}, function(res){
                     self.loading = false;
-                    self.$message({showClose: true, message: res.message, type: res.status});
+                    self.$notify({showClose: true, message: res.message, type: res.status});
                 });
 	        },
 	        /**
@@ -319,9 +333,34 @@
 	            if (res.status === 'success') {
 	            	this.systemForm = Object.assign({}, this.systemForm, {ico: res.url + '?' + Math.floor(Math.random()*10000000)});
 	            } else {
-	                this.$message.error(res.message);
+	                this.$notify.error(res.message);
 	            }
 	        },
+	        /**
+             * 去安装主题
+             */
+	        themeInstall() {
+	            parent.parentVm.path = 'themes/index'
+	        },
+	        /**
+             * 切换主题
+             */
+            themeChange() {
+                let self = this;
+                self.$confirm('确定切换主题吗？', '', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    request.post('themes/update', {theme: self.theme}, function(res) {
+                    if (res.status === 'success') {
+                            location.href = location.href;
+                        } else {
+                            self.$message({ showClose: true, message: res.message, type: res.status});
+                        }
+                    });
+                }).catch(() => {});
+            },
 	    },
 	})
 </script>

@@ -113,15 +113,15 @@ class AuthCheck
                 $bind = AdminMenu::where('title', $menu['bind'])->value('id');
                 $pid = $bind ? $bind : 0;
             }
+            $subSort             = isset($menu['sort']) ? $menu['sort'] : 0;
             $sub['pid']          = $pid;
             $sub['title']        = $menu['title'];
             $sub['path']         = $pluginName . '/' . $menu['path'];
             $sub['icon']         = $sub['pid'] === 0 ? '/plugins/' . $pluginName . '/menu.png' : '';
-            $sub['sort']         = $pid === 0 ? $sort : 999 - $key;
+            $sub['sort']         = $pid === 0 ? $sort : $subSort;
             $sub['ifshow']       = isset($menu['ifshow']) ? $menu['ifshow'] : 0;
             $sub['unread']       = isset($menu['unread']) ? $menu['unread'] : 0;
             $sub['logwriting']   = isset($menu['logwriting']) ? $menu['logwriting'] : 0;
-            $sub['operateClose'] = '插件菜单';
             if ($role === "*" || in_array($sub['id'], $role)) {
                 $pluginMenu[] = $sub;
             }

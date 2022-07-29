@@ -56,6 +56,15 @@ class Admin extends Model
         return $array['status'] === 1 ? '正常' : '屏蔽';
     }
     
+    public function getDisabledAttr($value, $array)
+    {
+        if ($array['group_id'] === 1) {
+            return true;
+        } else {
+            return $array['admin_id'] !== request()->userInfo->id && request()->userInfo->group_role !== '*';
+        }
+    }
+    
     // 修改器
     public function setPasswordAttr($value, $array)
     {
@@ -63,10 +72,5 @@ class Admin extends Model
             $password = password_hash($value, PASSWORD_BCRYPT, ['cost' => 12]); 
             $this->set('password', $password);
         }
-    }
-
-    public function getDisabledAttr($value, $array)
-    {
-        return $array['admin_id'] !== request()->userInfo->id && request()->userInfo->group_role !== '*';  
     }
 }

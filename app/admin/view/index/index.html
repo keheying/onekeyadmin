@@ -1,14 +1,16 @@
 {include file="$header"}
-<div id="app" v-cloak>
+<script type="text/javascript" src="/admin/js/nprogress.js?v={:config('app.version')}"></script>
+<div id="app" :class="color" v-cloak>
 	<el-container class="el-index">
 		<el-aside :width="asideWidth">
-	        <a class="header" href="/" target="_blank">
+	        <component :is="document.body.clientWidth > 768 ? 'a' : 'div'" class="header" href="/" target="_blank">
 	        	<i class="iconfont icon-onekey"></i><span>OneKeyAdmin</span>
-	        </a>
+	        	<i class="el-icon-close" @click="isCollapse = !isCollapse"></i>
+	        </component>
 	        <el-menu class="menu" :default-active="path" :collapse="isCollapse" text-color="#fff" active-text-color="#fff" @select="clickMenu">
 	            <template v-for="(item, index) in menuTree" :key="index">
 	                <template v-if="item.children">
-	                    <el-submenu :index="item.path" :key="item.path">
+	                    <el-submenu :popper-class="color" :index="item.path" :key="item.path">
 	                        <template slot="title">
 	                            <img class="el-menu-icon" :src="item.icon" />
 	                            <span slot="title">{{item.title}}</span>
@@ -45,7 +47,7 @@
 		<el-container>
 			<el-header>
 				<row :gutter="10">
-					<el-col :md="12">
+					<el-col :md="12" :xs="4">
 						<div class="el-notice">
 							<i class="iconfont" :class="isCollapse ? 'icon-caidanyou' : 'icon-caidanzuo01'" @click="isCollapse = !isCollapse"></i>
 					        <i class="iconfont icon-bobao"></i>
@@ -54,7 +56,7 @@
 					        </ul>
 					    </div>
 					</el-col>
-					<el-col :md="12">
+					<el-col :md="12" :xs="20">
 						<div class="el-right-panel">
 							<el-dropdown class="el-language-dropdown" @command="langClick">
 								<div>
@@ -68,8 +70,21 @@
 									</el-dropdown-item>
 								</el-dropdown-menu>
 							</el-dropdown>
-							<span class="item" @click="cacheClear()"><span class="iconfont icon-qingchuhuancun1"></span>清除缓存</span>
-							<span class="item" @click="systemCheck()"><span class="iconfont icon-gengxin"></span>检测更新</span>
+							<span class="item" @click="cacheClear()">
+							    <el-tooltip content="清除缓存" placement="bottom">
+    							    <span class="icon el-icon-refresh"></span>
+							    </el-tooltip>
+							</span>
+							<span class="item" @click="systemCheck()">
+							    <el-tooltip content="检测更新" placement="bottom">
+    							    <span class="icon el-icon-warning-outline"></span>
+							    </el-tooltip>
+							</span>
+							<span class="item" @click="drawer = true">
+							    <el-tooltip content="切换肤色" placement="bottom">
+    							    <span class="icon el-icon-brush"></span>
+							    </el-tooltip>
+							</span>
 							<el-dropdown class="el-userinfo-dropdown" @command="userClick">
 								<div>
 									<el-avatar size="medium" :src="userInfo.cover">
@@ -84,6 +99,19 @@
 								</el-dropdown-menu>
 							</el-dropdown>
 						</div>
+						<el-drawer :visible.sync="drawer" :with-header="false" size="80px">
+						    <div class="el-item-color-warp" v-for="(item, index) in colors">
+                                <div 
+                                    class="el-item-color"
+                                    :class="{active: color == item.class}"
+                                    :style="{backgroundColor: item.color}"
+                                    :title="item.title"
+                                    @click="color = item.class">
+                                    <div v-if="typeof item.bcolor != 'undefined'" :style="{backgroundColor: item.bcolor}"></div>
+                                </div>
+                                <p>{{item.title}}</p>
+                            </div>
+                        </el-drawer>
 						<el-dialog 
 							top="120px" 
 							width="800px"
@@ -115,10 +143,15 @@
 			        </el-col>
 			    </row>
 		    </el-header>
-		    <el-tabs type="card" v-model="path" @tab-remove="removeTab" closable>
-	            <el-tab-pane v-for="(item, index) in tabs" :key="item.path" :name="item.path" :label="item.title"></el-tab-pane>
-	        </el-tabs>
-	        <el-main><iframe :src="url(path)"></iframe></el-main>
+		    <div class="el-tabs-warp">
+    		    <el-tabs type="card" v-model="path" @tab-remove="removeTab" closable>
+    	            <el-tab-pane v-for="(item, index) in tabs" :key="item.path" :name="item.path" :label="item.title"></el-tab-pane>
+    	        </el-tabs>
+    	        <el-tooltip v-if="tabs.length > 2" content="清除导航项" placement="bottom">
+        	        <i class="el-tabs-close el-icon-d-arrow-left" @click="removeAllTab()"></i>
+    	        </el-tooltip>
+	        </div>
+	        <el-main><iframe id="iframe" :src="url(path)"></iframe></el-main>
 		</el-container>
 	</el-container>
 </div>
@@ -129,6 +162,14 @@
 	        return {
 	        	menu: {:json_encode($menu)},
 	            horn: {:json_encode($notification)},
+	            drawer: false,
+	            color: localStorage.color,
+	            colors: [
+	                {title: '蓝黑', class: 'lanhei', color: '#1890ff', bcolor: '#282c34'},
+	                {title: '绿黑', class: 'lvhei', color: '#41b584', bcolor: '#282c34'},
+	                {title: '红黑', class: 'honghei', color: '#41b584', bcolor: '#f34d37'},
+	                {title: '默认', class: '', color: '#399efd'},
+                ],
 	            version: "{$version}",
 	            userInfo: userInfo,
 	            language: language,
@@ -137,7 +178,7 @@
 	            tabs: [],
 	            path: "",
 	            animate: false,
-	            isCollapse: false,
+	            isCollapse: localStorage.isCollapse == 'true',
 	            dialogCheck: false,
 	            loadingCheck: false,
 	            loadingUpdate: false,
@@ -149,7 +190,7 @@
 	    },
 	    computed: {
 	    	asideWidth() {
-	    		return this.isCollapse ? '64px' : '266px'; 
+	    		return this.isCollapse ? document.body.clientWidth > 768 ? '64px' : '0' : '266px'; 
 	    	},
 	    	menuTree() {
 	    		return tree.convert(this.menu);
@@ -159,6 +200,14 @@
 	            return index === -1 ? "" : this.langAllow[index];
 	        },
 	    },
+	    mounted () {
+            let iframe = document.querySelector('#iframe');
+            if (iframe.attachEvent) {
+                iframe.attachEvent('onload', function () { NProgress.done(); })
+            } else {
+                iframe.onload = function () { NProgress.done(); }
+            }
+        },
 	    created() {
 	    	this.init();
 	    	setInterval(this.showMarquee, 4000);
@@ -185,6 +234,21 @@
 	            if (path !== this.path) {
 	            	this.path = path;
 	            }
+	        },
+	        /**
+	         * 清除导航项
+	         */
+	        removeAllTab() {
+	            let tabs = [];
+	            let consoleIndex = common.arrayIndex(this.menu, 'console/index', 'path');
+	    		if (consoleIndex !== -1) {
+	    			tabs.push(this.menu[consoleIndex]);
+	    		}
+	            if (this.tabs.length > 1) {
+	                let index = common.arrayIndex(this.menu, this.path, 'path');
+	                tabs.push(this.menu[index]);
+	            }
+	            this.tabs = tabs;
 	        },
 	        /**
 	         * 删除导航项
@@ -244,7 +308,7 @@
                     if (res.status === 'success') {
                         self.versionList = res.data;
                     } else {
-                        self.$message({ showClose: true, message: res.message, type: res.status });
+                        self.$notify({ showClose: true, message: res.message, type: res.status });
                     }
                     self.loadingCheck = false;
                 })
@@ -261,7 +325,7 @@
 	        cacheClear() {
 	        	let self = this;
 	        	request.post(self.cacheClearUrl,{},function(res){
-                    self.$message({ showClose: true, message: res.message, type: res.status });
+                    self.$notify({ showClose: true, message: res.message, type: res.status });
                 })
 	        },
 	        /**
@@ -291,8 +355,20 @@
 	    		window.location.hash = path;
 	    		let pathIndex = common.arrayIndex(this.menu, path, 'path');
                 let tabsIndex = common.arrayIndex(this.tabs, path, 'path');
-                if (tabsIndex === -1) this.tabs.push(this.menu[pathIndex]);
+                if (pathIndex != -1) {
+                    if (tabsIndex === -1) {
+                        let tab = pathIndex == -1 && path == 'console/index' ? {title: '控制台', path: 'console/index'} : this.menu[pathIndex];
+                        this.tabs.push(tab);
+                    }
+                }
+                NProgress.start();
 	    	},
+	    	isCollapse(v){
+	    	    localStorage.isCollapse = v;
+	    	},
+	    	color(v) {
+	    	    localStorage.color = v;
+	    	}
 	    }
 	})
 </script>

@@ -4,11 +4,23 @@
 Vue.component('el-curd', {
     template: `
     <div class="el-curd">
+        <slot name="warp" v-bind="self"></slot>
         <el-form ref="search" class="el-curd-header" size="small" :inline="true" :model="search" @submit.native.prevent>
             <el-form-item class="el-button-form">
-                <el-button type="info" icon="el-icon-refresh" @click="refreshData()">刷新</el-button>
-                <el-button v-if="tableTree" :icon="expand ? 'el-icon-arrow-down' : 'el-icon-arrow-right'" @click="expandAll()">{{expand ? '折叠' : '伸展'}}</el-button>
-                <el-button v-if="deleteAuthority" type="danger" icon="el-icon-delete" @click="removeData()" :disabled="rows.length === 0">删除</el-button>
+                <el-button type="info" icon="el-icon-refresh" @click="refreshData()" v-if="searchRefresh">刷新</el-button>
+                <el-button 
+                    v-if="tableTree" :icon="expand ? 'el-icon-arrow-down' : 'el-icon-arrow-right'" 
+                    @click="expandAll()">
+                    {{expand ? '折叠' : '伸展'}}
+                </el-button>
+                <el-button 
+                    v-if="deleteAuthority" 
+                    type="danger" 
+                    icon="el-icon-delete" 
+                    @click="removeData()" 
+                    :disabled="rows.length === 0">
+                    删除
+                </el-button>
                 <el-button v-if="synchroAuthority" type="warning" icon="el-icon-warning-outline" @click="synchroData()">同步</el-button>
                 <el-button v-if="saveAuthority" type="primary" icon="el-icon-plus" @click="openData()">添加</el-button>
                 <el-popover v-if="copyAuthority" placement="top" width="200" v-model="copyVisible">
@@ -47,10 +59,25 @@ Vue.component('el-curd', {
                 <slot name="button" v-bind="self"></slot>
             </el-form-item>
             <el-form-item prop="date" v-if="searchDate">
-                <el-date-picker v-model="search.date" type="daterange" align="right" unlink-panels range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" format="yyyy-MM-dd" value-format="yyyy-MM-dd" :picker-options="picker" @change="searchData()"></el-date-picker>
+                <el-date-picker 
+                    v-model="search.date" 
+                    type="daterange" 
+                    align="right" 
+                    unlink-panels 
+                    range-separator="至" 
+                    start-placeholder="开始日期" 
+                    end-placeholder="结束日期" 
+                    format="yyyy-MM-dd" 
+                    value-format="yyyy-MM-dd" 
+                    :picker-options="picker" 
+                    @change="searchData()">
+                </el-date-picker>
             </el-form-item>
             <el-form-item prop="keyword" v-if="searchKeyword">
-                <el-input placeholder="根据关键词搜索" v-model="search.keyword" @keyup.enter.native="searchData()">
+                <el-input 
+                    :placeholder="searchKeyword === true ? '根据关键词搜索' : searchKeyword" 
+                    v-model="search.keyword" 
+                    @keyup.enter.native="searchData()">
                     <el-button slot="append" icon="el-icon-search" @click="searchData()"></el-button>
                 </el-input>
             </el-form-item>
@@ -79,42 +106,63 @@ Vue.component('el-curd', {
             :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
             :default-expand-all="tableExpand"
             :highlight-current-row="true"
+            :row-class-name="tableRowClass"
             @select="selectRow"
             @select-all="selectAll"
             @selection-change="selectionChange"
             @sort-change="sortChange">
-            <el-table-column type="selection" width="55" :selectable="selectableDisabled"></el-table-column>
-            <el-table-column
-                v-for="(item, index) in column"
-                :key="index"
-                :prop="item.prop" 
-                :label="typeof item.table.label !== 'undefined' ? item.table.label : item.label" 
-                :width="typeof item.table.width === 'undefined' ? '' : item.table.width" 
-                :sortable="typeof item.table.sort === 'undefined' || item.table.sort === false ? false : 'custom'">
-                <template slot-scope="scope">
-                    <template v-if="item.table.is === 'image'">
-                        <el-image 
-                            :src="scope.row[item.prop]" 
-                            :preview-src-list="[scope.row[item.prop]]">
-                            <div slot="error" class="image-slot">
-                                <img class="error-image" src="/admin/images/error.png"/>
-                            </div>
-                        </el-image>
+            <el-table-column type="selection" width="55" :selectable="selectableDisabled" v-if="tableSelection"></el-table-column>
+            <template v-for="(item, index) in column">
+                <el-table-column
+                    :key="index"
+                    :prop="item.prop" 
+                    :label="typeof item.table.label !== 'undefined' ? item.table.label : item.label" 
+                    :width="typeof item.table.width === 'undefined' ? '' : item.table.width" 
+                    :sortable="typeof item.table.sort === 'undefined' || item.table.sort === false ? false : 'custom'"
+                    :type="typeof item.table.expand !== 'undefined' && item.table.expand ? 'expand' : undefined">
+                    <template slot-scope="scope">
+                        <template v-if="item.table.is === 'image'">
+                            <el-image 
+                                :src="scope.row[item.prop]" 
+                                :preview-src-list="[scope.row[item.prop]]">
+                                <div slot="error" class="image-slot">
+                                    <img class="error-image" src="/admin/images/error.png"/>
+                                </div>
+                            </el-image>
+                        </template>
+                        <template v-else-if="item.table.is === 'object' && scope.row[item.prop] != null">
+                            <div v-for="(child, index) in item.table.child" :key="index" v-html="typeof item.table.prop === 'undefined' ? scope.row[item.prop][child] : scope.row[item.table.prop][child]"></div>
+                        </template>
+                        <template v-else-if="item.table.is === 'text'">
+                            <span>{{typeof item.table.prop === 'undefined' ? scope.row[item.prop] : scope.row[item.table.prop]}}</span>
+                        </template>
+                        <template v-else-if="item.table.is === 'el-switch'">
+                            <el-switch
+                                v-model="scope.row[item.prop]"
+                                :active-value="1"
+                                :inactive-value="0"
+                                :disabled="scope.row.disabled"
+                                @change="oneKeyData(scope.row)">
+                            </el-switch>
+                        </template>
+                        <template v-else-if="item.table.is === 'el-input'">
+                            <el-input 
+                                class="el-curd-table-input" 
+                                v-model="scope.row[item.prop]" 
+                                size="small" 
+                                :disabled="scope.row.disabled" 
+                                @change="oneKeyData(scope.row)">
+                            </el-input>
+                        </template>
+                        <template v-else>
+                            <span v-html="typeof item.table.prop === 'undefined' ? scope.row[item.prop] : scope.row[item.table.prop]"></span>
+                        </template>
+                        <template v-if="typeof item.table.bind !== 'undefined'">
+                            <div v-for="(bind, index) in item.table.bind" :key="index" v-html="scope.row[bind]"></div>
+                        </template>
                     </template>
-                    <template v-else-if="item.table.is === 'object' && scope.row[item.prop] != null">
-                        <div v-for="(child, index) in item.table.child" :key="index" v-html="typeof item.table.prop === 'undefined' ? scope.row[item.prop][child] : scope.row[item.table.prop][child]"></div>
-                    </template>
-                    <template v-else-if="item.table.is === 'text'">
-                        <span>{{typeof item.table.prop === 'undefined' ? scope.row[item.prop] : scope.row[item.table.prop]}}</span>
-                    </template>
-                    <template v-else>
-                        <span v-html="typeof item.table.prop === 'undefined' ? scope.row[item.prop] : scope.row[item.table.prop]"></span>
-                    </template>
-                    <template v-if="typeof item.table.bind !== 'undefined'">
-                        <div v-for="(bind, index) in item.table.bind" :key="index" v-html="scope.row[bind]"></div>
-                    </template>
-                </template>
-            </el-table-column>
+                </el-table-column>
+            </template>
             <el-table-column v-if="operationWidth > 0" label="操作" :width="operationWidth">
                 <template slot-scope="scope">
                     <template v-if="typeof scope.row.operateClose !== 'undefined'"">{{scope.row.operateClose}}</template>
@@ -122,7 +170,7 @@ Vue.component('el-curd', {
                         <el-tooltip content="拖动排序" placement="top" v-if="dropAuthority">
                             <el-button size="mini" class="rank" type="info" icon="el-icon-rank" circle></el-button>
                         </el-tooltip>
-                        <el-tooltip content="复制" placement="top" v-if="saveAuthority">
+                        <el-tooltip content="复制" placement="top" v-if="saveAuthority && tableOperationCopy">
                             <el-button type="primary" size="mini" icon="el-icon-copy-document" circle @click="copyData(scope.row)"></el-button>
                         </el-tooltip>
                         <el-tooltip content="追加" placement="top" v-if="pushAuthority">
@@ -158,67 +206,97 @@ Vue.component('el-curd', {
             <el-page-header @back="drawer=false" :content="drawerData['id'] === '' ? '添加' : '编辑'">
                 <template v-slot:title>Esc键返回</template>
             </el-page-header>
-            <el-form class="el-layout" :class="{'el-layout-one': colrow.length === 1}" :model="drawerData" ref="drawerData" :rules="drawerRules" :label-width="formLabelWidth" :validate-on-rule-change="false" @submit.native.prevent>
-                <el-tabs tab-position="left">
+            <el-form 
+            ref="drawerData" 
+            class="el-layout" 
+            :class="{'el-layout-one': colrow.length === 1}" 
+            :model="drawerData" 
+            :rules="drawerRules" 
+            :label-width="formLabelWidth" 
+            :validate-on-rule-change="false" 
+            @submit.native.prevent>
+                <el-tabs :tab-position="document.body.clientWidth > 768 ? 'left' : 'top'">
                     <el-tab-pane v-for="(tab, key) in colrow" :name="String(key)" :index="key">
                         <span slot="label">
                             <i :class="tab.icon" v-if="tab.icon"></i>{{tab.label}}
                         </span>
                         <div :class="tab.warp === false ? '' : 'el-pane-warp'">
-                            <template v-for="(item, index) in tab.field" :key="index">
-                                <el-form-item 
-                                    v-if="formItemShow(item)" 
-                                    :prop="item.prop"
-                                    :label="item.label == '' ? '' : item.label + '：'"
-                                    :label-width="item.label == '' ? '0px' : ''">
-                                    <template slot="label" v-if="variable !== ''">
-                                        <el-tooltip placement="top" :content="formVariable(item)">
-                                            <span>{{item.label == '' ? '' : item.label + '：'}}</span>
-                                        </el-tooltip>
-                                    </template>
-                                    <component 
-                                        v-model="drawerData[item.prop]" 
-                                        class="el-component"
-                                        :is="item.form.is" 
-                                        :type="item.form.type"
-                                        :options="item.form.options"
-                                        :disabled="item.form.disabled"
-                                        :variable="variable + '.field'"
-                                        :search="item.form.search"
-                                        :ifset="item.form.ifset"
-                                        :placeholder="item.form.placeholder"
-                                        :filterable="item.form.filterable"
-                                        :multiple="item.form.multiple"
-                                        :list="item.form.list"
-                                        :active-value="typeof item.form.activeValue === 'undefined' ? 1 : item.form.activeValue"
-                                        :inactive-value="typeof item.form.inactiveValue === 'undefined' ? 0 : item.form.inactiveValue"
-                                        :key="drawerData['id'] + index + randId"
-                                        :form-data="drawerData"
-                                        :label-position="item.form.labelPosition"
-                                        :label-width="formLabelWidth"
-                                        :format="typeof item.form.format === 'undefined' ? 'yyyy-MM-dd HH:mm:ss' : item.form.format"
-                                        :value-format="typeof item.form.valueFormat === 'undefined' ? 'yyyy-MM-dd HH:mm:ss' : item.form.valueFormat"
-                                        :start-placeholder="typeof item.form.startPlaceholder === 'undefined' ? '开始日期' : item.form.startPlaceholder"
-                                        :range-separator="typeof item.form.rangeSeparator === 'undefined' ? '至' : item.form.rangeSeparator"
-                                        :end-placeholder="typeof item.form.endPlaceholder === 'undefined' ? '结束日期' : item.form.endPlaceholder"
-                                        :maxlength="typeof item.form.maxlength === 'undefined' ? '' : item.form.maxlength"
-                                        :minlength="typeof item.form.minlength === 'undefined' ? '' : item.form.minlength"
-                                        show-word-limit>
-                                        <template v-if="typeof item.form.child !== 'undefined'">
+                            <el-row :gutter="formGutter">
+                                <template v-for="(item, index) in tab.field" :key="index">
+                                    <el-col 
+                                        v-if="formItemShow(item)" 
+                                        :md="typeof item.form.colMd == 'undefined' ? formColMd : item.form.colMd" 
+                                        :xs="typeof item.form.colSm == 'undefined' ? formColSm : item.form.colSm">
+                                        <el-form-item 
+                                            :prop="item.prop"
+                                            :label="item.label == '' ? '' : item.label + '：'"
+                                            :label-width="item.label == '' ? '0px' : ''">
+                                            <template slot="label" v-if="variable !== ''">
+                                                <el-tooltip placement="top" :content="formVariable(item)">
+                                                    <span>{{item.label == '' ? '' : item.label + '：'}}</span>
+                                                </el-tooltip>
+                                            </template>
                                             <component 
-                                                v-for="(val, key) in formChildValue(item)"
-                                                :is="item.form.child.is"
-                                                :key="val.value"
-                                                :label="val.label"
-                                                :value="val.value">
-                                                <span v-html="val.treeString"></span>
-                                                {{ val.label }}
+                                                v-model="drawerData[item.prop]" 
+                                                class="el-component"
+                                                :is="item.form.is" 
+                                                :type="item.form.type"
+                                                :style="typeof item.form.style === 'undefined' ? '' : item.form.style"
+                                                :editorcss="typeof item.form.editorcss === 'undefined' ? '' : item.form.editorcss"
+                                                :options="item.form.options"
+                                                :disabled="item.form.disabled"
+                                                :variable="variable + '.field'"
+                                                :search="item.form.search"
+                                                :ifset="item.form.ifset"
+                                                :placeholder="item.form.placeholder"
+                                                :filterable="item.form.filterable"
+                                                :multiple="item.form.multiple"
+                                                :props="item.form.props"
+                                                :list="item.form.list"
+                                                :active-value="typeof item.form.activeValue === 'undefined' ? 1 : item.form.activeValue"
+                                                :inactive-value="typeof item.form.inactiveValue === 'undefined' ? 0 : item.form.inactiveValue"
+                                                :key="drawerData['id'] + index + randId"
+                                                :form-data="drawerData"
+                                                :label-position="item.form.labelPosition"
+                                                :label-width="formLabelWidth"
+                                                :format="typeof item.form.format === 'undefined' ? 'yyyy-MM-dd HH:mm:ss' : item.form.format"
+                                                :value-format="typeof item.form.valueFormat === 'undefined' ? 'yyyy-MM-dd HH:mm:ss' : item.form.valueFormat"
+                                                :start-placeholder="typeof item.form.startPlaceholder === 'undefined' ? '开始日期' : item.form.startPlaceholder"
+                                                :range-separator="typeof item.form.rangeSeparator === 'undefined' ? '至' : item.form.rangeSeparator"
+                                                :end-placeholder="typeof item.form.endPlaceholder === 'undefined' ? '结束日期' : item.form.endPlaceholder"
+                                                :maxlength="typeof item.form.maxlength === 'undefined' ? '' : item.form.maxlength"
+                                                :minlength="typeof item.form.minlength === 'undefined' ? '' : item.form.minlength"
+                                                :is-range="item.form.type == 'is-range'"
+                                                arrow-control
+                                                show-word-limit>
+                                                <template v-if="typeof item.form.child !== 'undefined'">
+                                                    <template v-if="item.form.is == 'el-radio-group' || item.form.is == 'el-checkbox-group'">
+                                                        <component 
+                                                            v-for="(val, key) in formChildValue(item)"
+                                                            :is="item.form.is == 'el-radio-group' ? 'el-radio' : 'el-checkbox'"
+                                                            :key="val.label"
+                                                            :label="typeof val.value == 'undefined' ? val.label : val.value">
+                                                            {{ val.label }}
+                                                        </component>
+                                                    </template>
+                                                    <template v-else>
+                                                        <component 
+                                                            v-for="(val, key) in formChildValue(item)"
+                                                            is="el-option"
+                                                            :key="val.value"
+                                                            :label="val.label"
+                                                            :value="typeof val.value == 'undefined' ? val.label : val.value">
+                                                            <span v-html="val.treeString"></span>
+                                                            {{ val.label }}
+                                                        </component>
+                                                    </template>
+                                                </template>
                                             </component>
-                                        </template>
-                                    </component>
-                                    <div class="el-tips" v-if="typeof item.form.tips !== 'undefined'"" v-html="item.form.tips"></div>
-                                </el-form-item>
-                            </template>
+                                            <div class="el-tips" v-if="typeof item.form.tips !== 'undefined'" v-html="item.form.tips"></div>
+                                        </el-form-item>
+                                    </el-col>
+                                </template>
+                            </el-row>
                             <div v-if="tab.warp !== false" class="el-bottom">
                                 <el-button size="medium" type="primary" icon="el-icon-refresh-right" @click="saveData()" :loading="drawerLoading">保 存</el-button>
                                 <el-button size="medium" @click="drawer = false">返 回</el-button>
@@ -296,9 +374,25 @@ Vue.component('el-curd', {
             type: String,
             default: '',
         },
-        formLabelWidth: {
+        tableOperationCopy: {
+            type: Boolean,
+            default: true,
+        },
+        tablePageSize: {
+            type: Number,
+            default: 20,
+        },
+        tablePageSizes: {
+            type: Array,
+            default: [20, 50, 100, 200, 500],
+        },
+        tableEmpty: {
             type: String,
-            default: '120px'
+            default: '暂无数据',
+        },
+        tableSelection: {
+            type: Boolean,
+            default: true
         },
         searchCatalog: {
             type: Array,
@@ -309,12 +403,32 @@ Vue.component('el-curd', {
             default: [],
         },
         searchKeyword: {
+            type: String,
+            default: true
+        },
+        searchRefresh: {
             type: Boolean,
             default: true
         },
         searchDate: {
             type: Boolean,
             default: true
+        },
+        formLabelWidth: {
+            type: String,
+            default: '120px'
+        },
+        formGutter: {
+            type: Number,
+            default: 10,
+        },
+        formColMd: {
+            type: Number,
+            default: 24,
+        },
+        formColSm: {
+            type: Number,
+            default: 24,
         },
         preview: {
             type: Boolean,
@@ -340,10 +454,10 @@ Vue.component('el-curd', {
                 prop: '',
                 order: '',
                 page: 1,
-                pageSize: 20,
+                pageSize: this.tablePageSize,
                 theme: theme,
             },
-            pageSizes: [20, 50, 100, 200, 500],
+            pageSizes: this.tablePageSizes,
             total: 0,
             expand: this.tableExpand,
             loading: false,
@@ -402,9 +516,7 @@ Vue.component('el-curd', {
                     self.table.splice(evt.newIndex, 0, currRow);
                     request.post(self.dropUrl, {table: self.table}, function(res){
                         self.getData();
-                        if (res.status !== 'success') {
-                            self.$message({ showClose: true, message: res.message, type: res.status});
-                        }
+                        self.$notify({ showClose: true, message: res.message, type: res.status});
                     });
                 }
             }
@@ -442,7 +554,7 @@ Vue.component('el-curd', {
                 if (typeof items.field != 'undefined') {
                     items.field.forEach(function (item, index) {
                         if (typeof item.form.rules !== 'undefined') {
-                            let test = JSON.parse(JSON.stringify(item.form.rules));
+                            let test = common.parseJson(common.stringifyJson(item.form.rules));
                             test.forEach(function (rule, index) {
                                 // 添加时不能为空
                                 if (typeof rule.saveRequired !== 'undefined' && self.drawerData['id'] === '') {
@@ -450,10 +562,9 @@ Vue.component('el-curd', {
                                 }
                                 // 更新时不能为空
                                 if (typeof rule.updateRequired !== 'undefined' && self.drawerData['id'] !== '') {
-                                    console.log(1);
                                     test.push({required: true, message: rule.message, trigger: 'blur'});
                                 }
-                            })
+                            });
                             rules[item.prop] = test;
                         }
                     })
@@ -474,7 +585,7 @@ Vue.component('el-curd', {
             return this.saveAuthority && this.tableTree;
         },
         dropAuthority() {
-            return authority.indexOf(this.dropUrl) !== -1
+            return authority.indexOf(this.dropUrl) !== -1;
         },
         synchroAuthority() {
             return authority.indexOf(this.synchroUrl) !== -1 && language !== langDefault;
@@ -514,7 +625,7 @@ Vue.component('el-curd', {
                         self.$emit('get-data', res);
                     }
                 } else {
-                    self.$message({ showClose: true, message: res.message, type: res.status});
+                    self.$notify({ showClose: true, message: res.message, type: res.status});
                 }
                 self.loading = false;
             });
@@ -538,6 +649,19 @@ Vue.component('el-curd', {
             this.$emit('open-data', this.drawerData);
         },
         /**
+         * 快捷修改数据
+         */
+        oneKeyData(row) {
+            let self = this;
+            request.post(self.updateUrl, row, function(res){
+                if (res.status === 'success') {
+                    self.$emit('save-data', res);
+                } else {
+                    self.$notify({ showClose: true, message: res.message, type: res.status});
+                }
+            });
+        },
+        /**
          * 保存数据
          */
         saveData() {
@@ -551,9 +675,8 @@ Vue.component('el-curd', {
                             self.getData();
                             self.drawer = false;
                             self.$emit('save-data', res);
-                        } else {
-                            self.$message({ showClose: true, message: res.message, type: res.status});
                         }
+                        self.$notify({ showClose: true, message: res.message, type: res.status});
                     });
                 } else {
                     return false;
@@ -566,49 +689,60 @@ Vue.component('el-curd', {
         exportData(type) {
             let self = this;
             let list = self.tableTree ? tree.convertString(self.list) : self.list;
-            let props = [];
-            let labels = [];
-            self.column.forEach(function (item, index) {
-                let prop = typeof item.table.prop !== 'undefined' ? item.table.prop : item.prop;
-                let label = typeof item.table.label !== 'undefined' && item.table.label !== '' ? item.table.label : item.label;
-                if (typeof item.table.bind !== 'undefined' && item.table.bind.length > 0) {
-                    prop = [prop];
-                    item.table.bind.forEach(function (b,i) {
-                        prop.push(b);
-                    })
-                }
-                if (typeof item.table.child !== 'undefined' && item.table.child.length > 0) {
-                    let key = prop;
-                    prop = [];
-                    item.table.child.forEach(function (b,i) {
-                        prop.push(key + '.' + b);
-                    })
-                }
-                props.push(prop);
-                labels.push(label);
-            });
-            let str  = labels.toString() + '\n';
-            let rows = [];
-            list.forEach(function (item, index) {
-                props.forEach(function (prop, index) {
-                    if ((typeof prop == 'object')) {
-                        prop.forEach(function (b,i) {
-                            let g = prop.length - 1 == i ? '' : '|';
-                            let k = b.split('.');
-                            let v = k[1] === 'undefined' ? item[b] : item[k[0]][k[1]];
-                            str += v + g; 
-                        });
-                        str += '\t,'; 
-                    } else {
-                        str += item[prop] + '\t,'; 
+            let str  = '';
+            if (type === 'json') {
+                str = JSON.stringify(list);
+            } else {
+                let props = [];
+                let labels = [];
+                self.column.forEach(function (item, index) {
+                    let prop = typeof item.table.prop !== 'undefined' ? item.table.prop : item.prop;
+                    let label = typeof item.table.label !== 'undefined' && item.table.label !== '' ? item.table.label : item.label;
+                    if (typeof item.table.bind !== 'undefined' && item.table.bind.length > 0) {
+                        prop = [prop];
+                        item.table.bind.forEach(function (b,i) {
+                            prop.push(b);
+                        })
                     }
-                })
-                str += '\n';
-            });
+                    if (typeof item.table.child !== 'undefined' && item.table.child.length > 0) {
+                        let key = prop;
+                        prop = [];
+                        item.table.child.forEach(function (b,i) {
+                            prop.push(key + '.' + b);
+                        })
+                    }
+                    props.push(prop);
+                    labels.push(label);
+                });
+                str = labels.toString() + '\n';
+                let rows = [];
+                list.forEach(function (item, index) {
+                    props.forEach(function (prop, index) {
+                        if ((typeof prop == 'object')) {
+                            prop.forEach(function (b,i) {
+                                let g = prop.length - 1 == i ? '' : '|';
+                                let k = b.split('.');
+                                let v = item[prop[i]];
+                                str += v + g; 
+                            });
+                            str += '\t,'; 
+                        } else {
+                            str += item[prop] + '\t,'; 
+                        }
+                    })
+                    str += '\n';
+                });
+            }
             let link = document.createElement("a");
             link.href = 'data:text/' + type + ';charset=utf-8,\ufeff' + encodeURIComponent(str);
             link.download =  "onekeyadmin-" + common.dateTime() + "." + type;
             link.click();
+        },
+        /**
+         * 表格行类名
+         */
+        tableRowClass({row, rowIndex}) {
+            return typeof row.table_row_class !== 'undefined' ? row.table_row_class : '';
         },
         /**
          * 追加数据
@@ -637,9 +771,8 @@ Vue.component('el-curd', {
                     if (res.status === 'success') {
                         self.getData();
                         self.$emit('remove-data', res);
-                    } else {
-                        self.$message({ showClose: true, message: res.message, type: res.status});
                     }
+                    self.$notify({ showClose: true, message: res.message, type: res.status});
                 });
             }).catch(() => {});
         },
@@ -653,9 +786,8 @@ Vue.component('el-curd', {
                     if (res.status === 'success') {
                         self.getData();
                         self.$emit('synchro-data', res);
-                    } else {
-                        self.$message({ showClose: true, message: res.message, type: res.status});
                     }
+                    self.$notify({ showClose: true, message: res.message, type: res.status});
                 });
             }).catch(() => {});
         },
@@ -683,7 +815,7 @@ Vue.component('el-curd', {
                             self.copyVisible = false;
                             self.$refs.copyForm.clearValidate();
                         }
-                        self.$message({ showClose: true, message: res.message, type: res.status});
+                        self.$notify({ showClose: true, message: res.message, type: res.status});
                     });
                 } else {
                     return false;
@@ -903,12 +1035,11 @@ Vue.component('el-tree-menu', {
             node-key="id"
             ref="tree"
             :data="data"
-            :render-content="renderContent"
             :props="{children: 'children', label: 'title'}"
             :expand-on-click-node="false"
+            @check="checkChange()"
             show-checkbox
-            check-on-click-node
-            @check-change="checkChange()">
+            check-on-click-node>
         </el-tree>
     </div>
     `,
@@ -965,6 +1096,7 @@ Vue.component('el-tree-menu', {
         checkedAll() {
             let keys = this.isChecked ? common.arrayColumn(this.list, 'id') : [];
             this.$refs.tree.setCheckedKeys(keys);
+            this.$emit('input', keys);
         },
         /**
          * 展开
@@ -973,28 +1105,10 @@ Vue.component('el-tree-menu', {
             let self = this;
             let keys = common.arrayColumn(self.list, 'id');
             keys.forEach(function(val, key){
-                self.$refs.tree.store.nodesMap[val].expanded = self.expand;
-            })
-            // 样式
-            self.$nextTick(()=>{
-                let levelName = document.getElementsByClassName("levelname");
-                for (let i = 0; i < levelName.length; i++) {
-                    levelName[i].parentNode.style.cssFloat = "left";
-                    levelName[i].parentNode.style.styleFloat = "left";
-                    levelName[i].parentNode.style.paddingLeft = "18px";
+                if (self.$refs.tree.store.nodesMap[val].childNodes.length > 0) {
+                    self.$refs.tree.store.nodesMap[val].expanded = self.expand;
                 }
             })
-        },
-        /**
-         * 样式
-         */
-        renderContent(h, { node, data, store }) {
-            if (data.pid === 0 ) {
-                var classname = "";
-            } else {
-                var classname = typeof data.children === "undefined" ||  data.children.length === 0 ? "levelname" :"";
-            }
-            return h("p", { class: classname }, node.label );
         },
         /**
          * 状态改变
@@ -1264,6 +1378,7 @@ Vue.component('el-watermark', {
                                 accept=".png">
                                 <el-image :src="watermark.image"></el-image>
                             </el-upload>
+                            只允许.png格式图片
                         </el-form-item>
                     </template>
                 </el-form>
@@ -1417,11 +1532,11 @@ Vue.component('el-watermark', {
                     self.saveLoading = false;
                     self.dialog  = false;
                     if(res.status !== 'success') {
-                        self.$message({ showClose: true, message: res.message, type: res.status});
+                        self.$notify({ showClose: true, message: res.message, type: res.status});
                     }
                 });
             } else {
-                self.$message({ showClose: true, message: "请上传水印图片", type: "error"});
+                self.$notify({ showClose: true, message: "请上传水印图片", type: "error"});
             }
         },
         /**
@@ -1431,7 +1546,7 @@ Vue.component('el-watermark', {
             if (res.status === 'success') {
                 this.watermark.image = res.url + '?' + Math.floor(Math.random()*10000000);
             } else {
-                this.$message.error(res.message);
+                this.$notify.error(res.message);
             }
         },
         /**
@@ -1441,10 +1556,10 @@ Vue.component('el-watermark', {
             const isJPG  = file.type === 'image/png';
             const isLt2M = file.size / 1024 / 1024 < 1;
             if (!isJPG) {
-                this.$message.error('上传水印图片只能是 png 格式!');
+                this.$notify.error('上传水印图片只能是 png 格式!');
             }
             if (!isLt2M) {
-                this.$message.error('上传水印图片大小不能超过 1MB!');
+                this.$notify.error('上传水印图片大小不能超过 1MB!');
             }
             return isJPG && isLt2M;
         }
@@ -1457,7 +1572,7 @@ Vue.component('el-file-list', {
     template: `
     <el-container class="el-file-list el-layout">
         <el-aside width="192px">
-            <el-tabs tab-position="left" v-model="typeIndex" @tab-click="typeChange">
+            <el-tabs :tab-position="document.body.clientWidth > 768 ? 'left' : 'top'" v-model="typeIndex" @tab-click="typeChange">
                 <el-tab-pane v-for="(item, index) in side" :key="index" :name="String(index)">
                     <span slot="label"><i class="iconfont" :class="item.icon"></i>{{item.title}}</span>
                 </el-tab-pane>
@@ -1534,7 +1649,12 @@ Vue.component('el-file-list', {
                                         </template>
                                     </el-input>
                                     <span v-else>{{item.title}}</span>
-                                    <el-image v-show="false" :ref="'preview' + index" :src="item.url" :preview-src-list="previewImages"></el-image>
+                                    <el-image 
+                                        v-show="false" 
+                                        :ref="'preview' + index" 
+                                        :src="item.url" 
+                                        :preview-src-list="previewImages">
+                                    </el-image>
                                 </div>
                                 <div class="operation" v-if="item.rename === false">
                                     <span v-show="search.type !== 'recycle'" @click.stop="renameClick(item, index)" class="el-icon-edit" title="重命名"></span>
@@ -1571,7 +1691,7 @@ Vue.component('el-file-list', {
     },
     data() {
         return {
-            show: 'table',
+            show: document.body.clientWidth > 768 ? 'table' : 'flat',
             list: [],
             rows: this.value,
             loading: false,
@@ -1777,7 +1897,7 @@ Vue.component('el-file-list', {
                     item.title = item.ctitle;
                     self.renameClose();
                 } else {
-                    self.$message({ showClose: true, message: res.message, type: res.status});
+                    self.$notify({ showClose: true, message: res.message, type: res.status});
                 }
             });
         },
@@ -1797,7 +1917,7 @@ Vue.component('el-file-list', {
                     if(res.status === 'success') {
                         self.refresh();
                     } else {
-                        self.$message({ showClose: true, message: res.message, type: res.status});
+                        self.$notify({ showClose: true, message: res.message, type: res.status});
                     }
                 });
             }).catch(() => {});
@@ -1818,7 +1938,7 @@ Vue.component('el-file-list', {
                     if(res.status === 'success') {
                         self.refresh();
                     } else {
-                        self.$message({ showClose: true, message: res.message, type: res.status});
+                        self.$notify({ showClose: true, message: res.message, type: res.status});
                     }
                 });
             }).catch(() => {});
@@ -1834,7 +1954,7 @@ Vue.component('el-file-list', {
                 if(res.status === 'success') {
                     self.refresh();
                 } else {
-                    self.$message({ showClose: true, message: res.message, type: res.status});
+                    self.$notify({ showClose: true, message: res.message, type: res.status});
                 }
             });
         },
@@ -1852,7 +1972,7 @@ Vue.component('el-file-list', {
                     if(res.status === 'success') {
                         self.refresh();
                     } else {
-                        self.$message({ showClose: true, message: res.message, type: res.status});
+                        self.$notify({ showClose: true, message: res.message, type: res.status});
                     }
                 });
             }).catch(() => {});
@@ -1862,6 +1982,7 @@ Vue.component('el-file-list', {
          */
         beforeUpload(item) {
             let fileItem = {
+                url: '',
                 uid: item.uid, 
                 size: file.size(item.size),
                 title: item.name, 
@@ -1896,7 +2017,7 @@ Vue.component('el-file-list', {
                 }, 500);
             } else {
                 self.list.splice(index,1);
-                self.$message({showClose: true, message: res.message, type: 'error'});
+                self.$notify({showClose: true, message: res.message, type: 'error'});
             }
         },
         /**
@@ -1905,7 +2026,7 @@ Vue.component('el-file-list', {
         errorUpload(res, item) {
             let index = common.arrayIndex(this.list, item['uid'], 'uid');
             this.list.splice(index,1);
-            self.$message({showClose: true, message: '系统错误！', type: 'error'});
+            self.$notify({showClose: true, message: '系统错误！', type: 'error'});
         },
     },
     watch: {
@@ -2331,7 +2452,7 @@ Vue.component('el-link-select', {
         catalogListSearch() {
             let self = this;
             if (this.linkForm.type == '3' && this.catalogList.length == 0) {
-                request.post(self.catalogUrl, {}, function(res) {
+                request.post(self.catalogUrl, {theme: theme}, function(res) {
                     self.catalogList = tree.convertString(res.data);
                 });
             }
@@ -2379,51 +2500,36 @@ Vue.component('el-link-select', {
  */
 Vue.component('el-field', {
     template:`
-    <div class="el-field">
-        <el-form class="el-field-push" :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" v-if="ifset" @submit.native.prevent>
-            <el-form-item label="字段类型：" prop="type">
-                <el-select style="width:100%" placeholder="请选择字段类型" v-model="ruleForm.type" value-key="label" filterable>
-                    <el-option v-for="(item, index) in common.formType()" :key="index" :label="item.label" :value="item"></el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="字段标题：" prop="label"> 
-                <el-input v-model="ruleForm.label" placeholder="如：内容"></el-input>
-            </el-form-item>
-            <el-form-item label="字段变量：" prop="field">
-                <el-input v-model="ruleForm.field" placeholder="如：content"></el-input>
-            </el-form-item>
-            <el-form-item v-if="ruleForm.type != ''" style="width:100%" :label="ruleForm.label === '' ? '' : ruleForm.label + '：'" prop="value">
-                <component v-model="ruleForm.type.value" :is="ruleForm.type.is" :key="ruleForm.type.field" :type="ruleForm.type.type"></component>
-            </el-form-item>
-            <el-form-item style="width:100%">
-                <el-button size="small" type="primary" @click="addItem()">添加自定义字段</el-button>
-            </el-form-item>
-        </el-form>
-        <el-form :label-width="labelWidth" :label-position="labelPosition" @submit.native.prevent>
-            <draggable v-model="list" v-bind="draggable">
-                <template v-for="(item, index) in list" :key="index">
-                    <template v-if="typeof item.label !== 'undefined' && item.label != ''">
-                        <el-form-item class="el-form-draggable">
-                            <template slot="label">
-                                <el-tooltip placement="top" :content="formVariable(item)">
-                                    <div>{{item.label}}：</div>
-                                </el-tooltip>
-                                <div class="el-field-button" v-if="ifset">
-                                    <el-tooltip content="拖放排序" placement="top" >
-                                        <el-button size="mini" class="rank" type="info" icon="el-icon-rank" circle></el-button>
-                                    </el-tooltip>
-                                    <el-tooltip content="设置" placement="top">
-                                        <el-button size="mini" type="primary" icon="el-icon-s-tools" circle @click="setItem(item, index)"></el-button>
-                                    </el-tooltip>
-                                    <el-tooltip content="删除" placement="top">
-                                        <el-button size="mini" type="danger" icon="el-icon-close" circle @click="removeItem(item,index)"></el-button>
-                                    </el-tooltip>
-                                </div>
-                            </template>
-                            <component v-if="show" v-model="item.type.value" :is="item.type.is" :key="item.type.field" :type="item.type.type"></component>
-                        </el-form-item>
+    <div class="el-field" :style="{display: ifset ? 'flex' : 'block'}">
+        <div class="el-field-push" v-if="ifset">
+            <draggable class="add-draggable" v-model="field" v-bind="addDraggable" :clone="addItem">
+                <div v-for="(item, index) in field" class="el-field-move-item">
+                    <i class="iconfont" :class="item.icon"></i>
+                    <div class="title">{{item.label}}</div>
+                </div>
+            </draggable>
+        </div>
+        <el-form class="el-field-content" :class="{notset: ifset == false}" :label-width="labelWidth" :label-position="labelPosition" @submit.native.prevent>
+            <draggable :class="{empty: list.length == 0 && ifset}" v-model="list" v-bind="draggable">
+                <el-form-item v-for="(item, index) in list" :key="index" class="el-form-draggable">
+                    <template slot="label">
+                        <el-tooltip placement="top" :content="formVariable(item)">
+                            <div>{{item.label}}：</div>
+                        </el-tooltip>
+                        <div class="el-field-button" v-if="ifset">
+                            <el-tooltip content="拖放排序" placement="top" >
+                                <el-button size="mini" class="rank" type="info" icon="el-icon-rank" circle></el-button>
+                            </el-tooltip>
+                            <el-tooltip content="设置" placement="top">
+                                <el-button size="mini" type="primary" icon="el-icon-s-tools" circle @click="setItem(item, index)"></el-button>
+                            </el-tooltip>
+                            <el-tooltip content="删除" placement="top">
+                                <el-button size="mini" type="danger" icon="el-icon-close" circle @click="removeItem(item,index)"></el-button>
+                            </el-tooltip>
+                        </div>
                     </template>
-                </template>
+                    <component v-if="show" v-model="item.type.value" :is="item.type.is" :key="item.type.field" :type="item.type.type"></component>
+                </el-form-item>
             </draggable>
         </el-form>
         <el-dialog :visible.sync="setShow" title="字段设置" width="500px" top="30px" :close-on-click-modal="false" append-to-body>
@@ -2484,15 +2590,18 @@ Vue.component('el-field', {
         return {
             show: true,
             list: this.value,
+            field: common.formType(),
             draggable: {
                 handle: '.rank',
                 animation: 300,
                 forceFallback: true,
+                group:"people"
             },
-            ruleForm: {
-                label: '',
-                field: '',
-                type: '',
+            addDraggable: {
+                animation: 300,
+                forceFallback: true,
+                sort: false,
+                group: {name: 'people', pull: 'clone', put: false},
             },
             rules: {
                 label: [
@@ -2516,16 +2625,12 @@ Vue.component('el-field', {
         /**
          * 添加
          */
-        addItem() {
-            this.$refs.ruleForm.validate((valid) => {
-                if (valid) {
-                    let item = JSON.parse(JSON.stringify(this.ruleForm));
-                    this.ruleForm = Object.assign({}, this.ruleForm, {label: "", field: "", type: ""});
-                    this.list.push(item);
-                } else {
-                    return false;
-                }
-            });
+        addItem(item) {
+            let arr         = {};
+            arr.field      = common.id(6);
+            arr.label      = '未命名';
+            arr.type       = item;
+            return JSON.parse(JSON.stringify(arr));
         },
         /**
          * 删除
@@ -2585,16 +2690,16 @@ Vue.component('el-field', {
 Vue.component('el-parameter', {
     template:`
     <div class="el-parameter">
-        <el-button type="primary" size="small" @click="push()">新增一行</el-button>
+        <el-button type="primary" size="small" @click="pushData()">新增一行</el-button>
         <el-input v-model="keyword" v-if="search" style="width:400px" size="small" prefix-icon="el-icon-search" placeholder="请输入关键词搜索"></el-input>
         <draggable v-model="searchList" v-bind="draggable">
             <template v-for="(item, index) in searchList" :key="index">
                 <div class="el-parameter-item">
-                    <el-input v-model="item.title" placeholder="请输入标题" class="title"><template slot="prepend">标题</template></el-input>
-                    <el-input v-model="item.value" placeholder="请输入内容" class="value"><template slot="prepend">内容</template></el-input>
-                    <el-button size="mini" class="rank" type="info" icon="el-icon-rank" circle></el-button>
-                    <el-button size="mini" type="primary" icon="el-icon-plus" @click="push(index)" circle></el-button>
-                    <el-button size="mini" type="danger" icon="el-icon-close" @click="remove(index)" circle></el-button>
+                    <el-input v-model="item.title" placeholder="请输入标题" class="title"></el-input>
+                    <el-input v-model="item.value" placeholder="请输入内容" class="value"></el-input>
+                    <el-button size="mini" v-if="rank" class="rank" type="info" icon="el-icon-rank" circle></el-button>
+                    <el-button size="mini" v-if="push" type="primary" icon="el-icon-plus" @click="pushData(index)" circle></el-button>
+                    <el-button size="mini" type="danger" icon="el-icon-close" @click="removeData(index)" circle></el-button>
                 </div>
             </template>
         </draggable>
@@ -2604,6 +2709,14 @@ Vue.component('el-parameter', {
         value: {
             type: Array,
             default: [],
+        },
+        rank: {
+            type: Boolean,
+            default: true,
+        },
+        push: {
+            type: Boolean,
+            default: true,
         },
         search: {
             type: Boolean,
@@ -2634,11 +2747,11 @@ Vue.component('el-parameter', {
         },
     },
     methods: {
-        push(index = "") {
+        pushData(index = "") {
             let row = {title: '', value: ''};
             index === "" ? this.list.unshift(row) : this.list.splice(index + 1, 0, row);
         },
-        remove(index) {
+        removeData(index) {
             this.list.splice(index, 1);
         },
     },
@@ -2650,6 +2763,47 @@ Vue.component('el-parameter', {
             this.value = val;
             this.$emit('input', val);
         }
+    }
+})
+/**
+ * 编辑器默认是textarea
+ */
+Vue.component('el-catalog-select', {
+    template: `
+    <el-select class="el-catalog-select" v-model="content" placeholder="请选择分类" filterable>
+        <el-option label="未选择" :value="0"></el-option>
+        <el-option v-for="(item, index) in catalogList" :key="index" :label="item.title" :value="item.id">
+            <span v-html="item.treeString"></span>
+            {{ item.title }}
+        </el-option>
+    </el-select>
+    `,
+    props: {
+        value: {
+            type: Number,
+        },
+    },
+    data() {
+        return {
+            catalogList: [],
+            catalogUrl: "catalog/query",
+            content: this.value,
+        }
+    },
+    created() {
+        let self = this;
+        request.post(self.catalogUrl, {theme: theme}, function(res) {
+            self.catalogList = tree.convertString(res.data);
+        });
+    },
+    watch: {
+        value(val) {
+            this.content = val;
+        },
+        content(val) {
+            this.value = val;
+            this.$emit('input', val);
+        },
     }
 })
 /**

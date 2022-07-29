@@ -68,22 +68,11 @@
                         label: '路径', 
                         table: {sort: true},
                         form: {
-                            tips:'开启一键curd后，此处请填写表名称如:mk_banner_table，系统根据表名称生成BannerTable控制器、模型、视图、增删改查权限菜单',
                             placeholder: '请输入控制器/方法名', 
                             rules: [
                                 {required: true,message: '路径不能为空'},
                             ]
                         }
-                    },
-                    {
-                        prop: 'curd',
-                        label: '一键curd',  
-                        table: false, 
-                        form: {
-                            is: 'el-switch',
-                            default: 0,
-                            update: false,
-                        },
                     },
                     {
                         prop: 'ifshow',

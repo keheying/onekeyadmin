@@ -21,8 +21,7 @@ class AppCheck
     public function handle($request, \Closure $next)
     {
         // 自动登录
-        User::checkAutomaticLogin();
-        $request->userInfo = session('admin');
+        $request->userInfo = User::checkAutomaticLogin();
         // 系统信息
         $pathinfo = str_replace('.html', '', $request->pathinfo());
         $request->path = empty($pathinfo) ? 'index/index' : $pathinfo;

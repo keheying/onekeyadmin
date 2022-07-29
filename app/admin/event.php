@@ -13,10 +13,6 @@ $systemListen = [
 ];
 // 插件
 $pluginListen = [
-    // 开始检查
-    'AppCheck'   => [],
-    // 权限检查
-    'AuthCheck'  => [],
     // 检查完毕
     'EndCheck'   => [],
     // 控制台 
