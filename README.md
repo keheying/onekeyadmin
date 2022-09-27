@@ -1,4 +1,4 @@
-<h2 align="center">:tw-1f525: OneKeyAdmin</h2>
+<h2 align="center">OneKeyAdmin</h2>
 <p align="center">
     <a href="http://www.onekeyadmin.com" target="_blank">
         <img src="https://img.shields.io/badge/OfficialWebsite-OneKeyAdmin-yellow.svg" />
