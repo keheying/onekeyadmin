@@ -24,8 +24,11 @@ class UserGroup extends BaseController
     public function index()
     {
         if ($this->request->isPost()) {
-            $input = input('post.');
-            $data  = GroupModel::withSearch(['keyword'], $input)->order($input['prop'], $input['order'])->append(['c_default','c_status'])->select();
+            $input  = input('post.');
+            $search = ['keyword'];
+            $append = ['c_default'];
+            $order  = [$input['prop'] => $input['order']];
+            $data   = GroupModel::withSearch($search, $input)->order($order)->append($append)->select();
             return json(['status' => 'success', 'message' => '获取成功', 'data' => $data]);
         } else {
             return View::fetch();

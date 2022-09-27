@@ -10,14 +10,13 @@
 // +----------------------------------------------------------------------
 namespace app\admin\controller;
 
-use think\Image as thinkImage;
+use think\Image;
 use think\facade\View;
 use think\facade\Filesystem;
 use think\exception\ValidateException;
-use app\admin\addons\Image;
 use app\admin\BaseController;
 use app\admin\model\Config;
-use app\addons\File as FileAddons;
+use onekey\File as FileAddons;
 use app\admin\model\File as FileModel;
 /**
  * 文件
@@ -30,9 +29,11 @@ class File extends BaseController
     public function index()
     {
         if ($this->request->isPost()) {
-            $input = input('post.');
-            $count = FileModel::withSearch(['keyword','type'], $input)->count();
-            $data  = FileModel::withSearch(['keyword','type'], $input)->order($input['prop'], $input['order'])->page($input['page'], 20)->select();
+            $input  = input('post.');
+            $search = ['keyword','type'];
+            $order  = [$input['prop'] => $input['order']];
+            $count  = FileModel::withSearch($search, $input)->count();
+            $data   = FileModel::withSearch($search, $input)->order($order)->page($input['page'], 20)->select();
             return json(['status' => 'success', 'message' => '获取成功', 'data' => $data, 'count' => $count]);
         } else {
             return View::fetch();
@@ -83,44 +84,47 @@ class File extends BaseController
                 'theme'       => theme(),
             ]);
             if ($type === "image") {
-                // 封面图片
-                Image::thumb($save['url'],100,100);
-                // 水印图片
-                $config = $this->request->watermark;
-                if (!empty($config)) {
-                    if ($config['open'] === 1) {
-                        $file = str_replace('\/', '/', public_path() . $save->url);
-                        $image = thinkImage::open($file);
-                        $scale = (int)$config['scale'] / 100;
-                        $position = (int)$config['position'];
-                        $opacity = (int)$config['opacity'];
-                        $height = $image->height();
-                        $width = $image->width(); 
-                        if ($config['type'] === 'image') {
-                            $water = public_path() . 'upload/watermark.png';
-                            if (is_file($water)) {
-                                if ($config['sizeType'] === 'scale') {
-                                    // 按照比例
-                                    $thumb = thinkImage::open($water);
-                                    $waterName = pathinfo($save->url, PATHINFO_FILENAME);
-                                    $waterThumb = str_replace($waterName, 'watermark_thumb', $water);
-                                    $thumb->thumb($width*$scale, $height*$scale)->save($waterThumb);
-                                    $image->water($waterThumb, $position, $opacity)->save($file);
-                                    if (is_file($waterThumb)) {
-                                        unlink($waterThumb);
+                $suffix = pathinfo($file->getOriginalName())['extension'];
+                if ($suffix != 'ico' && $suffix != 'gif') {
+                    // 封面图片
+                    thumbnail($save['url'],100,100);
+                    // 水印图片
+                    $config = $this->request->watermark;
+                    if (!empty($config)) {
+                        if ($config['open'] === 1) {
+                            $file     = str_replace('\/', '/', public_path() . $save->url);
+                            $image    = Image::open($file);
+                            $scale    = (int)$config['scale'] / 100;
+                            $position = (int)$config['position'];
+                            $opacity  = (int)$config['opacity'];
+                            $height   = $image->height();
+                            $width    = $image->width(); 
+                            if ($config['type'] === 'image') {
+                                $water = public_path() . 'upload/watermark.png';
+                                if (is_file($water)) {
+                                    if ($config['sizeType'] === 'scale') {
+                                        // 按照比例
+                                        $thumb = Image::open($water);
+                                        $waterName = pathinfo($save->url, PATHINFO_FILENAME);
+                                        $waterThumb = str_replace($waterName, 'watermark_thumb', $water);
+                                        $thumb->thumb($width*$scale, $height*$scale)->save($waterThumb);
+                                        $image->water($waterThumb, $position, $opacity)->save($file);
+                                        if (is_file($waterThumb)) {
+                                            unlink($waterThumb);
+                                        }
+                                    } else {
+                                        // 按实际大小
+                                        $image->water($water, $position, $opacity)->save($file);
                                     }
-                                } else {
-                                    // 按实际大小
-                                    $image->water($water, $position, $opacity)->save($file);
                                 }
+                            } else {
+                                $opacity    = 127 - (127 * $opacity / 100);
+                                $dechex     = dechex($opacity);
+                                $fontColor  = $config['fontColor'].$dechex;
+                                $fontSize   = $config['sizeType'] === 'scale' ? $scale * ($width/2) : $config['fontSize'];
+                                $fontFamily = public_path() . $config['fontFamily'];
+                                $image->text($config['fontText'], $fontFamily, $fontSize, $fontColor, $position, 0, $config['fontAngle'])->save($file);
                             }
-                        } else {
-                            $opacity    = 127 - (127 * $opacity / 100);
-                            $dechex     = dechex($opacity);
-                            $fontColor  = $config['fontColor'].$dechex;
-                            $fontSize   = $config['sizeType'] === 'scale' ? $scale * ($width/2) : $config['fontSize'];
-                            $fontFamily = public_path() . $config['fontFamily'];
-                            $image->text($config['fontText'], $fontFamily, $fontSize, $fontColor, $position, 0, $config['fontAngle'])->save($file);
                         }
                     }
                 }

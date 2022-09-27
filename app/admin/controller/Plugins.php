@@ -11,9 +11,9 @@
 namespace app\admin\controller;
 
 use PDO;
+use onekey\File;
 use think\facade\Db;
 use think\facade\View;
-use app\addons\File;
 use app\admin\BaseController;
 use app\admin\model\Catalog;
 /**
@@ -51,8 +51,8 @@ class Plugins extends BaseController
                 }
                 foreach ($data as $key => $value) {
                     $data[$key]['user']          = ['nickname' => '本站作者'];
-                    $createUrl = url('plugins/create', ["name" => $value["name"]]);
-                    $data[$key]['describe']      = '如果您想和TA人分享此插件，可<a href="'.$createUrl.'" target="_blank">一键打包</a>生成zip，<a href="'.config('app.api').'/api/user/pluginsList.html" target="_blank">上传到官方平台</a>';
+                    $createUrl                   = admin_url('plugins/create', ["name" => $value["name"]]);
+                    $data[$key]['describe']      = '如果您想和TA人分享此插件，可<a href="'.$createUrl.'" target="_blank">一键打包</a>生成zip，<a href="'.config('app.api').'" target="_blank">上传到官方平台</a>';
                     $data[$key]['price']         = 0;
                     $data[$key]['install_count'] = 0;
                 }
@@ -66,7 +66,7 @@ class Plugins extends BaseController
                     }
                     $input['name'] = array_column($list, 'name');
                 }
-                $result = api_post('plugins/catalog', $input);
+                $result = api_post('tokenPlugins/index', $input);
                 if ($result['status'] !== 'success') {
                     return json($result);
                 }
@@ -98,7 +98,7 @@ class Plugins extends BaseController
             ]);
         } else {
             // 分类
-            $result = api_post('token/pluginsClass');
+            $result = api_post('tokenPlugins/catalog');
             View::assign('catalog', $result['status'] === 'success' ? $result['data'] : []);
             return View::fetch();
         }
@@ -147,7 +147,7 @@ class Plugins extends BaseController
     public function createOrder()
     {
         if ($this->request->isPost()) {
-            $result = api_post('token/pluginsCreateOrder', input('post.'));
+            $result = api_post('tokenPlugins/orderCreate', input('post.'));
             return json($result);
         }
     }
@@ -158,7 +158,7 @@ class Plugins extends BaseController
     public function statusOrder()
     {
         if ($this->request->isPost()) {
-            $result = api_post('token/pluginsOrderSingle', input('post.'));
+            $result = api_post('tokenPlugins/orderDetails', input('post.'));
             return json($result);
         }
     }
@@ -169,7 +169,7 @@ class Plugins extends BaseController
     public function payMethod()
     {
         if ($this->request->isPost()) {
-            $result = api_post('token/pluginsPayMethod', input('post.'));
+            $result = api_post('tokenPlugins/payMethod', input('post.'));
             return json($result);
         }
     }
@@ -185,7 +185,7 @@ class Plugins extends BaseController
             if ($exits !== false) {
                 return json(['status' => 'success', 'message' => '插件已安装']);
             }
-            $result = api_post('token/pluginsInstall', $input);
+            $result = api_post('tokenPlugins/install', $input);
             if ($result['status'] === 'success') {
                 $zip = base64_decode($result['data']['zip']);
                 $path = plugin_path() . $input['name'] . '/';
@@ -214,6 +214,7 @@ class Plugins extends BaseController
                         }
                     }
                 }
+                File::delDirAndFile($oldView);
                 // 初始化信息
                 File::create($path.'info.php', "<?php\nreturn ".var_export($result['data']['info'],true).";");
                 // 分类信息
@@ -245,14 +246,13 @@ class Plugins extends BaseController
                                 'blank'           => 0,
                                 'show'            => 2,
                                 'status'          => 1,
-                                'language'        => config('lang.default_lang'),
                                 'mobile'          => 1,
                                 'theme'           => theme()
                             ]);
                         }
                     }
                     // 清除缓存
-                    cache('catalog_' . theme() . config('lang.default_lang'), NULL);
+                    cache('catalog_' . theme(), NULL);
                 }
                 return json(['status' => 'success', 'message' => '插件安装成功']);
             } else {
@@ -268,7 +268,7 @@ class Plugins extends BaseController
     {
         if ($this->request->isPost()) {
             $input  = input('post.');
-            $result = api_post('token/pluginsInstall', $input);
+            $result = api_post('tokenPlugins/install', $input);
             if ($result['status'] === 'success') {
                 $zip = base64_decode($result['data']['zip']);
                 $path = plugin_path() . $input['name'] . '/';

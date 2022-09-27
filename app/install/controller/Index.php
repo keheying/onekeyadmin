@@ -11,6 +11,7 @@
 namespace app\install\controller;
 
 use PDO;
+use onekey\File;
 use think\facade\Db;
 use think\facade\View;
 use app\install\BaseController;
@@ -27,7 +28,7 @@ class Index extends BaseController
         if ($this->request->isPost()) {
         	$token = session('token');
         	if (empty($token)) {
-        		$result = api_post('token/systemInstall', $_POST);
+        		$result = api_post('tokenSystem/install', $_POST);
         		$token  = $result['status'] === 'success' ? $result['token'] : '';
         		session('token', $token);
         	}
@@ -59,14 +60,22 @@ class Index extends BaseController
 			    $db->exec("insert into `mk_admin`(`id`,`admin_id`,`group_id`,`nickname`,`email`,`account`,`password`,`cover`,`login_ip`,`login_count`,`login_time`,`create_time`,`status`) values (1,0,1,'".$_POST['name']."','".$_POST['email']."','".$_POST['admin_account']."','".password_hash($_POST['admin_password'], PASSWORD_BCRYPT, ['cost' => 12])."','','".$this->request->ip()."',0,'".$data."','".$data."',1)");
 			    // 初始化文件
 			    $init = file_put_contents(root_path() . '.env',"APP_DEBUG = false\nAPP_TOKEN = $token\nMAP_ADMIN = $adminmap\n\n[DATABASE]\nHOSTNAME = localhost\nDATABASE = $database\nUSERNAME = $username\nPASSWORD = $password");
+			    // 删除安装包
+			    File::delDirAndFile(app_path());
 			    return json(['status' => 'success', 'message' => '安装成功']);
 			} catch(\PDOException $e) {
-			    return json(['status' => 'error', 'message' => $e->getMessage() . '，如果您遇到问题请加官方Q群反馈：648788102']);
+			    return json(['status' => 'error', 'message' => $e->getMessage()]);
 			}
         } else {
+	        // 修改底层（兼容localhost）
+	        $file = $this->request->baseFile();
+	        if ($file && 0 !== strpos($this->request->url(), $file)) {
+	            $file = str_replace('\\', '/', dirname($file));
+	        }
+	        $this->request->root = rtrim($file, '/');
         	View::assign([
         		'licenses' => $this->licenses(),
-        		'domain'   => request()->domain() . request()->root(),
+        		'domain'   => $this->request->domain() . $this->request->root,
         		'active'   => is_file(root_path() . '.env') ? 1 : 0,
         	]);
             return View::fetch();

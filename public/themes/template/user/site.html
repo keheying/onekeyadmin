@@ -1,13 +1,30 @@
-<div class="site">
-    {volist name="userSite" id="item"}
-    <a href="{$item.url}" class="item">
-        {if isset($item.count) && $item.count > 0}
-        <span class="el-badge"></span>
-        {/if}
-        <img class="cover" src="{$item.cover}">{$item.title}
-    </a>
-    {/volist}
-    <a href="{:url('login/logout')}" class="item">
-        <img class="cover" src="/themes/template/static/images/logout.png">{:lang('log out')}
-    </a>
+<div class="three">
+    <div class="info">
+        <a href="{:index_url('user/set')}">
+            <el-image :src="userInfo.cover"></el-image>
+            <span>{{userInfo.nickname}}</span>
+        </a>
+    </div>
+    <div class="item">
+        <div class="header">基本设置</div>
+        <a href="{:index_url('user/index')}" class="menu" :class="{if $pathinfo === 'user/index'}'active'{/if}">账号管理</a>
+        <a href="{:index_url('user/set')}" class="menu" :class="{if $pathinfo === 'user/set'}'active'{/if}">个人资料</a>
+    </div>
+    <div class="item">
+        <div class="header">订单管理</div>
+        <a href="{:index_url('onekey/userOrder/index')}" class="menu" :class="{if $pathinfo === 'onekey/userOrder/index'}'active'{/if}">我的订单</a>
+    </div>
+    <div class="item">
+        <div class="header">文章管理</div>
+        <a href="{:index_url('blog/user/blog')}" class="menu" :class="{if $pathinfo === 'blog/user/blog'}'active'{/if}">我的文章</a>
+        <a href="{:index_url('blog/user/blogCollect')}" class="menu" :class="{if $pathinfo === 'blog/user/blogCollect'}'active'{/if}">我收藏的</a>
+        <a href="{:index_url('blog/user/blogComment')}" class="menu" :class="{if $pathinfo === 'blog/user/blogComment'}'active'{/if}">我评论的</a>
+        <a href="{:index_url('blog/user/blogNotice')}" class="menu" :class="{if $pathinfo === 'blog/user/blogNotice'}'active'{/if}">最新通知</a>
+    </div>
+    <div class="item">
+        <div class="header">认证开发者</div>
+        <a href="{:index_url('onekey/userDeveloper/index')}" class="menu" :class="{if $pathinfo === 'onekey/userDeveloper/index'}'active'{/if}">申请认证</a>
+        <a href="{:index_url('onekey/userPlugins/index')}" class="menu" :class="{if $pathinfo === 'onekey/userPlugins/index'}'active'{/if}">上传插件</a>
+        <a href="{:index_url('onekey/userThemes/index')}" class="menu" :class="{if $pathinfo === 'onekey/userThemes/index'}'active'{/if}">上传主题</a>
+    </div>
 </div>

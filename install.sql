@@ -58,7 +58,6 @@ CREATE TABLE IF NOT EXISTS `mk_admin_log` (
   `path` varchar(255) NOT NULL,
   `ip` varchar(255) NOT NULL,
   `post` text NOT NULL,
-  `language` varchar(255) NOT NULL,
   `create_time` datetime NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -85,7 +84,7 @@ insert  into `mk_admin_menu`(`id`,`pid`,`title`,`icon`,`path`,`sort`,`ifshow`,`l
 (8,7,'管理员管理','','admin/index',4,1,0),
 (9,7,'角色管理','','adminGroup/index',0,1,0),
 (11,0,'会员管理','/upload/image/20220211/d7028be823a2eac0c1cf79709dabeabc.png','user',5,1,0),
-(12,11,'会员管理','','user/index',0,1,0),
+(12,11,'会员列表','','user/index',0,1,0),
 (13,11,'会员分组','','userGroup/index',0,1,0),
 (15,0,'插件商店','/upload/image/20220211/09872db382dabec10aac1e2e34934a8e.png','plugins/list',4,1,0),
 (17,15,'查看','','plugins/index',1,0,0),
@@ -116,9 +115,6 @@ insert  into `mk_admin_menu`(`id`,`pid`,`title`,`icon`,`path`,`sort`,`ifshow`,`l
 (145,12,'查看','','user/index',1,0,0),
 (147,4,'链接','','config/link',0,0,0),
 (148,4,'编辑','','config/update',0,0,1),
-(150,2,'语言管理','','lang/index',2,1,0),
-(151,150,'查看','','lang/index',1,0,0),
-(152,150,'编辑','','lang/update',0,0,1),
 (154,5,'上传','','file/upload',7,0,1),
 (157,5,'查看','','file/index',9,0,0),
 (158,5,'彻底删除','','file/delete',5,0,1),
@@ -142,20 +138,15 @@ insert  into `mk_admin_menu`(`id`,`pid`,`title`,`icon`,`path`,`sort`,`ifshow`,`l
 (213,191,'购买','','themes/createOrder',0,0,1),
 (214,191,'支付方式','','themes/payMethod',0,0,1),
 (215,15,'更新','','plugins/updateInstall',0,0,1),
-(216,6,'复制到其它语言','','catalog/copy',0,0,1),
 (217,6,'自定义查询','','catalog/query',0,0,0),
-(219,150,'删除','','lang/delete',0,0,1),
-(220,150,'排序','','lang/drop',0,0,1),
 (221,5,'自定义上传','','file/uploadAppoint',0,0,1),
 (223,5,'放入回收站','','file/recovery',6,0,1),
 (224,5,'文件还原','','file/reduction',3,0,1),
 (251,7,'管理员日志','','adminLog/index',3,1,0),
 (253,251,'删除','','adminLog/delete',1,0,1),
 (255,251,'查看','','adminLog/index',3,0,0),
-(256,150,'新增','','lang/save',0,0,1),
 (257,1,'清除缓存','','index/cacheClear',0,0,1),
 (258,5,'水印设置','','file/watermark',0,0,1),
-(264,11,'会员日志','','userLog/index',0,1,0),
 (267,15,'支付方式','','plugins/payMethod',0,0,1),
 (268,15,'订单查询','','plugins/statusOrder',0,0,1),
 (269,191,'订单查询','','themes/statusOrder',0,0,1),
@@ -164,28 +155,16 @@ insert  into `mk_admin_menu`(`id`,`pid`,`title`,`icon`,`path`,`sort`,`ifshow`,`l
 (297,0,'开发助手','/upload/image/20220215/e4c5c91f707df300ec49860df7eb92d2.png','curd/index',2,1,0),
 (299,297,'查看','','curd/index',2,0,0),
 (298,297,'生成','','curd/code',1,0,1),
-(302,150,'参数编辑','','langParameter/update',0,0,1),
-(303,150,'添加参数','','langParameter/save',0,0,1),
-(304,150,'删除参数','','langParameter/delete',0,0,1),
-(305,150,'查看参数','','langParameter/index',1,0,0),
 (306,15,'打包','','plugins/create',0,0,1),
 (307,297,'编辑','','curd/update',1,0,1),
+(310,297,'删除','','curd/delete',1,0,1),
 (308,297,'删除字段','','curd/deleteField',1,0,1),
 (309,297,'新增字段','','curd/saveField',1,0,1),
-(310,297,'修改字段','','curd/updateField',1,0,1);
-
-CREATE TABLE IF NOT EXISTS `mk_admin_token` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `token` varchar(60) NOT NULL,
-  `create_time` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+(311,297,'修改字段','','curd/updateField',1,0,1);
 
 CREATE TABLE IF NOT EXISTS `mk_catalog` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `pid` int(11) NOT NULL,
-  `num` int(11) NOT NULL COMMENT '栏目标识,区分多语言',
   `level` int(11) NOT NULL COMMENT '等级',
   `group_id` varchar(255) NOT NULL COMMENT '用户权限',
   `title` varchar(255) NOT NULL COMMENT '名称',
@@ -205,27 +184,24 @@ CREATE TABLE IF NOT EXISTS `mk_catalog` (
   `blank` tinyint(1) NOT NULL COMMENT '1新窗口打开',
   `show` tinyint(1) NOT NULL COMMENT '0不显示1都显示2头部显示3底部显示',
   `status` tinyint(1) NOT NULL COMMENT '0屏蔽 1正常',
-  `language` varchar(255) NOT NULL COMMENT '语言',
   `mobile` tinyint(1) NOT NULL COMMENT '手机栏目',
   `theme` varchar(255) NOT NULL COMMENT '当前主题',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
-insert  into `mk_catalog`(`id`,`pid`,`num`,`level`,`group_id`,`title`,`cover`,`content`,`description`,`field`,`bind_html`,`seo_url`,`seo_title`,`seo_keywords`,`seo_description`,`links_type`,`links_value`,`sort`,`type`,`blank`,`show`,`status`,`language`,`mobile`,`theme`) values 
-(1,0,0,1,'','首页','/upload/image/20220215/0be8a040d6db1b91d8ef0584dab5cd28.jpg','','','[]','','index','','','',0,'[]',0,'page',0,1,1,'cn',1,'template');
+insert  into `mk_catalog`(`id`,`pid`,`level`,`group_id`,`title`,`cover`,`content`,`description`,`field`,`bind_html`,`seo_url`,`seo_title`,`seo_keywords`,`seo_description`,`links_type`,`links_value`,`sort`,`type`,`blank`,`show`,`status`,`mobile`,`theme`) values 
+(1,0,1,'','首页','/upload/image/20220215/0be8a040d6db1b91d8ef0584dab5cd28.jpg','','','[]','','index','','','',0,'[]',0,'page',0,1,1,1,'template');
 
 CREATE TABLE IF NOT EXISTS `mk_config` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL COMMENT '名称',
   `name` varchar(255) NOT NULL COMMENT '别名',
-  `value` text NOT NULL COMMENT '值',
+  `value` longtext NOT NULL COMMENT '值',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
 insert  into `mk_config`(`id`,`title`,`name`,`value`) values 
 (1,'邮箱配置','email','{\"email\":\"\",\"password\":\"\",\"sender\":\"onekeyadmin\",\"smtp\":\"smtp.qq.com\",\"sendstyle\":\"ssl\"}'),
-(2,'默认模板模板配置','theme_template_cn','{\"characteristic\":\"使用最新的 ThinkPHP6.0 + Mysql + Element，代码开源无加密，有详细的代码注释，有完整系统手册。\",\"frame\":\"支持移动网站建设、小程序开发、微信平台开发、APP应用程序\",\"frame_list\":{\"column\":[{\"label\":\"标题\",\"field\":\"title\",\"type\":{\"label\":\"文本\",\"is\":\"el-input\",\"value\":\"\"}}],\"table\":[{\"title\":\"一键生成\"},{\"title\":\"资源管理\"},{\"title\":\"配置管理\"},{\"title\":\"分类管理\"},{\"title\":\"语言管理\"},{\"title\":\"权限管理\"},{\"title\":\"会员管理\"},{\"title\":\"应用插件\"},{\"title\":\"主题模板\"},{\"title\":\"钩子事件\"},{\"title\":\"路由机制\"}]},\"project\":\"OneKeyAdmin是基于Thinkphp6+Element编写的一套后台管理系统。安装包只有5MB大小，却拥有一键生成代码功能、无需写页面快速增删改查、资源管理、权限管理、通用的会员模块、系统分类、多语言配置、基础配置、系统日志、钩子事件。\",\"project_desc\":\"用户可上传插件免费或付费给予TA人使用，互帮互助，建立一个友好的社区环境。还有多套主题模板随时安装切换且全部免费使用哦\",\"project_list\":{\"column\":[{\"label\":\"图标\",\"field\":\"icon\",\"type\":{\"label\":\"文本\",\"is\":\"el-input\",\"width\":\"200px\",\"value\":\"\"}},{\"label\":\"标题\",\"field\":\"title\",\"type\":{\"label\":\"文本\",\"is\":\"el-input\",\"width\":\"200px\",\"value\":\"\"}},{\"label\":\"内容\",\"field\":\"content\",\"type\":{\"label\":\"文本\",\"is\":\"el-input\",\"width\":\"200px\",\"value\":\"\"}}],\"table\":[{\"icon\":\"el-icon-reading\",\"title\":\"一键生成\",\"content\":\"CURD、插件、模板\"},{\"icon\":\"el-icon-mouse\",\"title\":\"应用插件\",\"content\":\"安装、卸载、升级\"},{\"icon\":\"el-icon-brush\",\"title\":\"主题模板\",\"content\":\"安装、卸载、切换\"}]}}'),
-(3,'基础配置','system_cn','{"company":"温州万旗信息科技有限公司","email":"513038996@qq.com","telephone":"0577-010101","phone":"157573963XX","fax":"0577-010101","address":"浙江省温州市洞头区北岙街道89号","business_hours":"早上8:30-下午17:30","ico":"\/upload\/favicon.ico?5874802","logo":"\/upload\/image\/20220215\/e4c5c91f707df300ec49860df7eb92df.png","copyright":"温州万旗信息科技有限公司","seo_title":"温州万旗信息科技有限公司","seo_keywords":"OneKeyAdmin","seo_description":"温州万旗信息科技有限公司","icp":"<p>Copyright &copy; 2021-2024 onekeyadmin.com All rights reserved 温州市万旗信息科技有限公司 版权所有 &nbsp;浙江省 ICP备案号2021005285<\/p>","copy_logo":"\/upload\/image\/20220420\/3ee6d6771233863c2f6957b05ace9b2b.png","qq":"513038996","wechat":"157573963XX","wechat_qrcode":"\/upload\/image\/20220521\/8408e90f09bc6761db4d4a780a8d2492.png"}'),
-(4,'图片水印','watermark','{\"open\":0,\"type\":\"font\",\"sizeType\":\"actual\",\"scale\":\"15\",\"position\":\"5\",\"opacity\":\"100\",\"image\":\"\\/upload\\/watermark.png?4476064\",\"fontText\":\"OneKeyAdmin\",\"fontFamily\":\"\\/admin\\/css\\/fonts\\/FZHTJW.ttf\",\"fontSize\":\"28\",\"fontAngle\":0,\"fontColor\":\"#C91818\"}'),
-(5,'会员配置','user','[{\"label\":\"允许邮箱注册会员\",\"field\":\"register_email\",\"type\":{\"label\":\"开关\",\"is\":\"el-switch\",\"value\":true}},{\"label\":\"允许短信注册会员\",\"field\":\"register_mobile\",\"type\":{\"label\":\"开关\",\"is\":\"el-switch\",\"value\":true}},{\"label\":\"邀请好友赠送积分\",\"field\":\"invite_integral\",\"type\":{\"is\":\"el-input\",\"value\":\"6\"}},{\"label\":\"每日签到赠送积分\",\"field\":\"signin_integral\",\"type\":{\"is\":\"el-input\",\"value\":5}}]');
+(2,'基础配置','system','{"company":"温州万旗信息科技有限公司","email":"513038996@qq.com","telephone":"0577-010101","phone":"157573963XX","fax":"0577-010101","address":"浙江省温州市洞头区北岙街道89号","business_hours":"早上8:30-下午17:30","ico":"\/upload\/favicon.ico?5874802","logo":"\/upload\/image\/20220215\/e4c5c91f707df300ec49860df7eb92df.png","copyright":"温州万旗信息科技有限公司","seo_title":"温州万旗信息科技有限公司","seo_keywords":"OneKeyAdmin","seo_description":"温州万旗信息科技有限公司","icp":"<p>Copyright &copy; 2021-2024 onekeyadmin.com All rights reserved 温州市万旗信息科技有限公司 版权所有 &nbsp;浙江省 ICP备案号2021005285<\/p>","copy_logo":"\/upload\/image\/20220420\/3ee6d6771233863c2f6957b05ace9b2b.png","qq":"513038996","wechat":"157573963XX","wechat_qrcode":"\/upload\/image\/20220521\/8408e90f09bc6761db4d4a780a8d2492.png"}'),
+(3,'图片水印','watermark','{\"open\":0,\"type\":\"font\",\"sizeType\":\"actual\",\"scale\":\"15\",\"position\":\"5\",\"opacity\":\"100\",\"image\":\"\\/upload\\/watermark.png?4476064\",\"fontText\":\"OneKeyAdmin\",\"fontFamily\":\"\\/admin\\/css\\/fonts\\/FZHTJW.ttf\",\"fontSize\":\"28\",\"fontAngle\":0,\"fontColor\":\"#C91818\"}');
 
 CREATE TABLE IF NOT EXISTS `mk_file` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -303,18 +279,6 @@ CREATE TABLE IF NOT EXISTS `mk_user_group` (
 insert  into `mk_user_group`(`id`,`title`,`status`,`integral`,`default`) values 
 (1,'VIP1',1,0,1),
 (2,'VIP2',1,100,0);
-
-CREATE TABLE IF NOT EXISTS `mk_user_log` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '用户积分',
-  `user_id` int(11) NOT NULL COMMENT '用户id',
-  `to_id` int(11) NOT NULL COMMENT '对方id',
-  `explain` varchar(255) NOT NULL COMMENT '说明',
-  `number` decimal(12,2) NOT NULL COMMENT '数量',
-  `inc` tinyint(1) NOT NULL COMMENT '0减少 1增加',
-  `type` varchar(255) NOT NULL COMMENT '操作类型',
-  `create_time` datetime NOT NULL COMMENT '操作时间',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `mk_user_token` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

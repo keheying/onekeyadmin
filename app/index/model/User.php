@@ -11,7 +11,6 @@
 namespace app\index\model;
 
 use think\Model;
-use app\index\model\User;
 
 class User extends Model
 {
@@ -19,19 +18,6 @@ class User extends Model
     protected $json = ['field'];
 
     protected $jsonAssoc = true;
-    
-    public static function onAfterRead($user)
-    {
-        $userId = empty(request()->userInfo) ? 0 : request()->userInfo->id;
-        $user->message_count = UserLog::where('to_id', $user->id)->where('type', 'message')->count();
-        $user->visitor_count = UserLog::where('to_id', $user->id)->where('type', 'visitor')->count();
-        $user->follow_count  = UserLog::where('user_id', $user->id)->where('type', 'fans')->count();
-        $user->fans_count    = UserLog::where('to_id', $user->id)->where('type', 'fans')->count();
-        $user->is_follow     = $user->id == $userId ? null : UserLog::where('user_id', $userId)->where('to_id', $user->id)->where('type', 'fans')->count();
-        $user->url           = url('userpage', ['id' =>  $user->id]);
-        // 钩子
-        event('UserAfterRead', $user);
-    }
 
     // 关联模型
     public function group()
@@ -42,16 +28,26 @@ class User extends Model
     }
     
     // 获取器
+    public function getUrlAttr($value, $array)
+    {
+        return index_url('user/info', ['id' => $array['id']]);
+    }
+    
     public function getPasswordAttr($value, $array)
     {
         return '';
     }
-
+    
     public function getPayPaaswordAttr($value, $array)
     {
         return '';
     }
-
+    
+    public function getLoginIpAttr($value, $array)
+    {
+        return '';
+    }
+    
     public function getEmailAttr($value, $array)
     {
         return ! empty($value) ? substr_replace($value,'****',3,4): '';

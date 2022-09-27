@@ -21,12 +21,6 @@ class Themes extends Model
     protected $jsonAssoc = true;
     
     // 搜索器
-    public function searchLanguageAttr($query, $value, $array)
-    {
-        $language = request()->lang;
-        $query->where("language", $language);
-    }
-    
     public function searchNameAttr($query, $value, $array)
     {
         if (! empty($value)) {

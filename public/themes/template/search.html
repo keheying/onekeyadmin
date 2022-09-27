@@ -1,25 +1,18 @@
-{include file="$header"}
+{include file="common/header"}
+{include file="common/app"}
 <div id="app" v-cloak>
     <div class="el-warp">
         <div class="el-search">
             <el-form ref="search" :model="search" inline>
                 <el-form-item prop="keyword">
-                    <el-input v-model="search.keyword" placeholder="{:lang('keyword')}"></el-input>
-                </el-form-item>
-                <el-form-item prop="modular">
-                    <el-select v-model="search.modular" placeholder="{:lang('category')}">
-                        <el-option label="{:lang('all')}" value=""></el-option>
-                        {volist name="modulars" id="item"}
-                        <el-option label="{$item.title}" value="{$item.catalog}"></el-option>
-                        {/volist}
-                    </el-select>
+                    <el-input v-model="search.keyword" placeholder="关键词"></el-input>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="searchList()">{:lang('search')}</el-button>
+                    <el-button type="primary" @click="searchList()">搜索</el-button>
                 </el-form-item>
             </el-form>
-            <div class="list">
-                <el-empty v-if="count === 0" description="没有找到匹配的结果"></el-empty>
+            <div class="list" v-loading="loading">
+                <el-empty v-if="count == 0" description="没有找到匹配的结果"></el-empty>
                 <el-row>
                     <el-col :span="24" v-for="(item, index) in data" style="margin-bottom: 20px">
                         <el-card class="item">
@@ -27,7 +20,7 @@
                             <div class="description" v-html="item.description"></div>
                             <div class="time">
                                 <span>{{item.create_time}}</span>
-                                <a :href="item.url">{{lang('read more')}}</a>
+                                <a :href="item.url">查看更多</a>
                             </div>
                         </el-card>
                     </el-col>
@@ -55,7 +48,7 @@
                 search:{
                     page: 1,
                     keyword:  locationUrl.get('keyword'),
-                    modular:  locationUrl.get('modular'),
+                    catalog:  locationUrl.get('catalog'),
                 },
                 loading: false,
             }
@@ -65,12 +58,12 @@
         },
         methods: {
             /**
-             * 加载列表
+             * 加载
              */
             list() {
                 let self = this;
                 self.loading = true;
-                request.post('search', self.search, function (res) {
+                post('api/search', self.search, function (res) {
                     if (res.status === 'success') {
                         self.data  = res.data;
                         self.count = res.count;
@@ -78,6 +71,9 @@
                     self.loading = false;
                 })
             },
+            /**
+             * 分页
+             */
             pageChange(page) {
                 this.search.page = page;
                 this.list();
@@ -86,7 +82,8 @@
              * 搜索
              */
             searchList() {
-                location.href = url('search', {keyword: this.search.keyword, modular: this.search.modular});
+                this.search.page = 1;
+                this.list();
             },
         }
     });

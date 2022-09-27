@@ -17,41 +17,17 @@ namespace app\index\addons;
 class Url
 {
     /**
-     * 获取url
-     * @param 链接
-     * @param 语言
+     * 指定链接
+     * @param 自定义参数
      */
-    public static function getUrl($url, $lang = '', $paramArr = [], $theme = true): string
-    {
-        $domain = request()->domain();
-        $langx  = $lang === '' ? request()->lang : $lang;
-        $langx  = config('lang.default_lang') == $langx ? '/' : '/' . $langx . '/';
-        $suffix = empty(config('view.view_suffix')) ? '' : '.' . config('view.view_suffix');
-        $param  = '';
-        if ($theme && ! empty(input('theme'))) {
-            $param .= '?theme=' . theme();
-        }
-        if (! empty($paramArr)) {
-            foreach ($paramArr as $key => $val) {
-                $str = empty($param) ? '?' : '&';
-                $param .= $str . $key . '=' . $val;
-            }
-        }
-        return empty($url) || $url == 'index' ? $domain . $langx . $param : $domain . $langx . $url. $suffix . $param; 
-    }
-
-    /**
-     * 获取link的url
-     * @param 链接数组
-     */
-    public static function getLinkUrl($link, $theme = true): string
+    public static function appoint($link, $theme = true): string
     {
         $url = "";
         if (! empty($link)) {
             switch ($link['type']) {
                 case '1':
                     if (strstr($link['value'][1]['url'], 'http') === false) {
-                        $url = self::getUrl($link['value'][1]['url'], '', [], $theme);
+                        $url = index_url($link['value'][1]['url'], [], $theme);
                     } else {
                         $url = $link['value'][1]['url'];
                     }
@@ -73,10 +49,10 @@ class Url
                     }
                     if (! empty($catalog)) {
                         if ($catalog['links_type'] === 1) {
-                            $url = self::getLinkUrl(json_decode($catalog['links_value'],true), $theme);
+                            $url = self::appoint(json_decode($catalog['links_value'],true), $theme);
                         } else {
                             $anchor = empty($link['value'][3]['anchor']) ? '' : $link['value'][3]['anchor'];
-                            $url = self::getCatalogUrl($catalog, $theme).$anchor;
+                            $url = self::catalog($catalog, $theme).$anchor;
                         }
                     }
                     break;
@@ -88,13 +64,12 @@ class Url
     /**
      * 获取分类url(包含系统页)例：news、product
      * @param 分类详情
-     * @param 语言
      */
-    public static function getCatalogUrl(array $catalog, $lang = '', $theme = true): string
+    public static function catalog(array $catalog, $theme = true): string
     {
         if (! empty($catalog)) {
             $param = empty($catalog['seo_url']) ? $catalog['id'] : $catalog['seo_url'];
-            return self::getUrl($param, $lang, [], $theme);
+            return index_url($param, [], $theme);
         } else {
             return '';
         }
@@ -103,10 +78,8 @@ class Url
     /**
      * 获取单页url例：news/1
      * @param 单页详情
-     * @param 分类标识
-     * @param 语言
      */
-    public static function getSingleUrl(array $details, $lang = '', $theme = true): string
+    public static function single(array $details, $theme = true): string
     {
         $id = explode(',', $details['catalog_id'])[0];
         if (! empty(request()->catalogList)) {
@@ -121,20 +94,9 @@ class Url
         if (! empty($catalog)) {
             $name  = empty($catalog['seo_url']) ? $catalog['id'] : $catalog['seo_url'];
             $param = empty($details['seo_url']) ? $details['id'] : $details['seo_url'];
-            return self::getUrl($name .'/'. $param, $lang, [], $theme);
+            return index_url($name .'/'. $param, [], $theme);
         } else {
             return '';
         }
-    }
-
-    /**
-     * 获取分页url例：product/page/1
-     * @param 分页
-     */
-    public static function getCatalogPageUrl(int $page): string
-    {
-        $input = input();
-        $param = empty($input['keyword']) ? [] : ['keyword' => $input['keyword']];
-        return self::getUrl(request()->route .'/page/'. $page, "", $param);
     }
 }

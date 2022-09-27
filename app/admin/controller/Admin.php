@@ -15,8 +15,8 @@ use think\exception\ValidateException;
 use app\admin\BaseController;
 use app\admin\model\AdminLog;
 use app\admin\model\AdminGroup;
-use app\admin\model\Admin as UserModel;
-use app\admin\validate\Admin as UserValidate;
+use app\admin\model\Admin as AdminModel;
+use app\admin\validate\Admin as AdminValidate;
 /**
  * 管理员
  */
@@ -28,14 +28,12 @@ class Admin extends BaseController
     public function index()
     {
         if ($this->request->isPost()) {
-            $input = input('post.');
-            $count = UserModel::withSearch(['keyword', 'status'], $input)->count();
-            $data = UserModel::withSearch(['keyword', 'status'], $input)
-            ->append(['c_status','disabled'])
-            ->with(['group'])
-            ->order($input['prop'], $input['order'])
-            ->page($input['page'], $input['pageSize'])
-            ->select();
+            $input  = input('post.');
+            $search = ['keyword', 'status'];
+            $append = ['disabled'];
+            $order  = [$input['prop'] => $input['order']];
+            $count  = AdminModel::withSearch($search, $input)->count();
+            $data   = AdminModel::withSearch($search, $input)->with(['group'])->append($append)->order($order)->page($input['page'], $input['pageSize'])->select();
             return json(['status' => 'success','message' => '获取成功', 'data' => $data, 'count' => $count]);
         } else {
             $group = AdminGroup::where('status', 1)->order('id', 'asc')->select();
@@ -51,20 +49,19 @@ class Admin extends BaseController
     {
         try {
             $input = input('post.');
-            validate(UserValidate::class)->scene('save')->check($input);
-            if (UserModel::where('account', $input['account'])->value('id')) {
+            validate(AdminValidate::class)->scene('save')->check($input);
+            if (AdminModel::where('account', $input['account'])->value('id')) {
                 return json(['status' => 'error', 'message' => '账号已经存在！']);
             }
-            if (UserModel::where('email', $input['email'])->value('id')) {
+            if (AdminModel::where('email', $input['email'])->value('id')) {
                 return json(['status' => 'error', 'message' => '邮箱号已经存在！']);
             }
-            $date = date('Y-m-d H:i:s');
             $input['admin_id']    = $this->request->userInfo->id;
             $input['login_ip']    = "";
             $input['login_count'] = 0;
-            $input['login_time']  = $date;
-            $input['create_time'] = $date;
-            UserModel::create($input);
+            $input['login_time']  = date('Y-m-d H:i:s');
+            $input['create_time'] = date('Y-m-d H:i:s');
+            AdminModel::create($input);
             return json(['status' => 'success', 'message' => '新增成功']);
         } catch ( ValidateException $e ) {
             return json(['status' => 'error', 'message' => $e->getError()]);
@@ -78,16 +75,16 @@ class Admin extends BaseController
     {
         try {
             $input = input('post.');
-            validate(UserValidate::class)->scene('save')->check($input);
+            validate(AdminValidate::class)->scene('save')->check($input);
             $where[] = ['id', '<>', $input['id']];
-            if (UserModel::where('account', $input['account'])->where($where)->value('id')) {
+            if (AdminModel::where('account', $input['account'])->where($where)->value('id')) {
                 return json(['status' => 'error', 'message' => '账号已经存在！']);
             }
-            if (UserModel::where('email', $input['email'])->where($where)->value('id')) {
+            if (AdminModel::where('email', $input['email'])->where($where)->value('id')) {
                 return json(['status' => 'error', 'message' => '邮箱号已经存在！']);
             }
             if (empty($input['password'])) unset($input['password']);
-            UserModel::update($input);
+            AdminModel::update($input);
             return json(['status' => 'success', 'message' => '修改成功']);
         } catch ( ValidateException $e ) {
             return json(['status' => 'error', 'message' => $e->getError()]);
@@ -100,7 +97,7 @@ class Admin extends BaseController
     public function delete()
     {
         if ($this->request->isPost()) {
-            UserModel::destroy(input('post.ids'));
+            AdminModel::destroy(input('post.ids'));
             return json(['status' => 'success', 'message' => '删除成功']);
         }
     }
@@ -114,9 +111,11 @@ class Admin extends BaseController
             try {
                 $input = input('post.');
                 $userId = $this->request->userInfo->id;
-                validate(UserValidate::class)->scene('save')->check($input);
-                if (UserModel::where('email',$input['email'])->where('id', '<>', $userId)->value('id')) return json(['status' => 'error', 'message' => '邮箱号已经存在！']);
-                $save = UserModel::with(['group'])->find($userId);
+                validate(AdminValidate::class)->scene('save')->check($input);
+                if (AdminModel::where('email',$input['email'])->where('id', '<>', $userId)->value('id')) {
+                    return json(['status' => 'error', 'message' => '邮箱号已经存在！']);
+                }
+                $save = AdminModel::with(['group'])->find($userId);
                 $save->nickname = $input['nickname'];
                 $save->email    = $input['email'];
                 $save->cover    = $input['cover'];

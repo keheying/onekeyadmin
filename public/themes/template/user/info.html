@@ -1,0 +1,51 @@
+{include file="common/header"}
+{include file="common/app"}
+<div id="app" v-cloak>
+    <div class="el-warp">
+        <div class="el-user-info">
+            <el-skeleton :rows="3" :loading="loading" class="info">
+                <el-image variant="image"class="cover" :src="userInfo.cover" :preview-src-list="[userInfo.cover]"></el-image>
+                <div class="nickname">{{userInfo.nickname}}</div>
+                <div class="describe">{{userInfo.describe}}</div>
+            </el-skeleton>
+            <div class="content">
+                <div class="el-user-header">
+                    <div class="item active">概览</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                userInfo: {},
+                loading: false,
+            }
+        },
+        created() {
+            if (this.userInfo == null) {
+                location.href = index_url('login/index');
+            }
+            this.getData();
+        },
+        methods: {
+            /**
+             * 获取数据
+             */
+            getData() {
+                let self = this;
+                self.loading = true;
+                post('api/user/info', {id: locationUrl.get('id')}, function(res){
+                    self.userInfo = res.data;
+                    self.loading = false;
+                });
+            },
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -36,20 +36,7 @@ class AdminLog extends Model
             $query->where("create_time", 'between', $value);
         }
     }
-
-    public function searchIdAttr($query, $value, $array)
-    {
-        if (! empty($value)) {
-            $query->where("admin_id", $value);
-        }
-    }
-
-    // 获取器
-    public function getLanguageAttr($value, $array)
-    {
-        return lang($value);
-    }
-
+    
     // 修改器
     public function setPostAttr($array, $value)
     {

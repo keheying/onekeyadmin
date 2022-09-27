@@ -1,55 +1,55 @@
-{include file="$header"}
+{include file="common/header"}
+{include file="common/app"}
 <script type="text/javascript" src="/themes/template/static/js/cropper.min.js"></script>
 <div id="app" v-cloak>
     <div class="el-warp">
         <div class="el-user">
             {include file="user/site"}
-            <el-card class="box-card content">
-                <div slot="header" class="clearfix">
-                    <span>{:lang('account settings')}</span> 
-                    <a style="float: right;" :href="url('login/password')">
-                        {:lang('change password')}
-                    </a>
+            <div class="content">
+                <div class="el-user-header">
+                    <div class="item active">个人资料</div>
                 </div>
-                <div class="set">
-                    <el-form ref="user" label-width="160px" :model="user" :rules="rules">
-                        <el-form-item prop="account">
-                            <el-image :src="user.cover" :preview-src-list="[user.cover]" style="height: 120px;width: 120px"></el-image>
-                            <div><el-button @click="coverDialog = true" size="small">更换头像</el-button></div>
-                        </el-form-item>
-                        <el-form-item label="{:lang('email')}：" prop="email">
-                            <div>{{user.email}}</div>
-                            <el-button @click="bindShow('email')" size="small">
-                                {{user.email === '' ? lang('bind email') : lang('email change')}}
-                            </el-button>
-                        </el-form-item>
-                        <el-form-item label="{:lang('phone')}：" prop="mobile">
-                            <div>{{user.mobile}}</div>
-                            <el-button @click="bindShow('mobile')" size="small">
-                                {{user.mobile === '' ? lang('bind mobile') : lang('mobile change')}}
-                            </el-button>
-                        </el-form-item>
-                        <el-form-item label="{:lang('nickname')}：" prop="nickname">
-                            <el-input v-model="user.nickname" maxlength="12" show-word-limit></el-input>
-                        </el-form-item>
-                        <el-form-item label="{:lang('sign')}：" prop="describe">
-                            <el-input v-model="user.describe" maxlength="255" show-word-limit></el-input>
-                        </el-form-item>
-                        <el-form-item label="允许TA人访问主页：" prop="describe">
-                            <el-switch
-                                v-model="user.hide"
-                                :active-value="1"
-                                :inactive-value="0">
-                            </el-switch>
-                        </el-form-item>
-                        <el-form-item>
-                            <el-button type="primary" @click="update()" :loading="loading">
-                                {:lang('determine')}
-                            </el-button>
-                        </el-form-item>
-                    </el-form>
-                </div>
-            </el-card>
+                <el-form ref="userInfo" label-width="160px" :model="userInfo">
+                    <el-form-item prop="cover">
+                        <el-image 
+                            :src="userInfo.cover" 
+                            style="height: 120px;width: 120px" 
+                            @click="coverDialog = true">
+                        </el-image>
+                    </el-form-item>
+                    <el-form-item label="生日：" prop="birthday">
+                        <el-date-picker
+                            v-model="userInfo.birthday"
+                            type="date"
+                            format="yyyy-MM-dd"
+                            value-format="yyyy-MM-dd"
+                            placeholder="选择日期">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="性别：" prop="sex">
+                        <el-radio v-model="userInfo.sex" :label="0">男</el-radio>
+                        <el-radio v-model="userInfo.sex" :label="1">女</el-radio>
+                    </el-form-item>
+                    <el-form-item label="昵称：" prop="nickname">
+                        <el-input v-model="userInfo.nickname" maxlength="12" show-word-limit></el-input>
+                    </el-form-item>
+                    <el-form-item label="签名：" prop="describe">
+                        <el-input v-model="userInfo.describe" maxlength="255" show-word-limit></el-input>
+                    </el-form-item>
+                    <el-form-item label="允许TA人访问主页：" prop="hide">
+                        <el-switch
+                            v-model="userInfo.hide"
+                            :active-value="1"
+                            :inactive-value="0">
+                        </el-switch>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="update()" :loading="loading">
+                            更新
+                        </el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
         </div>
     </div>
     <el-dialog
@@ -89,33 +89,9 @@
             <el-button @click="rotateRight" icon="el-icon-refresh-right" size="small"></el-button>
         </div>
         <span slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="down()" size="small">确 定</el-button>
+            <el-button type="primary" @click="updateCover()" size="small">确 定</el-button>
             <el-button @click="coverDialog = false" size="small">取 消</el-button>
         </span>
-    </el-dialog>
-    <el-dialog :title="dialogTitle" :visible.sync="dialog" width="350px" :close-on-click-modal="false">
-        <el-form :model="dialogForm" :rules="dialogRules" ref="dialogForm" @submit.native.prevent>
-            <el-form-item prop="bind">
-                <el-input 
-                    v-model="dialogForm.bind" 
-                    :prefix-icon="bind === 'email' ? 'el-icon-message' : 'el-icon-mobile-phone'" 
-                    :placeholder="bind === 'email' ? lang('please enter email') : lang('please enter mobile')">
-                </el-input>
-            </el-form-item>
-            <el-form-item prop="captcha">
-                <el-input style="width: 194px" v-model="dialogForm.captcha" prefix-icon="el-icon-warning-outline" placeholder="{:lang('graphic verification')}"></el-input>
-                <img style="vertical-align: middle;height: 40px;width: 112px" :src="captcha" @click="getCaptcha()" />
-            </el-form-item>
-            <el-form-item prop="code">
-                <el-input style="width: 194px" v-model="dialogForm.code" prefix-icon="el-icon-time" placeholder="{:lang('please enter the verification code')}"></el-input>
-                <el-button style="width: 112px" @click="getCode()" :disabled="now_interval != 0" :loading="codeLoading">
-                    {{now_interval == 0 ? lang('get verification code') : now_interval + lang('resend in seconds')}}
-                </el-button>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="binding()" :loading="bindLoading">{:lang('determine')}</el-button>
-        </div>
     </el-dialog>
 </div>
 <script type="text/javascript">
@@ -123,46 +99,27 @@
         el: '#app',
         data() {
             return {
-                user: {:json_encode($userInfo)},
+                userInfo: userInfo,
                 loading: false,
                 rules: {
                     nickname: [
-                        { required: true, message: lang('please enter'), trigger: 'blur' },
+                        { required: true, message: '请输入昵称', trigger: 'blur' },
                     ],
                     describe: [
-                        { required: true, message: lang('please enter'), trigger: 'blur' },
+                        { required: true, message: '请输入自我介绍', trigger: 'blur' },
                     ],
-                },
-                captcha: '',
-                codeLoading: false,
-                bindLoading: false,
-                now_interval: 0,
-                interval: 60,
-                timer: '',
-                bind: '',
-                dialog: false,
-                dialogTitle: '',
-                dialogForm: {
-                    bind: '',
-                    code: '',
-                    captcha: '',
-                },
-                dialogRules: {
-                    bind: [
-                        { required: true, message: lang('please enter'), trigger: 'blur' },
+                    sex: [
+                        { required: true, message: '请选择性别', trigger: 'blur' },
                     ],
-                    code: [
-                        { required: true, message: lang('please enter'), trigger: 'blur' },
-                    ],
-                    captcha: [
-                        { required: true, message: lang('please enter'), trigger: 'blur' },
+                    birthday: [
+                        { required: true, message: '请输入生日', trigger: 'blur' },
                     ],
                 },
                 // 更换头像
                 previews: {},
                 coverDialog: false,
                 option: {
-                    img: "{$userInfo.cover}",
+                    img: "",
                     size: 1,
                     full: true, // 是否输出原图比例的截图
                     outputType: 'png', // 输出格式png,jpg,webp
@@ -182,83 +139,26 @@
                 fixedNumber: [1, 1]
             }
         },
+        created() {
+            if (JSON.stringify(userInfo) == '{}') {
+                location.href = "{:index_url('login/index')}"
+            }
+        },
         methods: {
             /**
              * 提交
              */
             update() {
                 let self = this;
-                self.$refs.user.validate((valid) => {
+                self.$refs.userInfo.validate((valid) => {
                     if (valid) {
                         self.loading = true;
-                        request.post("user/set", self.user, function(res){
+                        post('api/user/set', self.userInfo, function(res){
+                            if (res.status == 'success') {
+                                localStorage.userInfo = JSON.stringify(self.userInfo);
+                            }
                             self.loading = false;
                             self.$message({ showClose: true, message: res.message, type: res.status });
-                        });
-                    } else {
-                        return false;
-                    }
-                });
-            },
-            /**
-             * 绑定
-             */
-            bindShow(bind) {
-                this.bind = bind;
-                this.dialog = true;
-                this.dialogTitle = this.bind === 'email' ? lang('bind email') : lang('bind mobile');
-                this.getCaptcha();
-            },
-            /**
-             * 点击获取邮箱验证码
-             */
-            getCaptcha() {
-                this.captcha = url('login/verify', {rand: Math.random()});
-            },
-            /**
-             * 获取验证码
-             */
-            getCode() {
-                let self = this;
-                if (self.now_interval == 0) {
-                    self.codeLoading = true;
-                    let url = self.bind === 'email' ? 'user/sendBindEmailCode' : 'user/sendBindMobileCode';
-                    let data = {captcha: self.dialogForm.captcha};
-                    data[self.bind] = self.dialogForm.bind;
-                    request.post(url, data, function(res){
-                        if (res.status === 'success') {
-                            self.now_interval = 60;
-                            self.timer  = setInterval(() => {
-                                if (self.now_interval > 0) self.now_interval--;
-                            }, 1000);
-                        } else {
-                            self.$message({ showClose: true, message: res.message, type: res.status});
-                            self.getCaptcha();
-                            self.dialogForm.captcha = '';
-                        }
-                        self.codeLoading = false;
-                    })
-                }
-            },
-            /**
-             * 绑定
-             */
-            binding() {
-                let self = this;
-                self.$refs.dialogForm.validate((valid) => {
-                    if (valid) {
-                        self.bindLoading = true;
-                        let url = self.bind === 'email' ? 'user/bindEmail' : 'user/bindMobile';
-                        let data = self.dialogForm;
-                        data[self.bind] = self.dialogForm.bind;
-                        request.post(url, data, function(res){
-                            if (res.status === "success") {
-                                self.dialog = false;
-                                self.user[self.bind] = self.dialogForm.bind;
-                                self.$refs.dialogForm.resetFields();
-                            }
-                            self.bindLoading = false;
-                            self.$message({ showClose: true, message: res.message, type: res.status});
                         });
                     } else {
                         return false;
@@ -281,7 +181,7 @@
             realTime(data) {
                 this.previews = data;
             },
-            down() {
+            updateCover() {
                 let self = this;
                 self.$refs.cropper.getCropData((data) => {
                     let arr = data.split(','), mime = arr[0].match(/:(.*?);/)[1],
@@ -293,7 +193,7 @@
                     let formData = new FormData();
                     formData.append('file', file);
                     $.ajax({
-                        url: url('user/upload'),
+                        url: "{:index_url('user/upload')}",
                         type: 'post',
                         data: formData,
                         async:false,
@@ -311,7 +211,7 @@
                             self.coverDialog = false;
                         },
                         error:function(res) {
-                            self.$message({showClose: true, message: lang('system error'), type: 'error'});
+                            self.$message({showClose: true, message: '系统错误', type: 'error'});
                             self.coverDialog = false;
                         }
                     })

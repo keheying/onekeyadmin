@@ -13,12 +13,20 @@ namespace app\admin\controller;
 use think\facade\View;
 use app\admin\BaseController;
 /**
-* 控制台
-*/
+ * 控制台
+ */
 class Console extends BaseController
 {
     public function index()
     {
+    	// 钩子
+    	$object = (object)[];
+    	$object->html = '';
+    	event('Console', $object);
+    	View::assign([
+    		'html'   => $object->html,
+    		'domain' => $this->request->domain()
+    	]);
         return View::fetch();
     }
 }

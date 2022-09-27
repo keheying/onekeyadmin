@@ -255,7 +255,6 @@ class Container implements ContainerInterface, ArrayAccess, IteratorAggregate, C
         if (!$newInstance) {
             $this->instances[$abstract] = $object;
         }
-
         return $object;
     }
 

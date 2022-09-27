@@ -1,346 +1,212 @@
-{include file="$header"}
+{include file="common/header"}
+{include file="common/app"}
 <div id="app" v-cloak>
     <div class="el-warp">
         <div class="el-user">
             {include file="user/site"}
-            <el-card class="box-card content">
-                <div slot="header" class="clearfix">
-                    <span>{:lang('personal center')}</span> 
+            <div class="content">
+                <div class="el-user-header">
+                    <div class="item active">账号管理</div>
                 </div>
-                <div class="index">
-                    <el-avatar style="float: left;" :size="145" src="{$userInfo.cover}"></el-avatar>
-                    <div class="info">
-                        <a :href="url('user/set')">
-                            <div class="nickname">{$userInfo.nickname}</div>
-                            <div class="describe">{$userInfo.describe}</div>
-                        </a>
-                        <div class="labels">
-                            <div class="item">
-                                <span class="label">Lv</span><span class="value">{$userInfo.group_title}</span>
-                            </div>
-                            <div class="item">
-                                <span class="label">{:lang('current integral')}</span>
-                                <a :href="url('user/integral')" class="value">{$userInfo.now_integral}</a>
-                            </div>
-                            <div class="item">
-                                <span class="label">{:lang('current balance')}</span><a :href="url('user/balance')" class="value">{$userInfo.balance}</a>
-                            </div>
-                            <div class="item">
-                                <span class="label">{:lang('last login')}</span><span class="login_time">{$userInfo.login_time}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <el-row :gutter="20">
-                        <el-col :md="24" :sm="24">
-                            <el-row class="icons" :gutter="20">
-                                {volist name="userIndex" id="item"}
-                                <el-col :md="6" :sm="6">
-                                    <a class="item" href="{$item.url}">
-                                        <img src="{$item.cover}">
-                                        <div class="details">
-                                            <div class="count">{$item.count}</div>
-                                            <div class="title">{$item.title}</div>
-                                        </div>
-                                    </a>
-                                </el-col>
-                                {/volist}
-                            </el-row>
-                        </el-col>
-                        <el-col :md="24" :sm="24">
-                            <el-tabs v-model="tabs" class="tabs" type="card">
-                                <el-tab-pane :label="lang('follow') + '（{$userInfo.follow_count}）'" name="follow">
-                                    <div class="tab" v-infinite-scroll="followList" :infinite-scroll-disabled="followDisabled">
-                                        <div class="item" v-for="item in followData">
-                                            <a :href="item.to.url" target="_blank">
-                                                <img :src="item.to.cover">
-                                                <div class="details">
-                                                    <div class="title">{{item.to.nickname}}</div>
-                                                    <div class="describe">{{item.to.describe}}</div>
-                                                </div>
-                                            </a>
-                                            <div class="follow">
-                                                <el-button v-if="item.to.is_follow != null" :type="item.to.is_follow === 0 ? 'danger': '' " size="mini" @click="follow(item.to)">
-                                                    {{item.to.is_follow === 0 ? lang('follow') : lang('paid attention to')}}
-                                                </el-button>
-                                            </div>
-                                        </div>
-                                        <div v-if="followLoading" class="el-loader">{:lang('loading')}</div>
-                                        <div v-if="followNoMore && followLoading === false" class="el-nomore">{:lang('no more')}</div>
-                                    </div>
-                                </el-tab-pane>
-                                <el-tab-pane :label="lang('fans') + '（{$userInfo.fans_count}）'" name="fans">
-                                    <div v-if="tabs === 'fans'" class="tab" v-infinite-scroll="fansList" :infinite-scroll-disabled="fansDisabled">
-                                        <div class="item" v-for="(item,index) in fansData">
-                                            <a :href="item.user.url" target="_blank">
-                                                <img :src="item.user.cover">
-                                                <div class="details">
-                                                    <div class="title">{{item.user.nickname}}</div>
-                                                    <div class="describe">{{item.user.describe}}</div>
-                                                </div>
-                                            </a>
-                                            <div class="follow">
-                                                <el-button v-if="item.user.is_follow != null" :type="item.user.is_follow === 0 ? 'danger' : ''" size="mini" @click="follow(item.user)">
-                                                    {{item.user.is_follow === 0 ? lang('follow') : lang('paid attention to')}}
-                                                </el-button>
-                                                <i style="margin-left: 10px;cursor: pointer;" class="el-icon-close" @click="removeFans(item.id,index)"></i>
-                                            </div>
-                                        </div>
-                                        <div v-if="fansLoading" class="el-loader">{:lang('loading')}</div>
-                                        <div v-if="fansNoMore && fansLoading === false" class="el-nomore">{:lang('no more')}</div>
-                                    </div>
-                                </el-tab-pane>
-                                <el-tab-pane :label="lang('message') + '（{$userInfo.message_count}）'" name="message">
-                                    <div 
-                                        v-if="tabs === 'message'" 
-                                        class="tab" 
-                                        v-infinite-scroll="messageList" 
-                                        :infinite-scroll-disabled="messageDisabled">
-                                        <div class="item" v-for="(item, index) in messageData">
-                                            <a :href="item.user.url" target="_blank">
-                                                <img :src="item.user.cover">
-                                                <div class="details">
-                                                    <div class="title">{{item.user.nickname}}</div>
-                                                    <div class="describe">{{item.explain}}</div>
-                                                </div>
-                                            </a>
-                                            <div class="follow">
-                                                <el-button v-if="item.user.is_follow != null" :type="item.user.is_follow === 0 ? 'danger' : ''" size="mini" @click="follow(item.user)">
-                                                    {{item.user.is_follow === 0 ? lang('follow') : lang('paid attention to')}}
-                                                </el-button>
-                                                <i style="margin-left: 10px;cursor: pointer;" class="el-icon-close" @click="removeMessage(item.id,index)"></i>
-                                            </div>
-                                        </div>
-                                        <div v-if="messageLoading" class="el-loader">{:lang('loading')}</div>
-                                        <div v-if="messageNoMore && messageLoading === false" class="el-nomore">{:lang('no more')}</div>
-                                    </div>
-                                </el-tab-pane>
-                            </el-tabs>
-                            <el-card class="box-card" style="margin-top: 50px">
-                                <div slot="header" class="clearfix">
-                                    <span>{:lang('recent visitors')}</span>
-                                </div>
-                                <div class="visitor" v-infinite-scroll="visitorList" :infinite-scroll-disabled="visitorDisabled">
-                                    <div class="item" v-for="item in visitorData">
-                                        <a :href="item.user.url" target="_blank">
-                                            <img :src="item.user.cover">
-                                            <div class="details">
-                                                <div class="title">{{item.user.nickname}}</div>
-                                                <div class="describe">{{item.user.describe}}</div>
-                                            </div>
-                                        </a>
-                                        <div class="follow">
-                                            <el-button v-if="item.user.is_follow != null" :type="item.user.is_follow === 0 ? 'danger' : ''" size="mini" @click="follow(item.user)">
-                                                {{item.user.is_follow === 0 ? lang('follow') : lang('paid attention to')}}
-                                            </el-button>
-                                            <div class="time">{{item.create_time}}</div>
-                                        </div>
-                                    </div>
-                                    <div v-if="visitorLoading" class="el-loader">{:lang('loading')}</div>
-                                    <div v-if="visitorNoMore && visitorLoading === false" class="el-nomore">{:lang('no more')}</div>
-                                </div>
-                            </el-card>
-                        </el-col>
-                    </el-row>
-                </div>
-            </el-card>
+                <el-form ref="userInfo" label-width="160px" :model="userInfo">
+                    <el-form-item label="等级：">
+                       <el-tag>{{userInfo.group_title}}</el-tag>
+                    </el-form-item>
+                    <el-form-item label="积分：">
+                        <b style="color: #E6A23C">{{userInfo.now_integral}}</b>
+                    </el-form-item>
+                    <el-form-item label="余额：">
+                        <b style="color: #E6A23C">{{userInfo.balance}}</b>
+                    </el-form-item>
+                    <el-form-item label="邮箱：" prop="email">
+                        <div>{{userInfo.email}}</div>
+                        <el-button @click="emailDialog = true" size="small">
+                            {{userInfo.email === '' ? '绑定邮箱' : '修改绑定'}}
+                        </el-button>
+                    </el-form-item>
+                    <el-form-item label="手机：" prop="mobile">
+                        <div>{{userInfo.mobile}}</div>
+                        <el-button @click="mobileDialog = true" size="small">
+                            {{userInfo.mobile === '' ? '绑定手机' : '修改绑定'}}
+                        </el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
         </div>
     </div>
+    <el-dialog title="邮箱绑定" :visible.sync="emailDialog" width="400px" :close-on-click-modal="false">
+        <el-form :model="emailForm" :rules="emailRules" ref="emailForm" @submit.native.prevent>
+            <el-form-item prop="email">
+                <el-input v-model="emailForm.email" prefix-icon="el-icon-message" placeholder="请输入邮箱"></el-input>
+            </el-form-item>
+            <el-form-item prop="code">
+                <el-input style="width: 200px" v-model="emailForm.code" prefix-icon="el-icon-time" placeholder="请输入验证码"></el-input>
+                <el-button style="width: 120px" @click="emailGetCode()" :disabled="emailNowInterval != 0" :loading="emailCodeLoading">
+                    {{emailNowInterval == 0 ? '获取验证码' : emailNowInterval + '秒后获取'}}
+                </el-button>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="bindEmail()" :loading="emailLoading">确定绑定</el-button>
+        </div>
+    </el-dialog>
+    <el-dialog title="手机绑定" :visible.sync="mobileDialog" width="400px" :close-on-click-modal="false">
+        <el-form :model="mobileForm" :rules="mobileRules" ref="mobileForm" @submit.native.prevent>
+            <el-form-item prop="mobile">
+                <el-input v-model="mobileForm.mobile" prefix-icon="el-icon-message" placeholder="请输入邮箱"></el-input>
+            </el-form-item>
+            <el-form-item prop="code">
+                <el-input style="width: 200px" v-model="mobileForm.code" prefix-icon="el-icon-time" placeholder="请输入验证码"></el-input>
+                <el-button style="width: 120px" @click="mobileGetCode()" :disabled="mobileNowInterval != 0" :loading="mobileCodeLoading">
+                    {{mobileNowInterval == 0 ? '获取验证码' : mobileNowInterval + '秒后获取'}}
+                </el-button>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="bindMobile()" :loading="mobileLoading">确定绑定</el-button>
+        </div>
+    </el-dialog>
 </div>
 <script type="text/javascript">
     new Vue({
         el: '#app',
         data() {
             return {
-                tabs: 'follow',
-                visitorData: [],
-                visitorSearch:{
-                    id: {$userInfo.id},
-                    page: 1,
+                userInfo: userInfo,
+                loading: false,
+                emailForm: {
+                    code: '',
+                    email: '',
+                    salt: '',
+                    rcode: '',
                 },
-                visitorLoading: false,
-                fansData: [],
-                fansSearch:{
-                    id: {$userInfo.id},
-                    type: 'fans',
-                    page: 1,
+                emailRules: {
+                    email: [
+                        { required: true, message: '请输入邮箱', trigger: 'blur' },
+                    ],
+                    code: [
+                        { required: true, message: '请输入验证码', trigger: 'blur' },
+                    ],
                 },
-                fansLoading: false,
-                followData: [],
-                followSearch:{
-                    id: {$userInfo.id},
-                    type: 'follow',
-                    page: 1,
+                emailNowInterval: 0,
+                emailLoading: false,
+                emailCodeLoading: false,
+                emailDialog: false,
+                mobileForm: {
+                    code: '',
+                    mobile: '',
+                    salt: '',
+                    rcode: '',
                 },
-                followLoading: false,
-                messageData: [],
-                messageSearch:{
-                    id: {$userInfo.id},
-                    page: 1,
+                mobileRules: {
+                    mobile: [
+                        { required: true, message: '请输入手机', trigger: 'blur' },
+                    ],
+                    code: [
+                        { required: true, message: '请输入验证码', trigger: 'blur' },
+                    ],
                 },
-                messageLoading: false,
+                mobileNowInterval: 0,
+                mobileLoading: false,
+                mobileCodeLoading: false,
+                mobileDialog: false,
             }
         },
-        computed: {
-            visitorNoMore() {
-                return this.visitorCount <= this.visitorData.length;
-            },
-            visitorDisabled() {
-                return this.visitorLoading || this.visitorNoMore;
-            },
-            fansNoMore() {
-                return this.fansCount <= this.fansData.length;
-            },
-            fansDisabled() {
-                return this.fansLoading || this.fansNoMore;
-            },
-            followNoMore() {
-                return this.followCount <= this.followData.length;
-            },
-            followDisabled() {
-                return this.followLoading || this.followNoMore;
-            },
-            messageNoMore() {
-                return this.messageCount <= this.messageData.length;
-            },
-            messageDisabled() {
-                return this.messageLoading || this.messageNoMore;
-            },
+        created() {
+            if (JSON.stringify(userInfo) == '{}') {
+                location.href = index_url('login/index');
+            }
         },
         methods: {
             /**
-             * 关注
+             * 获取邮箱验证码
              */
-            follow(item) {
+            emailGetCode() {
                 let self = this;
-                request.post('user/follow', {id: item.id}, function (res) {
-                    if (res.status === 'success') {
-                        item.is_follow = item.is_follow === 0 ? 1 : 0;
-                    } else {
+                if (self.emailNowInterval == 0) {
+                    self.emailCodeLoading = true;
+                    post('api/user/sendBindEmailCode', {email: self.emailForm.email}, function(res){
+                        self.emailCodeLoading = false;
                         self.$message({ showClose: true, message: res.message, type: res.status});
-                    }
-                })
-            },
-            /**
-             * 加载列表
-             */
-            visitorList() {
-                let self = this;
-                self.visitorLoading = true;
-                request.post('visitorPage', self.visitorSearch, function (res) {
-                    if (res.status === 'success') {
-                        self.visitorSearch.page++;
-                        self.visitorData  = self.visitorData.concat(res.data);
-                        self.visitorCount = res.count;
-                    }
-                    self.visitorLoading = false;
-                })
-            },
-            /**
-             * 搜索
-             */
-            visitorSearchList() {
-                this.visitorSearch.page = 1;
-                this.visitorData = [];
-                this.visitorList();
-            },
-            /**
-             * 加载列表
-             */
-            fansList() {
-                let self = this;
-                self.fansLoading = true;
-                request.post('fansPage', self.fansSearch, function (res) {
-                    if (res.status === 'success') {
-                        self.fansSearch.page++;
-                        self.fansData  = self.fansData.concat(res.data);
-                        self.fansCount = res.count;
-                    }
-                    self.fansLoading = false;
-                })
-            },
-            /**
-             * 搜索
-             */
-            fansSearchList() {
-                this.fansSearch.page = 1;
-                this.fansData = [];
-                this.fansList();
-            },
-            /**
-             * 删除
-             */
-            removeFans(id, index) {
-                let self = this;
-                self.$confirm(lang('are you sure to delete'), '', {confirmButtonText: lang('determine'), cancelButtonText: lang('cancel'), type: 'warning'}).then(() => {
-                    request.post('user/fansDelete', {id: id}, function (res) {
                         if (res.status === 'success') {
-                            self.fansCount--;
-                            self.fansData.splice(index, 1);
+                            self.emailNowInterval = 60;
+                            self.timer        = setInterval(() => {
+                                if (self.emailNowInterval > 0) {
+                                    self.emailNowInterval--;
+                                }
+                            }, 1000);
+                            self.emailForm.salt  = res.salt;
+                            self.emailForm.rcode = res.code;
                         }
-                        self.$message({message: res.message, type: res.status});
                     })
-                }).catch(() => {});
+                }
             },
             /**
-             * 加载列表
+             * 获取手机验证码
              */
-            followList() {
+            mobileGetCode() {
                 let self = this;
-                self.followLoading = true;
-                request.post('fansPage', self.followSearch, function (res) {
-                    if (res.status === 'success') {
-                        self.followSearch.page++;
-                        self.followData  = self.followData.concat(res.data);
-                        self.followCount = res.count;
-                    }
-                    self.followLoading = false;
-                })
-            },
-            /**
-             * 搜索
-             */
-            followSearchList() {
-                this.followSearch.page = 1;
-                this.followData = [];
-                this.followList();
-            },
-            /**
-             * 加载列表
-             */
-            messageList() {
-                let self = this;
-                self.messageLoading = true;
-                request.post('messagePage', self.messageSearch, function (res) {
-                    if (res.status === 'success') {
-                        self.messageSearch.page++;
-                        self.messageData  = self.messageData.concat(res.data);
-                        self.messageCount = res.count;
-                    }
-                    self.messageLoading = false;
-                })
-            },
-            /**
-             * 搜索
-             */
-            messageSearchList() {
-                this.messageSearch.page = 1;
-                this.messageData = [];
-                this.messageList();
-            },
-            /**
-             * 删除
-             */
-            removeMessage(id, index) {
-                let self = this;
-                self.$confirm(lang('are you sure to delete'), '', {confirmButtonText: lang('determine'), cancelButtonText: lang('cancel'), type: 'warning'}).then(() => {
-                    request.post('user/messageDelete', {id: id}, function (res) {
+                if (self.mobileNowInterval == 0) {
+                    self.mobileCodeLoading = true;
+                    post('api/user/sendBindMobileCode', {mobile: self.mobileForm.mobile}, function(res){
+                        self.mobileCodeLoading = false;
+                        self.$message({ showClose: true, message: res.message, type: res.status});
                         if (res.status === 'success') {
-                            self.messageCount--;
-                            self.messageData.splice(index, 1);
+                            self.mobileNowInterval = 60;
+                            self.timer        = setInterval(() => {
+                                if (self.mobileNowInterval > 0) {
+                                    self.mobileNowInterval--;
+                                }
+                            }, 1000);
+                            self.mobileForm.salt  = res.salt;
+                            self.mobileForm.rcode = res.code;
                         }
-                        self.$message({message: res.message, type: res.status});
                     })
-                }).catch(() => {});
+                }
+            },
+            /**
+             * 绑定邮箱
+             */
+            bindEmail() {
+                let self = this;
+                self.$refs.emailForm.validate((valid) => {
+                    if (valid) {
+                        self.bindLoading = true;
+                        post('api/user/bindEmail', self.emailForm, function(res){
+                            if (res.status === "success") {
+                                self.emailLoading = false;
+                                self.userInfo.email = self.emailForm.email;
+                                self.$refs.emailForm.resetFields();
+                            }
+                            self.bindLoading = false;
+                            self.$message({ showClose: true, message: res.message, type: res.status});
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            /**
+             * 绑定手机
+             */
+            bindMobile() {
+                let self = this;
+                self.$refs.mobileForm.validate((valid) => {
+                    if (valid) {
+                        self.bindLoading = true;
+                        post('api/user/bindMobile', self.mobileForm, function(res){
+                            if (res.status === "success") {
+                                self.mobileLoading = false;
+                                self.userInfo.mobile = self.mobileForm.mobile;
+                                self.$refs.mobileForm.resetFields();
+                            }
+                            self.bindLoading = false;
+                            self.$message({ showClose: true, message: res.message, type: res.status});
+                        });
+                    } else {
+                        return false;
+                    }
+                });
             },
         },
     });

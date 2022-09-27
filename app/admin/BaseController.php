@@ -47,10 +47,5 @@ abstract class BaseController
      * 初始化
      */
     protected function initialize()
-    {
-        View::assign([
-            'header'   => app_path() . 'view/common/header.html',
-            'footer'   => app_path() . 'view/common/footer.html',
-        ]);
-    }
+    {}
 }

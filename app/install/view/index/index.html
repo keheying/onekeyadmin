@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<title>OneKeyAdmin程序快速安装向导</title>
+<title>快速安装向导</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
 <link rel="shortcut icon" href="{$domain}/upload/favicon.ico" />
 <link rel="stylesheet" type="text/css" href="{$domain}/admin/css/element.min.css" />
@@ -10,7 +10,8 @@
 	[v-cloak]{display: none;}
 	.content{max-width: 1200px;margin:0 auto;border: 1px dashed rgb(71, 71, 71);}
 	.header{display: flex;background-color: rgb(71, 71, 71);padding: 0 30px;}
-	.header .logo{width: 200px;margin-top: 5px;}
+	.header .logo{width: 240px;margin-top: 5px}
+	.header .logo .title{height: 36px;line-height: 36px;display: inline-block;vertical-align: top;color: #fff;font-size: 20px}
 	.header .el-steps{width:calc(100% - 200px);background-color: rgb(71, 71, 71)}
 	.header .el-step__title.is-process{color: rgb(255, 208, 75)}
 	.header .is-process .el-step__icon i{color: rgb(255, 208, 75)}
@@ -24,7 +25,10 @@
 <div id="app" v-cloak>
 	<div class="content">
 		<div class="header">
-			<div class="logo"><img src="{$domain}/admin/images/logo.png"></div>
+			<div class="logo">
+				<img src="{$domain}/admin/images/logo_site.png" height="36px">
+				<div class="title">OneKeyAdmin</div>
+			</div>
 			<el-steps :active="active" finish-status="success" direction="vertical" simple>
 				<el-step title="填写信息" icon="el-icon-edit"></el-step>
 				<el-step title="安装完成" icon="el-icon-check"></el-step>
@@ -53,13 +57,15 @@
 					<div class="tip"><p>数据库配置</p></div>
 					<el-form-item label="数据库名：" prop="sql_database">
 						<el-input v-model="form.sql_database" placeholder="例：onekeyadmin"></el-input>
-						<div style="color: #50bfff">OneKeyAdmin会自动创建数据库，防止重复</div>
+						<div style="color: #50bfff">OneKeyAdmin会自动创建数据库，请防止重复</div>
 					</el-form-item>
 					<el-form-item label="数据库用户名：" prop="sql_username">
 						<el-input v-model="form.sql_username" placeholder="例：root"></el-input>
+						<div style="color: #50bfff">数据库用户名一般情况下都为root，请宝塔面板用户注意</div>
 					</el-form-item>
 					<el-form-item label="数据库密码：" prop="sql_password">
 						<el-input v-model="form.sql_password" show-password placeholder="例：root"></el-input>
+						<div style="color: #50bfff">宝塔面板管理->数据库->左上角root密码</div>
 					</el-form-item>
 					<div class="tip"><p>安装协议说明(可以免费下载并商业使用，但是请遵守Apache2.0开源协议)</p></div>
 					<el-form-item label="安装协议：" prop="agreement">
@@ -80,7 +86,9 @@
 							<el-link :href="domain + '/' + form.admin_url" target="_blank">
 								{{domain}}/{{form.admin_url}}
 							</el-link>
-							<p style="color: #F56C6C" v-if="domain.indexOf('localhost') !== -1">请配置域名访问，<span>{{domain}}</span>无法访问静态资源</p>
+							<p style="color: #F56C6C" v-if="domain.indexOf('localhost') !== -1">
+    							请配置域名后访问，当前<span>{{domain}}</span>无法访问网站！
+							</p>
 						</el-form-item>
 						<el-form-item label="超级管理员账号：">
 							{{form.admin_account}}

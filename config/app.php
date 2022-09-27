@@ -32,9 +32,9 @@ return [
     // 错误页面
     'http_exception_template' => [],
     // 请求地址
-    'api' => 'https://www.onekeyadmin.com',
+    'api' => 'https://162.14.117.9',
     // 版本号
-    'version' => '127',
+    'version' => '139',
     // 当前主题
     'theme' => 'template',
 ];

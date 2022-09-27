@@ -556,12 +556,14 @@ class Request implements ArrayAccess
      */
     public function root(bool $complete = false): string
     {
-        // 修改底层（兼容localhost）
-        $file = $this->baseFile();
-        if ($file && 0 !== strpos($this->url(), $file)) {
-            $file = str_replace('\\', '/', dirname($file));
+        if (!$this->root) {
+            $file = $this->baseFile();
+            if ($file && 0 !== strpos($this->url(), $file)) {
+                $file = str_replace('\\', '/', dirname($file));
+            }
+            $this->root = rtrim($file, '/');
         }
-        $this->root = rtrim($file, '/');
+
         return $complete ? $this->domain() . $this->root : $this->root;
     }
 

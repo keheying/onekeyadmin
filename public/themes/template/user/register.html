@@ -1,0 +1,157 @@
+{include file="common/header"}
+{include file="common/app"}
+<div id="app" v-cloak>
+    <div class="el-warp">
+        <div class="el-login">
+            <div class="describe">
+                <img src="{$system.logo}">
+                <div class="content">基于Thinkphp6+Element的通用后台开发框架。一键安装插件/一键安装模板/一键生成代码/一键生成菜单权限/一键生成API接口， 网站、小程序、APP、ERP一个后台框架统统搞定！</div>
+                <div class="footer">onekeyadmin 企业版 - 企业级系统开发平台</div>
+            </div>
+            <div class="operation">
+                <div class="title">用户注册</div>
+                <div class="ctitle">USER REGISTER</div>
+                <el-form :model="ruleForm" :rules="rules" ref="ruleForm" @submit.native.prevent>
+                    <el-form-item prop="email">
+                        <el-input 
+                            v-model="ruleForm.email" 
+                            prefix-icon="el-icon-user" 
+                            placeholder="请输入邮箱" 
+                            @input="showGetCode()">
+                        </el-input>
+                    </el-form-item>
+                    <el-form-item prop="code" v-if="regular">
+                        <el-input 
+                            style="width: 200px" 
+                            v-model="ruleForm.code" 
+                            prefix-icon="el-icon-time" 
+                            placeholder="请输入验证码">
+                        </el-input>
+                        <template v-if="codeLoading">
+                            <el-button disabled>正在获取中...</el-button>
+                        </template>
+                        <template v-else>
+                            <el-button @click="getCode()" :disabled="nowInterval != 0">
+                                {{nowInterval == 0 ? '点击获取验证码': nowInterval + '秒重新后获取'}}
+                            </el-button>
+                        </template>
+                    </el-form-item>
+                    <el-form-item prop="password">
+                        <el-input 
+                            v-model="ruleForm.password" 
+                            prefix-icon="el-icon-key" 
+                            placeholder="请填写密码" 
+                            show-password 
+                            @keyup.enter.native="register()">
+                        </el-input>
+                    </el-form-item>
+                    <el-button 
+                        class="go" 
+                        type="primary"
+                        :loading="loading"
+                        @click="register()">
+                        立即注册
+                    </el-button>
+                    <div class="footer">
+                        <a href="{:index_url('login/index')}">去登录</a>
+                        <a href="{:index_url('login/password')}">忘记密码？</a>
+                    </div>
+                </el-form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                loading: false,
+                codeLoading: false,
+                regular: false,
+                nowInterval: 0,
+                timer: '',
+                ruleForm: {
+                    uid: locationUrl.get('uid'),
+                    email: "",
+                    password: "",
+                    code: "",
+                    salt: "",
+                    rcode: "",
+                },
+                rules: {
+                    email: [
+                        { required: true, message: '请输入邮箱号', trigger: 'blur' },
+                        { pattern: /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/, message: '邮箱号输入格式不对', trigger: 'blur' },
+                    ],
+                    password: [
+                        { required: true, message: '请输入密码', trigger: 'blur' },
+                    ],
+                    code: [
+                        { required: true, message: '请输入验证码', trigger: 'blur' },
+                    ],
+                },
+            }
+        },
+        methods: {
+            /**
+             * 显示获取邮箱验证码
+             */
+            showGetCode() {
+                let email  = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
+                this.regular = email.test(this.ruleForm.email);
+            },
+            /**
+             * 获取邮箱验证码
+             */
+            getCode() {
+                let self = this;
+                if (self.nowInterval == 0) {
+                    self.codeLoading = true;
+                    post('api/login/sendRegisterEmailCode', {email: self.ruleForm.email}, function(res){
+                        self.codeLoading = false;
+                        self.$message({ showClose: true, message: res.message, type: res.status});
+                        if (res.status === 'success') {
+                            self.nowInterval = 60;
+                            self.timer        = setInterval(() => {
+                                if (self.nowInterval > 0) {
+                                    self.nowInterval--;
+                                }
+                            }, 1000);
+                            self.ruleForm.salt  = res.salt;
+                            self.ruleForm.rcode = res.code;
+                        }
+                    })
+                }
+            },
+            /**
+             * 点击立即注册
+             */
+            register() {
+                let self = this;
+                self.$refs.ruleForm.validate((valid) => {
+                    if (valid) {
+                        self.loading = true;
+                        post('api/login/registerEmail', self.ruleForm, function(res){
+                            self.loading = false;
+                            if (res.status == 'success') {
+                                self.$message({ showClose: true, message: res.message, type: res.status, onClose:function(){
+                                    location.href = "{:index_url('login/index')}"
+                                }});
+                            } else {
+                                self.$message({ showClose: true, message: res.message, type: res.status});
+                            }
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+        },
+        beforeDestroy() {
+            clearInterval(this.timer);
+        },
+    });
+</script>
+</body>
+</html>

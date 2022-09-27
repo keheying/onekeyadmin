@@ -10,9 +10,9 @@
 // +----------------------------------------------------------------------
 namespace app\admin\controller;
 
-use think\facade\Db;
+use onekey\File;
 use think\facade\View;
-use app\addons\File;
+use think\facade\Cache;
 use app\admin\BaseController;
 use app\admin\model\AdminMenu as MenuModel;
 /**
@@ -37,7 +37,7 @@ class AdminMenu extends BaseController
                 }
             }
             foreach ($data as $key => $value) {
-                $data[$key]['c_ifshow']     = $value['ifshow'] == 1 ? '显示' : '隐藏';
+                $data[$key]['c_ifshow']     = $value['ifshow']     == 1 ? '显示' : '隐藏';
                 $data[$key]['c_logwriting'] = $value['logwriting'] == 1 ? '开启' : '关闭';
             }
             return json(['status' => 'success', 'message' => '请求成功', 'data' => $data, 'publicMenu' => $this->request->publicMenu]);
@@ -55,6 +55,8 @@ class AdminMenu extends BaseController
             $input = input('post.');
             if (is_numeric($input['id'])) {
                 MenuModel::update($input);
+                // 删除缓存
+                Cache::tag('adminRole')->clear();
             } else {
                 $arr    = explode('_', $input['id']);
                 $plugin = $arr[0];
@@ -104,6 +106,8 @@ class AdminMenu extends BaseController
             foreach ($input['ids'] as $key => $id){
                 if (is_numeric($id)) {
                     MenuModel::recursiveDestroy((string)$id);
+                    // 删除缓存
+                    Cache::tag('adminRole')->clear();
                 } else {
                     $arr        = explode('_', $id);
                     $plugin     = $arr[0];
@@ -137,6 +141,8 @@ class AdminMenu extends BaseController
             $input = input('post.');
             if (is_numeric($input['pid'])) {
                 MenuModel::create($input);
+                // 删除缓存
+                Cache::tag('adminRole')->clear();
             } else {
                 $arr    = explode('_', $input['pid']);
                 if (count($arr) > 3) {

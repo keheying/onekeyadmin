@@ -1,0 +1,101 @@
+{include file="common/header"}
+{include file="common/app"}
+<div id="app" v-cloak>
+    <div class="el-warp">
+        <div class="el-login">
+            <div class="describe">
+                <img src="{$system.logo}">
+                <div class="content">基于Thinkphp6+Element的通用后台开发框架。一键安装插件/一键安装模板/一键生成代码/一键生成菜单权限/一键生成API接口， 网站、小程序、APP、ERP一个后台框架统统搞定！</div>
+                <div class="footer">onekeyadmin 企业版 - 企业级系统开发平台</div>
+            </div>
+            <div class="operation">
+                <div class="title">用户登录</div>
+                <div class="ctitle">USER LOGIN</div>
+                <el-form ref="loginForm" :model="loginForm" :rules="rules" @submit.native.prevent>
+                    <el-form-item prop="account">
+                        <el-input 
+                            v-model="loginForm.account" 
+                            prefix-icon="el-icon-user" 
+                            placeholder="请输入邮箱" 
+                            @keyup.enter.native="submitForm()">
+                        </el-input>
+                    </el-form-item>
+                    <el-form-item prop="password">
+                        <el-input 
+                            v-model="loginForm.password" 
+                            prefix-icon="el-icon-key" 
+                            placeholder="请输入密码" 
+                            show-password 
+                            @keyup.enter.native="submitForm()">
+                        </el-input>
+                    </el-form-item>
+                    <el-button 
+                        class="go" 
+                        type="primary"
+                        :loading="loading" 
+                        @click="submitForm()">
+                        登录
+                    </el-button>
+                    <div class="footer">
+                        <a href="{:index_url('login/password')}">忘记密码？</a>
+                        <a href="{:index_url('login/register')}">立即注册</a>
+                    </div>
+                </el-form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                loading: false,
+                loginForm: {
+                    account: "",
+                    password: "",
+                },
+                rules: {
+                    account: [
+                        { required: true, message: "请输入账号", trigger: 'blur' },
+                        { pattern: /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/, message: '邮箱号输入格式不对', trigger: 'blur' },
+                    ],
+                    password: [
+                        { required: true, message: "请输入密码", trigger: 'blur' },
+                    ]
+                },
+            }
+        },
+        created() {
+            localStorage.token    = null;
+            localStorage.userInfo = null;
+        },
+        methods: {
+            /**
+             * 点击登录
+             */
+            submitForm() {
+                let self = this;
+                this.$refs.loginForm.validate((valid) => {
+                    if (valid) {
+                        self.loading = true;
+                        post('api/login/index', self.loginForm, function (res){
+                            self.loading = false;
+                            self.$message({ showClose: true, message: res.message, type: res.status});
+                            if (res.status === 'success') {
+                                location.href         = localStorage.lastUrl;
+                                // 保存令牌和用户信息
+                                localStorage.token    = res.token;
+                                localStorage.userInfo = JSON.stringify(res.userInfo);
+                            }
+                        })
+                    } else {
+                        return false;
+                    }
+                })
+            },
+        }
+    });
+</script>
+</body>
+</html>

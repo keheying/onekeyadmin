@@ -1,67 +1,77 @@
-{include file="$header"}
-<div id="app" v-cloak>
-	<div class="el-index-warp">
-		<div class="el-warp">
-			<el-row class="head">
-				<el-col :md="24" :sm="24">
-					<div class="inner">
-						<div class="title">{:lang('characteristics')}</div>
-						<div class="content">{$system.characteristic}</div>
-						<a class="link" href="">{:lang('read more')}<i class="el-icon-right"></i></a>
+{include file="common/header"}
+<section class="col-index-banner col-banner" id="100001">
+	<div class="swiper-container banner-container">
+		<div class="swiper-wrapper">
+			<div class="swiper-slide">
+				<div style="background:url({$catalog.cover});" class="img slide-img"></div>
+				<div class="slide-content i1">
+					<h1>{$system.frame}</h1>
+				</div>
+			</div>
+		</div>
+		<div class="swiper-page">
+			<div class="swiper-pagination"></div>
+		</div>
+	</div>
+</section>
+<section class="col-product-wrap">
+	<div class="container">
+		<div class="row col-product-1">
+			<div class="col-md-8 col-pad-0">
+				<div class="col-web-design">
+					<div class="inner-container">
+						<h2 class="title-head wow fadeInLeft">{$label.characteristic}</h2>
+						<div class="main-content wow fadeInLeft" data-wow-delay=".2s">{$system.characteristic}</div>
+						<a class="wow fadeInLeft" data-wow-delay=".4s" href="">Read More<i class="fa fa-long-arrow-right"></i></a>
 					</div>
-				</el-col>
-			</el-row>
-			<el-row>
-				<el-col :md="8" :sm="24">
-					<div class="inner">
-						<div class="title">
-							{:lang('framework')}
-							<p class="c-title">{$system.frame}</p>
-						</div>
-						<ul class="list1">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="col-service"></div>
+			</div>
+			<div class="fl-layer wow fadeInUp"><img src="/themes/template/static/images/pc_img.png"></div>
+		</div>	
+		<div class="row col-product-2">
+			<div class="col-md-4">
+				<div class="col-mobile">
+					<h2 class="title-head wow fadeInLeft">{$label.frame_list}</h2>
+					<div class="main-content">
+						<ul>
 							{volist name="system.frame_list" id="item"}
-							<li class="wow fadeInUp" data-wow-delay=".1s">{$item.title}<i class="el-icon-right"></i></li>
+							<li class="wow fadeInUp">{$item.title}<i class="fa fa-long-arrow-right"></i></li>
 							{/volist}
 						</ul>
+						<div class="s-img"><img src="/themes/template/static/images/mobile_img.jpg"></div>
 					</div>
-				</el-col>
-				<el-col :md="16" :sm="24">
-					<div class="marketing">
-						<el-row :gutter="40">
-							<el-col :md="12" :sm="24">
-								<div class="title">{:lang('project')}</div>
-								<div class="content">{$system.project}</div>
-								<a class="link" href="">{:lang('read more')}<i class="el-icon-right"></i></a>
-							</el-col>
-							<el-col :md="12" :sm="24">
-								<ul class="list2">
+				</div>
+			</div>
+			<div class="col-md-8 col-pad-0">
+				<div class="col-marketing">
+					<div class="col-md-6">
+						<div class="item-left">
+							<h2 class="title-head wow fadeInRight">{$label.project_desc}</h2>
+							<div class="main-content wow fadeInRight" data-wow-delay=".2s">{$system.project_desc}</div>
+							<a class="wow fadeInRight" data-wow-delay=".4s" href="#">Read More<i class="fa fa-long-arrow-right"></i></a>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="item-right">
+							<div class="main-content">
+								<ul>
 									{volist name="system.project_list" id="item"}
-									<li>
-										<el-button icon="{$item.icon}" circle></el-button>
-										<div class="info"><div>{$item.title}</div><p>{$item.content}</p></div>
+									<li class="wow fadeInRight" data-wow-delay=".2s">
+										<div class="s-list"><strong>{$item.title}</strong><p>{$item.content}</p></div>
 									</li>
 									{/volist}
 								</ul>
-								<div class="s-content">{$system.project_desc}</div>
-							</el-col>
-						</el-row>
+								<div class="s-content wow fadeInRight" data-wow-delay=".8s">{$system.project}</div>
+							</div>
+						</div>
 					</div>
-				</el-col>
-			</el-row>
+					<div class="clearfix"></div>
+				</div>
+			</div>
 		</div>
 	</div>
-</div>
-<script>
-    new Vue({
-        el: '#app',
-        data() {
-            return {}
-        },
-        mounted() {
-            this.$nextTick(function () {
-                new WOW().init()
-            })
-        },
-    })
-</script>
-{include file="$footer"}
+</section>
+{include file="common/footer"}

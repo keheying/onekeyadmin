@@ -1,4 +1,4 @@
-{include file="$header"}
+{include file="common/header"}
 <div id="app" v-cloak>
     <el-curd 
         :field="field" 
@@ -8,26 +8,13 @@
         :search-status="[{label: '正常', value: 1}, {label: '屏蔽', value: 0}]"
         variable="userInfo"
         preview>
-        <template v-slot:operation="{self, row}">
-            <el-tooltip content="查看日志" placement="top">
-                <el-button icon="el-icon-reading" size="mini" circle @click="id = row.id;logDrawer = true;"></el-button>
-            </el-tooltip>
-        </template>
     </el-curd>
-    <el-drawer :visible.sync="logDrawer" :with-header="false" size="100%">
-        <el-page-header @back="logDrawer=false" content="日志列表">
-            <template v-slot:title>Esc键返回</template>
-        </el-page-header>
-        <iframe class="el-drawer-iframe" :src="url('userLog/index', {id: id})"></iframe>
-    </el-drawer>
 </div>
 <script>
     new Vue({
         el: '#app',
         data() {
             return {
-                id: '',
-                logDrawer: false,
                 field: [
                     {
                         label: '编号', 
@@ -75,17 +62,10 @@
                         form: false,
                     },
                     {
-                        prop: 'group_id', 
-                        label: '所属组别',
-                        table: {prop: 'group_title', sort: true},
-                        form: {
-                            is: 'el-select', 
-                            child: {is: 'el-option',value: {:json_encode($group)}, props:{label: 'title', value: 'id'}},
-                            rules: [
-                                {required: true, message: '请选择组别'},
-                            ],
-                            colMd: 12
-                        },
+                        prop: 'balance', 
+                        label: '余额',  
+                        table:{sort: true},
+                        form: {type: 'number',default: 0.00,colMd: 12}
                     },
                     {
                         prop: 'password', 
@@ -102,6 +82,25 @@
                         },
                     },
                     {
+                        prop: 'now_integral', 
+                        label: '积分',  
+                        table:{sort: true},
+                        form: {type: 'number',default: 0,colMd: 12}
+                    },
+                    {
+                        prop: 'group_id', 
+                        label: '分组',
+                        table: {prop: 'group_title', sort: true},
+                        form: {
+                            is: 'el-select', 
+                            child: {is: 'el-option',value: {:json_encode($group)}, props:{label: 'title', value: 'id'}},
+                            rules: [
+                                {required: true, message: '请选择组别'},
+                            ],
+                            colMd: 12
+                        },
+                    },
+                    {
                         prop: 'sex', 
                         label: '性别', 
                         table: false,
@@ -113,22 +112,10 @@
                         }
                     },
                     {
-                        prop: 'balance', 
-                        label: '余额',  
-                        table:{sort: true},
-                        form: {type: 'number',default: 0.00,colMd: 8}
-                    },
-                    {
-                        prop: 'now_integral', 
-                        label: '积分',  
-                        table:{sort: true},
-                        form: {type: 'number',default: 0,colMd: 8}
-                    },
-                    {
                         prop: 'birthday', 
                         label: '生日',
                         table: false,
-                        form: {is: 'el-date-picker', type: 'date', format: 'yyyy-MM-dd', valueFormat: 'yyyy-MM-dd',colMd: 8},
+                        form: {is: 'el-date-picker', type: 'date', format: 'yyyy-MM-dd', valueFormat: 'yyyy-MM-dd',colMd: 12},
                     },
                     {
                         prop: 'describe', 
@@ -139,7 +126,7 @@
                     {
                         prop: 'status',
                         label: '状态',  
-                        table: {sort: true, prop: 'c_status'}, 
+                        table: {is: 'el-switch', sort: true},
                         form: {is: 'el-switch', default: 1},
                     },
                     {
@@ -153,4 +140,4 @@
         },
     })
 </script>
-{include file="$footer"}
+{include file="common/footer"}

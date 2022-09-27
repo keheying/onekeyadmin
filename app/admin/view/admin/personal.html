@@ -1,44 +1,45 @@
-{include file="$header"}
+{include file="common/header"}
 <div id="app" v-cloak>
-    <div class="el-personal">
-        <el-form
-            :model="formData" 
-            ref="formData" 
-            :rules="formRules" 
-            label-width="70px">
-            <el-form-item label="头像：" prop="cover">
-                <el-file-select v-model="formData.cover"></el-file-select>
-            </el-form-item>
-            <el-form-item label="昵称：" prop="nickname">
-                <el-input v-model="formData.nickname" placeholder="请输入管理员昵称" maxlength="40" show-word-limit></el-input>
-            </el-form-item>
-            <el-form-item label="邮箱：" prop="email">
-                <el-input v-model="formData.email" placeholder="请输入管理员邮箱"></el-input>
-            </el-form-item>
-            <el-form-item label="账号：" prop="account">
-                <el-input 
-                    v-model="formData.account" 
-                    placeholder="请输入管理员登录账号" 
-                    maxlength="40" 
-                    show-word-limit 
-                    :disabled="true">
-                </el-input>
-            </el-form-item>
-            <el-form-item label="密码：" prop="password">
-                <el-input v-model="formData.password" placeholder="留空则为原密码"></el-input>
-            </el-form-item>
-            <el-form-item>
-                <el-button 
-                    type="primary" 
-                    size="small" 
-                    icon="el-icon-refresh-right"
-                    @click="saveForm()" 
-                    :loading="formLoading">
-                    保存资料
-                </el-button>
-            </el-form-item>
-        </el-form>
-        <iframe class="el-drawer-iframe" :src="url('adminLog/index', {id: userInfo.id})"></iframe>
+    <div class="el-layout">
+        <div class="el-pane-warp">
+            <el-form
+                :model="formData" 
+                ref="formData" 
+                :rules="formRules" 
+                label-width="70px">
+                <el-form-item label="头像：" prop="cover">
+                    <el-file-select v-model="formData.cover"></el-file-select>
+                </el-form-item>
+                <el-form-item label="昵称：" prop="nickname">
+                    <el-input v-model="formData.nickname" placeholder="请输入管理员昵称" maxlength="40" show-word-limit></el-input>
+                </el-form-item>
+                <el-form-item label="邮箱：" prop="email">
+                    <el-input v-model="formData.email" placeholder="请输入管理员邮箱"></el-input>
+                </el-form-item>
+                <el-form-item label="账号：" prop="account">
+                    <el-input 
+                        v-model="formData.account" 
+                        placeholder="请输入管理员登录账号" 
+                        maxlength="40" 
+                        show-word-limit 
+                        :disabled="true">
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="密码：" prop="password">
+                    <el-input v-model="formData.password" placeholder="留空则为原密码"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button 
+                        type="primary" 
+                        size="small" 
+                        icon="el-icon-refresh-right"
+                        @click="saveForm()" 
+                        :loading="formLoading">
+                        保存资料
+                    </el-button>
+                </el-form-item>
+            </el-form>
+        </div>
     </div>
 </div>
 <script>
@@ -99,4 +100,4 @@
         },
     })
 </script>
-{include file="$footer"}
+{include file="common/footer"}

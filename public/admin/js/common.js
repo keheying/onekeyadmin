@@ -4,14 +4,14 @@
 var request = {
 	post(link, data, callback = ""){
 		$.ajax({
-			url: url(link),
+			url: admin_url(link),
 			type: 'post',
 			dataTyle: 'json',
 			contentType:"application/json;charset=utf-8",
 			data: JSON.stringify(data),
 			success:function(res) {
 				if (res.status === 'login') {
-					location.href = url('login/index');
+					location.href = admin_url('login/index');
 				} else {
 					if (callback != "") callback(res)
 				}

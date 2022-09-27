@@ -28,14 +28,18 @@ class User extends BaseController
     public function index()
     {
         if ($this->request->isPost()) {
-            $input = input('post.');
-            $count = UserModel::withSearch(['keyword','date','status'], $input)->count();
-            $data = UserModel::withSearch(['keyword','date','status'], $input)
-            ->append(['c_status','url'])
-            ->with(['group'])
-            ->order($input['prop'], $input['order'])
-            ->page($input['page'], $input['pageSize'])
-            ->select();
+            $input  = input('post.');
+            $search = ['keyword','date','status'];
+            $append = ['url'];
+            $page     = empty($input['page']) ? 1 : $input['page'];
+            $pageSize = empty($input['pageSize']) ? 20 : $input['pageSize'];
+            if (! empty($input['prop']) && ! empty($input['order'])) {
+                $order = [$input['prop'] => $input['order']];
+            } else {
+                $order = ['create_time' => 'desc'];
+            }
+            $count  = UserModel::withSearch($search, $input)->count();
+            $data   = UserModel::withSearch($search, $input)->append($append)->with(['group'])->order($order)->page($page, $pageSize)->select();
             return json(['status' => 'success', 'message' => '获取成功', 'data' => $data, 'count' => $count]);
         } else {
             $group = UserGroup::where('status', 1)->order('integral', 'asc')->select();

@@ -1,4 +1,4 @@
-{include file="$header"}
+{include file="common/header"}
 <div id="app" v-cloak>
 	<div class="el-layout">
 		<el-tabs v-model="tabs" :tab-position="document.body.clientWidth > 768 ? 'left' : 'top'">
@@ -64,7 +64,7 @@
 								<div><el-tooltip placement="top" content="{literal}{$system.ico}{/literal}"><div>地址栏ico：</div></el-tooltip></div>
 							</template>
 							<el-upload
-	                            :action="url('file/uploadAppoint')"
+	                            :action="admin_url('file/uploadAppoint')"
 	                            :data="{name: 'favicon', ext: 'ico'}"
 	                            :show-file-list="false"
 	                            :on-success="icoSuccess"
@@ -206,25 +206,6 @@
 					</div>
 				</div>
 			</el-tab-pane>
-			<el-tab-pane label="会员配置" name="user">
-				<div class="el-pane-warp">
-					<el-form label-width="0">
-		                <el-form-item>
-		                    <el-field v-model="userForm" label-position="left" variable="system" label-width="150px" :ifset="false"></el-field>
-		                </el-form-item>
-		            </el-form>
-		            <div class="el-bottom">
-						<el-button 
-							size="medium"
-							:loading="loading" 
-							type="primary" 
-							icon="el-icon-refresh-right" 
-							@click="saveConfig('会员配置', userForm)">
-							保 存
-						</el-button>
-					</div>
-				</div>
-			</el-tab-pane>
 			<el-tab-pane label="上传限制" name="upload">
 				<div class="el-pane-warp">
 					<el-form ref="uploadForm" :model="uploadForm" label-width="170px">
@@ -292,7 +273,6 @@
                 themes: {:json_encode($themes)},
 	        	emailForm: {:json_encode($email)},
 	        	systemForm: {:json_encode($system)},
-	        	userForm: {:json_encode($user)},
 	        	uploadForm: {:json_encode($upload)},
 	        	themesForm: {:json_encode($theme)},
 	        }
@@ -364,4 +344,4 @@
 	    },
 	})
 </script>
-{include file="$footer"}
+{include file="common/footer"}

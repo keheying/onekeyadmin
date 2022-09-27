@@ -1,141 +1,77 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html>
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<meta name="keywords" content="{$seo_keywords}">
-<meta name="description" content="{$seo_description}">
-<title>{$seo_title}</title>
-<link rel="icon" href="/upload/favicon.ico">
-<link rel="stylesheet" href="/themes/template/static/css/element.min.css">
-<link rel="stylesheet" href="/themes/template/static/css/animate.min.css">
-<link rel="stylesheet" href="/themes/template/static/css/swiper.min.css">
-<link rel="stylesheet" href="/themes/template/static/css/onekey.min.css">
-<script type="text/javascript" src="/themes/template/static/js/jquery.min.js"></script>
-<script type="text/javascript" src="/themes/template/static/js/wow.min.js"></script>
-<script type="text/javascript" src="/themes/template/static/js/vue.min.js"></script>
-<script type="text/javascript" src="/themes/template/static/js/swiper.min.js"></script>
-<script type="text/javascript" src="/themes/template/static/js/element.min.js"></script>
-<script type="text/javascript" src="/themes/template/static/js/common.js"></script>
+<head> 
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<title>{$seo_title}</title>
+	<meta name="keywords" content="{$seo_keywords}">
+	<meta name="description" content="{$seo_description}">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<meta name="baidu-site-verification" content="code-09qLlhlH1O" />
+	<link rel="shortcut icon" href="/upload/favicon.ico">
+	<link rel="stylesheet" type="text/css" href="/themes/template/static/css/bootstrap.min.css"/>
+	<link rel="stylesheet" type="text/css" href="/themes/template/static/css/onekey.min.css"/>
+	<link rel="stylesheet" type="text/css" href="/themes/template/static/css/animates.css"/>
+	<link rel="stylesheet" type="text/css" href="/themes/template/static/css/font-awesome.min.css"/>
+	<link rel="stylesheet" type="text/css" href="/themes/template/static/css/jquery.mmenu.all.css"/>
+	<link rel="stylesheet" type="text/css" href="/themes/template/static/css/swiper.min.css"/>
+	<script type="text/javascript" src="/themes/template/static/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/themes/template/static/js/jquery.mmenu.all.js"></script>
+	<script type="text/javascript" src="/themes/template/static/js/masonry.pkgd.min.js"></script>
+	<script type="text/javascript" src="/themes/template/static/js/swiper.animate.min.js"></script>
+	<script type="text/javascript" src="/themes/template/static/js/swiper.min.js"></script>
+	<script type="text/javascript" src="/themes/template/static/js/wow.min.js"></script>
+	<script type="text/javascript" src="/themes/template/static/js/common.js"></script>
 </head>
 <body>
-<div id="header" v-cloak>
-    <div class="el-navigation" :class="{down: down}">
-        <div class="el-warp">
-            <a class="el-logo" href="{url('/')}"><img :src="down ? '{$system.copy_logo}' : '{$system.logo}'"></a>
-            <div class="el-mobile-menu">
-                <el-dropdown class="el-language">
-                    <span>{:lang($language)}</span>
-                    <el-dropdown-menu slot="dropdown">
-                        {volist name="langAllow" id="item"}
-                        <li class="el-language-item"><a href="{$item.url}">{:lang($item.name)}</a></li>
-                        {/volist}
-                    </el-dropdown-menu>
-                </el-dropdown>
-                <i class="el-icon-menu" @click="open = true"></i>
-            </div>
-            <el-menu class="el-menu-list" :class="{open: open}" :mode="clientWidth > 992 ? 'horizontal' : 'vertical'">
-                {volist name="catalogHeader" id="item1"}
-                <component index="{$item1.id}" is="{if isset($item1.children)}el-submenu{else/}el-menu-item{/if}" class="{if $catalog.level1 == $item1.id}active{/if}">
-                    <template slot="title">
-                        <a href="{$item1.url}">{$item1.title}</a>
-                    </template>
-                    {if isset($item1.children)}
-                    {volist name="item1.children" id="item2"}
-                    <component index="{$item2.id}" is="{if isset($item2.children)}el-submenu{else/}el-menu-item{/if}" >
-                        <template slot="title">
-                            <a href="{$item2.url}">{$item2.title}</a>
-                        </template>
-                        {if isset($item2.children)}
-                        {volist name="item2.children" id="item3"}
-                        <el-menu-item index="{$item3.id}">
-                            <a href="{$item3.url}">{$item3.title}</a>
-                        </el-menu-item>
-                        {/volist}
-                        {/if}
-                    </component>
-                    {/volist}
-                    {/if}
-                </component>
-                {/volist}
-                <el-menu-item>
-                    <a href="{:url('search')}">{:lang('station search')}</a>
-                </el-menu-item>
-                <el-menu-item>
-                    <a href="{:url('user/index')}">{:lang('personal center')}</a>
-                </el-menu-item>
-                <el-dropdown class="el-language">
-                    <span>{:lang($language)}</span>
-                    <el-dropdown-menu slot="dropdown">
-                        {volist name="langAllow" id="item"}
-                        <li class="el-language-item"><a href="{$item.url}">{:lang($item.name)}</a></li>
-                        {/volist}
-                    </el-dropdown-menu>
-                </el-dropdown>
-                <i class="el-icon-close" @click="open = false"></i>
-            </el-menu>
-        </div>
-    </div>
-    <div class="el-banner">
-        <div class="swiper">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide">
-                    <img src="{$catalog.cover}">
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<script>
-    new Vue({
-        el: '#header',
-        data() {
-            return {
-                open: false,
-                scrollTop: document.body.scrollTop || document.documentElement.scrollTop,
-                clientWidth: document.body.clientWidth || document.documentElement.clientWidth,
-            }
-        },
-        computed: {
-            down() {
-                return this.scrollTop > 80 || '{$catalog.seo_url}' !== 'index';
-            }
-        },
-        mounted() {
-            window.onscroll = () => {
-                return (() => {
-                    this.scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
-                })()
-            }
-            window.onresize = () => {
-                return (() => {
-                    this.clientWidth = (document.body.clientWidth || document.documentElement.clientWidth) + 10;
-                })()
-            },
-            new Swiper(".el-banner .swiper", {
-                loop: true,
-                effect : 'fade',
-                fadeEffect: {
-                    crossFade: true,
-                },
-                pagination: {
-                    el: ".el-banner .swiper-pagination",
-                    type: "fraction",
-                },
-                navigation: {
-                    nextEl: ".el-banner .swiper-button-next",
-                    prevEl: ".el-banner .swiper-button-prev",
-                },
-            });
-        },
-        watch: {
-            open(v) {
-                if (v) {
-                    document.body.style.overflow = "hidden";
-                } else {
-                    document.body.style.overflow = "visible";
-                }
-            },
-        }
-    })
-</script>
+<div id="page">
+<header id="header">
+	<div class="container">
+		<div class="logo"><a href="/"><img src="{$system.logo}" alt="" /></a></div>
+		<div class="tel"><i class="fa fa-phone"></i> <span>{$system.telephone}</span></div>
+		<nav class="nav">
+			<ul>
+				{volist name="catalogHeader" id="item1"}
+				<li>
+					<a href="{$item1.url}">{$item1.title}</a>
+					<ul>
+						{volist name="item1.children" id="item2"}
+						<li><a href="{$item2.url}" >{$item2.title}</a></li>
+						{/volist}
+					</ul>
+				</li>
+				{/volist}
+			</ul>
+		</nav>
+		<a href="#menu" class="mm_btn">
+			<div class="menu_bar">
+				<div class="menu_bar_item top">
+					<div class="rect top"></div>
+				</div>
+				<div class="menu_bar_item mid">
+					<div class="rect mid"></div>
+				</div>
+				<div class="menu_bar_item bottom">
+					<div class="rect bottom"></div>
+				</div>
+			</div>
+		</a> 
+	</div>
+</header>
+<nav id="menu" class="mm-menu_offcanvas">
+	<div id="panel-menu">
+		<ul>
+			{volist name="catalogHeader" id="item1"}
+			<li>
+				<a href="{$item1.url}">{$item1.title}</a>
+				<ul>
+					{volist name="item1.children" id="item2"}
+					<li><a href="{$item2.url}" >{$item2.title}</a></li>
+					{/volist}
+				</ul>
+			</li>
+			{/volist}
+		</ul>
+	</div>
+</nav>	

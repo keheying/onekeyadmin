@@ -1,7 +1,6 @@
-{include file="$header"}
+{include file="common/header"}
 <div id="app" v-cloak>
-    <el-curd :field="field" :table-sort="{prop: 'create_time', order: 'desc'}">
-    </el-curd>
+    <el-curd :field="field" :table-sort="{prop: 'create_time', order: 'desc'}"></el-curd>
 </div>
 <script>
     new Vue({
@@ -35,11 +34,6 @@
                         table: {sort: true}
                     },
                     {
-                        prop: 'language', 
-                        label: '语言', 
-                        table: {sort: true}
-                    },
-                    {
                         prop: 'create_time', 
                         label: '时间', 
                         table: {sort: true}
@@ -49,4 +43,4 @@
         },
     })
 </script>
-{include file="$footer"}
+{include file="common/footer"}

@@ -12,7 +12,7 @@ foreach ($tableField as $key => $val) {
     }
 }
 
-// 生成前台控制器
+// 生成API控制器
 $indexController = '<?php
 // +----------------------------------------------------------------------
 // | OneKeyAdmin [ Believe that you can do better ]
@@ -23,11 +23,10 @@ $indexController = '<?php
 // +----------------------------------------------------------------------
 // | Author: MUKE <513038996@qq.com>
 // +----------------------------------------------------------------------
-namespace plugins\\'.$input['name'].'\index\controller;
+namespace plugins\\'.$input['name'].'\api\controller;
 
-use think\facade\View;
-use app\index\BaseController;
-use plugins\\'.$input['name'].'\index\model\\'.$class.' as '.$class.'Model;
+use app\api\BaseController;
+use plugins\\'.$input['name'].'\api\model\\'.$class.' as '.$class.'Model;
 /**
  * '.$class.'管理
  */
@@ -35,7 +34,7 @@ class '.$class.' extends BaseController
 {
     /**
      * 显示资源列表
-     * 访问：'.$_SERVER['SERVER_NAME'].'/'.$input['name'].'/'.lcfirst($class).'/index.html
+     * 访问：'.$_SERVER['SERVER_NAME'].'/api/'.$input['name'].'/'.lcfirst($class).'/index
      */
     public function index()
     {
@@ -54,7 +53,7 @@ class '.$class.' extends BaseController
     public function single()
     {
         if ($this->request->isPost()) {
-            '.$class.'Model::find(input("post.id"));
+            $data = '.$class.'Model::find(input("post.id"));
             return json(["status" => "success", "message" => "请求成功", "data" => $data]);
         }
     }
@@ -167,7 +166,7 @@ class '.$class.' extends BaseController
     }
 }';
 
-// 生成前台模型
+// 生成API模型
 $indexModel = '<?php
 // +----------------------------------------------------------------------
 // | OneKeyAdmin [ Believe that you can do better ]
@@ -178,7 +177,7 @@ $indexModel = '<?php
 // +----------------------------------------------------------------------
 // | Author: MUKE <513038996@qq.com>
 // +----------------------------------------------------------------------
-namespace plugins\\'.$input['name'].'\index\model;
+namespace plugins\\'.$input['name'].'\api\model;
 
 use think\Model;
 
@@ -224,95 +223,86 @@ class '.$class.' extends Model
 // 生成field参数
 $viewFieldStr = "[";
 foreach ($field as $key => $val) {
-    if ($val['prop'] === 'id') {
-        $viewFieldStr .= "\n\t\t\t\t\t{";
-        $viewFieldStr .= "\n\t\t\t\t\t\tprop: 'id',";
-        $viewFieldStr .= "\n\t\t\t\t\t\tlabel: '编号',"; 
-        $viewFieldStr .= "\n\t\t\t\t\t\tform: false,";
-        $viewFieldStr .= "\n\t\t\t\t\t\ttable: false";
-        $viewFieldStr .= "\n\t\t\t\t\t},";
+    $viewFieldStr .= "\n\t\t\t\t\t{";
+    $viewFieldStr .= "\n\t\t\t\t\t\tprop: '".$val['prop']."',";
+    $viewFieldStr .= "\n\t\t\t\t\t\tlabel: '".$val['label']."',"; 
+    // 表格
+    if (! $val['tableShow']) {
+    $viewFieldStr .= "\n\t\t\t\t\t\ttable: false,";
     } else {
-        $viewFieldStr .= "\n\t\t\t\t\t{";
-        $viewFieldStr .= "\n\t\t\t\t\t\tprop: '".$val['prop']."',";
-        $viewFieldStr .= "\n\t\t\t\t\t\tlabel: '".$val['label']."',"; 
-        // 表格
-        if (! $val['tableShow']) {
-        $viewFieldStr .= "\n\t\t\t\t\t\ttable: false,";
-        } else {
-        $viewFieldStr .= "\n\t\t\t\t\t\ttable: {";
-        if ($val['is'] == 'el-file-list-select') {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\tis: 'image',";
-        }
-        if ($val['tableSort']) {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\tsort: true,";
-        }
-        if ($val['tableWidth'] > 0) {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\twidth: '".$val['tableWidth']."px',";
-        }
-        if (! empty($val['tableBind'])) {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\tbind: ".json_encode($val['tableBind'],JSON_UNESCAPED_UNICODE).",";
-        }
-        if ($val['tableProp'] != '' && $val['tableProp'] != $val['prop']) {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\tprop: '".$val['tableProp']."',";
-        }
-        if ($val['tableLabel'] != '' && $val['tableLabel'] != $val['label']) {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\tlabel: '".$val['tableLabel']."',";
-        }
-        $viewFieldStr .= "\n\t\t\t\t\t\t},";
-        }
-        // 表单
-        if (! $val['formShow']) {
-        $viewFieldStr .= "\n\t\t\t\t\t\tform: false";
-        } else {
-        $viewFieldStr .= "\n\t\t\t\t\t\tform: {";
-        $viewFieldStr .= "\n\t\t\t\t\t\t\tis: '".$val['is']."',";
-        if ($val['placeholder'] !== '' && $val['is'] == 'el-input' || $val['is'] == 'el-editor' || $val['is'] == 'el-select') {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\tplaceholder: '".$val['placeholder']."',";
-        }
-        if ($val['tips'] !== '') {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\ttips: '".$val['tips']."',";    
-        }
-        if ($val['default'] !== '' && $val['is'] != 'el-link-select' && $val['is'] != 'el-parameter') {
-        if (is_array($val['default'])) {
-            $default = json_encode($val['default'],JSON_UNESCAPED_UNICODE);
-        } else {
-            $default = '\''.$val['default'].'\'';
-        }
-        $viewFieldStr .= "\n\t\t\t\t\t\t\tdefault: ".$default.",";    
-        }
-        if ($val['pattern'] !== '' || $val['required']) {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\trules: [";
-        if ($val['required']) {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\t\t{required: true, message: '请输入'},";
-        }
-        if ($val['pattern'] !== '' && $val['is'] == 'el-input') {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\t\t{pattern: ".$val['pattern'].",message: '格式错误'},";    
-        }
-        $viewFieldStr .= "\n\t\t\t\t\t\t\t],";
-        }
-        if ($val['disabled']) {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\tdisabled: true,";
-        }
-        if ($val['colMd'] !== '' && $val['colMd'] != $value['form_col_md']) {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\tcolMd: ".$val['colMd'].",";
-        }
-        if ($val['is'] == 'el-radio-group' || $val['is'] == 'el-checkbox-group' || $val['is'] == 'el-select') {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\tchild: {";
-        $viewFieldStr .= "\n\t\t\t\t\t\t\t\tvalue: ".json_encode($val['child'],JSON_UNESCAPED_UNICODE).",";
-        $viewFieldStr .= "\n\t\t\t\t\t\t\t\tprops: {label: 'title', value: 'value'}";
-        $viewFieldStr .= "},";
-        }
-        if ($val['type'] !== '' && $val['is'] == 'el-input' || $val['is'] == 'el-file-select' || $val['is'] == 'el-file-list-select' || $val['is'] == 'el-date-picker') {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\ttype: '".$val['type']."',";
-        }
-        if ($val['is'] == 'el-file-select') {
-        $viewFieldStr .= "\n\t\t\t\t\t\t\tfilterable: ".$val['filterable'].",";
-        $viewFieldStr .= "\n\t\t\t\t\t\t\tmultiple: ".$val['multiple'].",";
-        }
-        $viewFieldStr .= "\n\t\t\t\t\t\t}";
-        }
-        $viewFieldStr .= "\n\t\t\t\t\t},";
+    $viewFieldStr .= "\n\t\t\t\t\t\ttable: {";
+    if ($val['is'] == 'el-file-list-select') {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\tis: 'image',";
     }
+    if ($val['tableSort']) {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\tsort: true,";
+    }
+    if ($val['tableWidth'] > 0) {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\twidth: '".$val['tableWidth']."px',";
+    }
+    if (! empty($val['tableBind'])) {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\tbind: ".json_encode($val['tableBind'],JSON_UNESCAPED_UNICODE).",";
+    }
+    if ($val['tableProp'] != '' && $val['tableProp'] != $val['prop']) {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\tprop: '".$val['tableProp']."',";
+    }
+    if ($val['tableLabel'] != '' && $val['tableLabel'] != $val['label']) {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\tlabel: '".$val['tableLabel']."',";
+    }
+    $viewFieldStr .= "\n\t\t\t\t\t\t},";
+    }
+    // 表单
+    if (! $val['formShow']) {
+    $viewFieldStr .= "\n\t\t\t\t\t\tform: false";
+    } else {
+    $viewFieldStr .= "\n\t\t\t\t\t\tform: {";
+    $viewFieldStr .= "\n\t\t\t\t\t\t\tis: '".$val['is']."',";
+    if ($val['placeholder'] !== '' && $val['is'] == 'el-input' || $val['is'] == 'el-editor' || $val['is'] == 'el-select') {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\tplaceholder: '".$val['placeholder']."',";
+    }
+    if ($val['tips'] !== '') {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\ttips: '".$val['tips']."',";    
+    }
+    if ($val['default'] !== '' && $val['is'] != 'el-link-select' && $val['is'] != 'el-parameter') {
+    if (is_array($val['default'])) {
+        $default = json_encode($val['default'],JSON_UNESCAPED_UNICODE);
+    } else {
+        $default = '\''.$val['default'].'\'';
+    }
+    $viewFieldStr .= "\n\t\t\t\t\t\t\tdefault: ".$default.",";    
+    }
+    if ($val['pattern'] !== '' || $val['required']) {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\trules: [";
+    if ($val['required']) {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\t\t{required: true, message: '请输入'},";
+    }
+    if ($val['pattern'] !== '' && $val['is'] == 'el-input') {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\t\t{pattern: ".$val['pattern'].",message: '格式错误'},";    
+    }
+    $viewFieldStr .= "\n\t\t\t\t\t\t\t],";
+    }
+    if ($val['disabled']) {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\tdisabled: true,";
+    }
+    if ($val['colMd'] !== '' && $val['colMd'] != $value['form_col_md']) {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\tcolMd: ".$val['colMd'].",";
+    }
+    if ($val['is'] == 'el-radio-group' || $val['is'] == 'el-checkbox-group' || $val['is'] == 'el-select') {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\tchild: {";
+    $viewFieldStr .= "\n\t\t\t\t\t\t\t\tvalue: ".json_encode($val['child'],JSON_UNESCAPED_UNICODE).",";
+    $viewFieldStr .= "\n\t\t\t\t\t\t\t\tprops: {label: 'title', value: 'value'}";
+    $viewFieldStr .= "},";
+    }
+    if ($val['type'] !== '' && $val['is'] == 'el-input' || $val['is'] == 'el-file-select' || $val['is'] == 'el-file-list-select' || $val['is'] == 'el-date-picker') {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\ttype: '".$val['type']."',";
+    }
+    if ($val['is'] == 'el-file-select') {
+    $viewFieldStr .= "\n\t\t\t\t\t\t\tfilterable: ".$val['filterable'].",";
+    $viewFieldStr .= "\n\t\t\t\t\t\t\tmultiple: ".$val['multiple'].",";
+    }
+    $viewFieldStr .= "\n\t\t\t\t\t\t}";
+    }
+    $viewFieldStr .= "\n\t\t\t\t\t},";
 }
 $viewFieldStr .= "\n\t\t\t\t]";
 // 生成后台视图

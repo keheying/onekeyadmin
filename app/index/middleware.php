@@ -4,12 +4,14 @@
 // +----------------------------------------------------------------------
 
 return [
-    // Session初始化
+	// Session初始化
     \think\middleware\SessionInit::class,
+    // 环境检测
+    app\index\middleware\AppCheck::class,
     // 分类检测
-    app\index\middleware\Catalog::class,
-    // 系统检测
-    app\index\middleware\System::class,
-    // 多语言加载
-    \think\middleware\LoadLangPack::class,
+    app\index\middleware\CatalogCheck::class,
+    // 配置检测
+    app\index\middleware\ConfigCheck::class,
+    // TDK检测
+    app\index\middleware\TdkCheck::class,
 ];

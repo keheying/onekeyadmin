@@ -1,4 +1,4 @@
-{include file="$header"}
+{include file="common/header"}
 <div id="app" v-cloak>
     <el-curd 
         :field="field" 
@@ -28,15 +28,6 @@
                         }
                     },
                     {
-                        prop: 'default', 
-                        label: '注册默认',  
-                        table: {prop: 'c_default'},
-                        form: {
-                            is: 'el-switch', 
-                            default: 0,
-                        }
-                    },
-                    {
                         label: '升级积分', 
                         prop: 'integral', 
                         table: {sort: true},
@@ -49,9 +40,18 @@
                         }
                     },
                     {
+                        prop: 'default', 
+                        label: '注册默认',  
+                        table: {prop: 'c_default'},
+                        form: {
+                            is: 'el-switch', 
+                            default: 0,
+                        }
+                    },
+                    {
                         prop: 'status', 
                         label: '状态',  
-                        table: {prop: 'c_status'},
+                        table: {is: 'el-switch', sort: true},
                         form: {
                             is: 'el-switch', 
                             default: 1,
@@ -65,4 +65,4 @@
         },
     })
 </script>
-{include file="$footer"}
+{include file="common/footer"}

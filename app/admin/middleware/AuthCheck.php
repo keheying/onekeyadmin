@@ -12,9 +12,12 @@ declare (strict_types = 1);
 
 namespace app\admin\middleware;
 
+use think\facade\Cache;
+use app\admin\model\Admin;
 use app\admin\model\AdminMenu;
+use app\admin\model\AdminToken;
 /**
- * 权限检查
+ * 权限检测
  */
 class AuthCheck
 {
@@ -31,13 +34,12 @@ class AuthCheck
         if (! in_array($request->class, $this->ignoreCheckClass)) {
             // 登录检查
             if (empty($request->userInfo)) {
-                if ($request->isGet()) cookie('admin_last_url', $request->authorityPath);
-                return $request->isPost() ? json(['status'=>'login', 'message'=>'登录状态过期失效！']) : redirect(url('login/index'));
+                return $request->isPost() ? json(['status'=>'login', 'message'=>'登录状态过期失效！']) : redirect(admin_url('login/index'));
             }
             // 菜单列表
-            $systemMenu = $this->systemMenu($request);
-            $pluginMenu = $this->pluginMenu($request);
-            $request->menu = array_merge( array_sort($systemMenu,'sort'), array_sort($pluginMenu,'sort'));
+            $request->systemMenu = $this->systemMenu($request);
+            $request->pluginMenu = $this->pluginMenu($request);
+            $request->menu       = array_merge(array_sort($request->systemMenu, 'sort'), array_sort($request->pluginMenu, 'sort'));
             $publicMenu = [];
             foreach ($request->menu as $key => $value) {
                 if ($value['ifshow'] === 1) {
@@ -54,8 +56,7 @@ class AuthCheck
                 }
             }
         }
-        // 钩子
-        event('AuthCheck', $request);
+        // 下一步
         return $next($request);
     }
 
@@ -65,11 +66,16 @@ class AuthCheck
     public function systemMenu($request)
     {
         $where = [];
-        if ($request->userInfo->group_role !== "*") {
-            $where[] = ['id', 'in', $request->userInfo->group_role];
+        $group_role = is_array($request->userInfo->group_role) ? implode(',', $request->userInfo->group_role) : $request->userInfo->group_role;
+        if ($group_role !== "*") {
+            $where[] = ['id', 'in', $group_role];
         }
-        $menu = AdminMenu::where($where)->select();
-        $menu = $menu ? $menu->toArray() : [];
+        $menu = Cache::get('role-'.$group_role);
+        if (empty($menu)) {
+            $menu = AdminMenu::where($where)->select();
+            $menu = $menu ? $menu->toArray() : [];
+            Cache::tag('adminRole')->set('role-'.$group_role, $menu);
+        }
         foreach ($menu as $key => $value) {
             $menu[$key]['unread'] = 0;
         }
@@ -85,17 +91,10 @@ class AuthCheck
         foreach (plugin_list() as $index => $plugin) {
             $fileMenu = plugin_path() . $plugin['name'] . '/menu.php';
             $fileInfo = plugin_path() . $plugin['name'] . '/info.php';
-            $sort = 0;
-            if (is_file($fileInfo)) {
-                $info = include($fileInfo);
-                if (isset($info['sort'])) {
-                    $sort = $info['sort'];
-                }
-            }
             if (is_file($fileMenu)) {
                 $menu = include($fileMenu);
                 $menu = is_array($menu) ? $menu : [];
-                $pluginMenu = $this->pluginMenuRecursion($menu, 0, $plugin['name'], $request->userInfo['group_role'],$sort);
+                $pluginMenu = $this->pluginMenuRecursion($menu, 0, $plugin['name'], $request->userInfo['group_role'],$request);
             }
         }
         return $pluginMenu;
@@ -104,21 +103,23 @@ class AuthCheck
     /**
      * 插件菜单(递归)
      */
-    public function pluginMenuRecursion($array, $pid, $pluginName, $role, $sort)
+    public function pluginMenuRecursion($array, $pid, $pluginName, $role, $request)
     {
         static $pluginMenu = [];
+        $count = count($array);
         foreach ($array as $key => $menu) {
             $sub['id'] = $pid === 0 ? $pluginName . '_' . $key : $pid . '_' . $key;
             if (isset($menu['bind'])) {
-                $bind = AdminMenu::where('title', $menu['bind'])->value('id');
-                $pid = $bind ? $bind : 0;
+                $pid  = 0;
+                foreach ($request->systemMenu as $key => $val) {
+                    if ($val['title'] === $menu['bind']) $pid = $val['id']; 
+                }
             }
-            $subSort             = isset($menu['sort']) ? $menu['sort'] : 0;
             $sub['pid']          = $pid;
             $sub['title']        = $menu['title'];
             $sub['path']         = $pluginName . '/' . $menu['path'];
-            $sub['icon']         = $sub['pid'] === 0 ? '/plugins/' . $pluginName . '/menu.png' : '';
-            $sub['sort']         = $pid === 0 ? $sort : $subSort;
+            $sub['icon']         = isset($menu['icon']) ? "/plugins/$pluginName/" . $menu['icon'] : '';
+            $sub['sort']         = isset($menu['sort']) ? $menu['sort'] : $count - $key;
             $sub['ifshow']       = isset($menu['ifshow']) ? $menu['ifshow'] : 0;
             $sub['unread']       = isset($menu['unread']) ? $menu['unread'] : 0;
             $sub['logwriting']   = isset($menu['logwriting']) ? $menu['logwriting'] : 0;
@@ -126,7 +127,7 @@ class AuthCheck
                 $pluginMenu[] = $sub;
             }
             if (isset($menu['children'])) {
-               $this->pluginMenuRecursion($menu['children'], $sub['id'], $pluginName, $role, $sort);
+               $this->pluginMenuRecursion($menu['children'], $sub['id'], $pluginName, $role, $request);
             }
         }
         return $pluginMenu;

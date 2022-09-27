@@ -23,11 +23,6 @@ class UserGroup extends Model
     }
 
     // 修改器
-    public function getCStatusAttr($value, $array)
-    {
-        return $array['status'] === 1 ? '正常' : '屏蔽';
-    }
-
     public function getCDefaultAttr($value, $array)
     {
         return $array['default'] === 1 ? '是' : '否';

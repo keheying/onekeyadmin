@@ -28,11 +28,6 @@ class Catalog extends Model
             $query->where("title",'like', '%' . $value . '%');
         }
     }
-
-    public function searchLanguageAttr($query, $value, $array)
-    {
-        $query->where("language", request()->lang);
-    }
     
     public function searchStatusAttr($query, $value, $array)
     {
@@ -54,7 +49,7 @@ class Catalog extends Model
 
     public function getUrlAttr($value, $array)
     {
-        return $array['links_type'] === 1 ? Url::getLinkUrl($array['links_value'], false) : Url::getCatalogUrl($array, $array['language'], false);
+        return $array['links_type'] === 1 ? Url::appoint($array['links_value'], false) : Url::catalog($array, false);
     }
 
     public function getCTypeAttr($value, $array) 

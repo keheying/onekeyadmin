@@ -18,7 +18,7 @@ class File
     protected $cacheFile;
 
     /**
-     * 写入编译缓存
+     * 写入编译缓存(修改底层)
      * @access public
      * @param  string $cacheFile 缓存的文件名
      * @param  string $content 缓存的内容
@@ -26,7 +26,7 @@ class File
      */
     public function write(string $cacheFile, string $content): void
     {
-        // 修改底层(前端模板缓存路径)
+        // (前端模板缓存路径)
         if (App('http')->getName() === 'index') {
             $cacheFile = str_replace(basename($cacheFile), theme() . DIRECTORY_SEPARATOR . basename($cacheFile), $cacheFile);
         }
@@ -50,7 +50,7 @@ class File
      */
     public function read(string $cacheFile, array $vars = []): void
     {
-        // 修改底层(前端模板缓存路径)
+        // (前端模板缓存路径)
         if (App('http')->getName() === 'index') {
             $this->cacheFile = str_replace(basename($cacheFile), theme() . DIRECTORY_SEPARATOR . basename($cacheFile), $cacheFile);
         } else {
@@ -73,7 +73,7 @@ class File
      */
     public function check(string $cacheFile, int $cacheTime): bool
     {
-        // 修改底层(前端模板缓存路径)
+        // (前端模板缓存路径)
         if (App('http')->getName() === 'index') {
             $cacheFile = str_replace(basename($cacheFile), theme() . DIRECTORY_SEPARATOR . basename($cacheFile), $cacheFile);
         }

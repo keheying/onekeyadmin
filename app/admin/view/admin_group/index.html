@@ -1,4 +1,4 @@
-{include file="$header"}
+{include file="common/header"}
 <div id="app" v-cloak>
     <el-curd 
         :field="field" 
@@ -30,7 +30,7 @@
                     {
                         prop: 'status', 
                         label: '状态',  
-                        table: {prop: 'c_status', sort: true},
+                        table: {is: 'el-switch', sort: true},
                         form: {
                             is: 'el-switch', 
                             default: 1,
@@ -54,4 +54,4 @@
         },
     })
 </script>
-{include file="$footer"}
+{include file="common/footer"}

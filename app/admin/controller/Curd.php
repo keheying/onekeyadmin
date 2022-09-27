@@ -10,9 +10,9 @@
 // +----------------------------------------------------------------------
 namespace app\admin\controller;
 
+use onekey\File;
 use think\facade\Db;
 use think\facade\View;
-use app\addons\File;
 use app\admin\BaseController;
 use app\admin\model\Curd as CurdModel;
 /**
@@ -30,7 +30,7 @@ class Curd extends BaseController
             $data   = CurdModel::withSearch(['keyword'], $input)->order('sort', 'desc')->select();
             return json(['status' => 'success', 'message' => '获取成功', 'data' => $data, 'publicMenu' => $this->request->publicMenu]);
         } else {
-            $result = api_post('token/sqlTable');
+            $result = api_post('tokenSystem/table');
             if ($result['status'] === 'success') {
                 $table = array_column(Db::query('SHOW TABLES'),'Tables_in_'.env('database.database'));
                 $data  = [];
@@ -82,8 +82,13 @@ class Curd extends BaseController
                         $field = [];
                         foreach ($props as $key => $prop) {
                             $field[$key]['is']          = 'el-input';
+                            $field[$key]['key']         = $prop['Key'];
                             $field[$key]['prop']        = $prop['Field'];
-                            $field[$key]['label']       = empty($prop['Comment']) ? $prop['Field'] : $prop['Comment'];
+                            if ($prop['Key'] === 'PRI') {
+                                 $field[$key]['label']  = '主键';
+                            } else {
+                                $field[$key]['label']   = empty($prop['Comment']) ? $prop['Field'] : $prop['Comment'];
+                            }
                             $field[$key]['colMd']       = '';
                             $field[$key]['default']     = '';
                             $field[$key]['placeholder'] = '';
@@ -95,7 +100,7 @@ class Curd extends BaseController
                             $field[$key]['required']    = false;
                             $field[$key]['pattern']     = '';
                             $field[$key]['disabled']    = false;
-                            $field[$key]['formShow']    = true;
+                            $field[$key]['formShow']    = $prop['Key'] === 'PRI' ? false : true;
                             $field[$key]['tableWidth']  = 0;
                             $field[$key]['tableBind']   = [];
                             $field[$key]['tableSort']   = true;
@@ -128,9 +133,6 @@ class Curd extends BaseController
                     }
                 }
             }
-            $result = api_post('token/plugins');
-            $names  = $result['status'] === 'success' ? $result['data'] : [];
-            View::assign('names', $names);
             return View::fetch();
         }
     }
@@ -184,12 +186,9 @@ class Curd extends BaseController
                 File::create($pluginPath . "admin/view/$viewPath/index.html", $adminView); // 可重复创建
                 if (! is_file($pluginPath . "admin/controller/$class.php")) File::create($pluginPath . "admin/controller/$class.php", $adminController);
                 if (! is_file($pluginPath . "admin/model/$class.php")) File::create($pluginPath . "admin/model/$class.php", $admminModel);
-                // 前台
-                $indexView = "{include file='common/header'}\n请编写您的视图，头尾文件是引入当前默认主题的，你也可以不使用\n{include file='common/footer'}";
-                if (! is_file($pluginPath . "index/view/catalog/".$viewPath.".html")) File::create($pluginPath . "index/view/catalog/".$viewPath.".html", $indexView);
-                if (! is_file($pluginPath . "index/view/single/".$viewPath.".html")) File::create($pluginPath . "index/view/single/".$viewPath.".html", $indexView);
-                if (! is_file($pluginPath . "index/controller/$class.php")) File::create($pluginPath . "index/controller/$class.php", $indexController);
-                if (! is_file($pluginPath . "index/model/$class.php")) File::create($pluginPath . "index/model/$class.php", $indexModel);
+                // API
+                if (! is_file($pluginPath . "api/controller/$class.php")) File::create($pluginPath . "api/controller/$class.php", $indexController);
+                if (! is_file($pluginPath . "api/model/$class.php")) File::create($pluginPath . "api/model/$class.php", $indexModel);
                 // 菜单
                 array_push($menuChildren,
                 [
@@ -237,11 +236,23 @@ class Curd extends BaseController
             [
         		'title'    => $input['title'],
         		'path'     => $input['name'],
+                'icon'     => 'menu.png',
         		'ifshow'   => 1,
         		'children' => $menuChildren
             ];
             File::create($pluginPath.'menu.php', "<?php\nreturn ".var_export($pluginMenu,true).";");
             return json(['status' => 'success','message' => '一键生成插件成功']);
+        }
+    }
+    
+    /**
+     * 删除指定资源
+     */
+    public function delete()
+    {
+        if ($this->request->isPost()) {
+            CurdModel::destroy(input('post.ids'));
+            return json(['status' => 'success', 'message' => '删除成功']);
         }
     }
 }

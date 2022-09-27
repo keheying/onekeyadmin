@@ -11,17 +11,15 @@
 declare (strict_types = 1);
 
 namespace app\admin\middleware;
-
-use app\admin\addons\User;
 /**
- * 环境检查
+ * 环境检测
  */
 class AppCheck
 {
     public function handle($request, \Closure $next)
     {
-        // 自动登录
-        $request->userInfo = User::checkAutomaticLogin();
+        // 是否安装
+        if (! is_file(root_path().'.env')) return redirect(request()->root(true) . '/install/index/index');
         // 系统信息
         $pathinfo = str_replace('.html', '', $request->pathinfo());
         $request->path = empty($pathinfo) ? 'index/index' : $pathinfo;
@@ -38,8 +36,11 @@ class AppCheck
             $request->pluginNamespace = "$request->pluginRoute\controller\\".ucfirst($request->pluginClass); //命名空间
             $request->authorityPath   = $request->pluginPath;
         }
-        // 钩子
+        // 用户信息
+        $request->userInfo = session('admin');
+        // 绑定事件
         event('AppCheck', $request);
+        // 下一步
         return $next($request);
     }
 }

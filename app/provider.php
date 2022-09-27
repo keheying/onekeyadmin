@@ -1,10 +1,6 @@
 <?php
-use app\ExceptionHandle;
-use app\Request;
-
 // 容器Provider定义文件
 return [
-    'think\Request'          => Request::class,
-    'think\exception\Handle' => ExceptionHandle::class,
-    'think\Paginator'        => 'app\index\addons\Bootstrap'
+    'think\Paginator' => \onekey\ThinkPaginator::class,
+    'think\View'      => \onekey\ThinkView::class,
 ];

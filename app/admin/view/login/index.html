@@ -1,21 +1,17 @@
-{include file="$header"}
+{include file="common/header"}
 <div id="app" v-cloak>
     <div class="el-login-wrapper">
         <div class="container">
             <div class="side">
                 <div class="logo">
-                    <img src="/admin/images/logo.png">
+                    <img src="/admin/images/logo_site.png">OneKeyAdmin
                 </div>
-                <div class="comments">
-                框架易于功能扩展，代码维护，方便二次开发，帮助开发者简单高效降低二次开发成本，满足专注业务深度开发的需求。
-                架构科学，轻松支持上千万数据、千万PV；支持全站静态化，动态页面局部静态化等为您快速建站，也是企业级项目产品原型的良好选择。
-                插件应用与界面主题一键式开发程序，他将是您轻松建站的首选利器。
-                </div>
+                <div class="comments">基于Thinkphp6+Element的通用后台开发框架。一键安装插件/一键安装模板/一键生成代码/一键生成菜单权限/一键生成API接口， 网站、小程序、APP、ERP一个后台框架统统搞定！</div>
                 <div class="footer">
                     <a href="{:config('app.api')}" target="_blank">©&nbsp;onekeyadmin.com&nbsp;</a>
                     <a href="{:config('app.api')}/blog.html" target="_blank">论坛专区</a>
                     <a href="{:config('app.api')}/docs.html" target="_blank">帮助文档</a>
-                    <a href="{:config('app.api')}/api/user/developer.html" target="_blank">认证成为开发者</a>
+                    <a href="{:config('app.api')}/onekey/userDeveloper/index" target="_blank">认证成为开发者</a>
                 </div>
             </div>
             <div class="form">
@@ -37,9 +33,6 @@
                         <el-form-item prop="loginPassword">
                             <el-input v-model="loginForm.loginPassword" prefix-icon="el-icon-key" placeholder="请输入密码" show-password @keyup.enter.native="getCaptcha()">
                             </el-input>
-                        </el-form-item>
-                        <el-form-item prop="checked">
-                            <el-checkbox v-model="loginForm.checked">两周内自动登录</el-checkbox>
                         </el-form-item>
                         <el-button @click="getCaptcha()" :loading="loading" plain>
                             登录
@@ -65,7 +58,6 @@
                     loginAccount: "",
                     loginPassword: "",
                     captcha: "",
-                    checked: false,
                 },
                 rules: {
                     loginAccount: [
@@ -87,7 +79,7 @@
             getCaptcha() {
                 let self = this;
                 request.post('login/isNeedVerification', {}, function(res){
-                    let link  = url('login/verify');
+                    let link  = admin_url('login/verify');
                     let param = link.indexOf('?') === -1 ? '?' : '&';
                     self.captcha = res.status === 'error' ? link + param + Math.random() : '';
                     self.$refs.loginForm.validate((valid) => {
@@ -112,7 +104,7 @@
                 request.post('login/index', self.loginForm, function (res){
                     self.loading = false;
                     if(res.status === 'success'){
-                        location.href = res.url;
+                        top.location.href = admin_url();
                     } else {
                         self.captchaShow = false;
                         self.loginForm.captcha = "";
@@ -123,4 +115,4 @@
         },
     })
 </script>
-{include file="$footer"}
+{include file="common/footer"}

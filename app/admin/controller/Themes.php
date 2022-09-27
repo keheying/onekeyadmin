@@ -10,8 +10,8 @@
 // +----------------------------------------------------------------------
 namespace app\admin\controller;
 
+use onekey\File;
 use think\facade\View;
-use app\addons\File;
 use app\admin\BaseController;
 use app\admin\model\Catalog;
 use app\admin\model\Themes as ThemesModel;
@@ -31,7 +31,7 @@ class Themes extends BaseController
             if ($input['install'] == 1) {
                 $input['name'] = array_column($list, 'name');
             }
-            $result = api_post('themes/catalog', $input);
+            $result = api_post('tokenThemes/index', $input);
             if ($result['status'] === 'success') {
                 $count = $result['count'];
                 $data  = $result['data'];
@@ -59,7 +59,7 @@ class Themes extends BaseController
             }
         } else {
             // 分类
-            $result = api_post('token/themesClass');
+            $result = api_post('tokenThemes/catalog');
             View::assign([
                 'install' => $list,
                 'catalog' => $result['status'] === 'success' ? $result['data'] : [],
@@ -105,7 +105,7 @@ class Themes extends BaseController
     public function createOrder()
     {
         if ($this->request->isPost()) {
-            $result = api_post('token/themesCreateOrder', input('post.'));
+            $result = api_post('tokenThemes/orderCreate', input('post.'));
             return json($result);
         }
     }
@@ -116,7 +116,7 @@ class Themes extends BaseController
     public function statusOrder()
     {
         if ($this->request->isPost()) {
-            $result = api_post('token/themesOrderSingle', input('post.'));
+            $result = api_post('tokenThemes/orderDetails', input('post.'));
             return json($result);
         }
     }
@@ -127,7 +127,7 @@ class Themes extends BaseController
     public function payMethod()
     {
         if ($this->request->isPost()) {
-            $result = api_post('token/themesPayMethod', input('post.'));
+            $result = api_post('tokenThemes/payMethod', input('post.'));
             return json($result);
         }
     }
@@ -139,7 +139,7 @@ class Themes extends BaseController
     {
         if ($this->request->isPost()) {
             $input  = input('post.');
-            $result = api_post('token/themesInstall', $input);
+            $result = api_post('tokenThemes/install', $input);
             if ($result['status'] === 'success') {
                 $zip     = base64_decode($result['data']['zip']);
                 $path    = theme_path() . $input['name'] . '/';
@@ -158,6 +158,7 @@ class Themes extends BaseController
                 $default = $result['data']['catalog'];
                 $saveAll = [];
                 foreach ($default as $key => $val) {
+                    $val['group_id'] = $val['group_id'] ? array_map('intval', explode(',', $val['group_id'])) : [];
                     unset($val['id']);
                     array_push($saveAll, $val);
                 }
@@ -181,6 +182,9 @@ class Themes extends BaseController
                     }
                 }
                 ThemesModel::create($info);
+                // 清除缓存
+                cache('theme_' . $info['name'], null);
+                cache('catalog_' . $info['name'], null);
                 return json(['status' => 'success', 'message' => '安装成功']);
             } else {
                 return json($result);

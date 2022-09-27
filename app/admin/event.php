@@ -2,35 +2,26 @@
 // +----------------------------------------------------------------------
 // | 事件
 // +----------------------------------------------------------------------
-
-// 系统
-$systemListen = [
+$listen = [
     'AppInit'     => [],
     'HttpRun'     => [],
     'HttpEnd'     => [],
     'LogWrite'    => [],
     'RouteLoaded' => [],
-];
-// 插件
-$pluginListen = [
-    // 检查完毕
-    'EndCheck'   => [],
+    // 中间件环境检测
+    'AppCheck'  => [],
     // 控制台 
-    'Console'    => [],
-    // 上传结束
-    'UploadEnd'  => [],
-    // 登录视图
-    'LoginView'  => [],
-    // 登录结束
-    'LoginEnd'   => [],
-    // 会员配置
-    'UserConfig' => [],
+    'Console'   => [],
+    // 文件上传结束
+    'UploadEnd' => [],
+    // 頁面检测
+    'HtmlCheck'    => [],
 ];
-foreach ($pluginListen as $handle => $listen) {
+foreach ($listen as $handle => $value) {
     foreach (plugin_list() as $key => $plugin) {
         $path = $plugin['name'] . '/admin/listen/' . $handle;
         if (is_file(plugin_path() . $path  . '.php')) {
-            array_push($pluginListen[$handle], 'plugins\\' . str_replace('/', '\\', $path));
+            array_push($listen[$handle], 'plugins\\' . str_replace('/', '\\', $path));
         }
     }
 }
@@ -39,7 +30,7 @@ $list = [
     // 绑定事件
     'bind'      => [],
     // 监听事件
-    'listen'    => array_merge($systemListen, $pluginListen),
+    'listen'    => $listen,
     // 订阅事件
     'subscribe' => [],
 ];

@@ -86,39 +86,6 @@ class View extends Manager
      */
     public function fetch(string $template = '', array $vars = []): string
     {
-        // 修改底层（前端fetch）
-        if (App('http')->getName() === 'index') {
-            $viewName = strtolower(preg_replace('/(?<=[a-z])([A-Z])/','_$1', $template));
-            // 详情页或分类页，模板文件可绑定路由
-            if ($template != '404' && $template != '403') {
-                $action = input('action');
-                if ($action === 'catalog' || $action === 'single') {
-                    $viewName = input('action') . '/' . input('class');
-                    if (request()->catalog['type'] !== 'page' && request()->catalog['bind_html'] !== '') {
-                        $viewName = $action . '/' . request()->catalog['bind_html'];
-                    }
-                }
-            }
-            // 正常情况下
-            $template = theme_now_view() . $viewName .'.html';
-            if (! is_file($template) && ! empty(input('plugin'))) {
-                $pluginName    = input("plugin"); // 插件名
-                $pluginRoute   = "plugins\\$pluginName\index"; //插件路径
-                $template      = str_replace('\\', '/', public_path() . "$pluginRoute\\view\\$viewName.html");
-            }
-        }
-        // 修改底层（后端fetch）
-        if (App('http')->getName() === 'admin') {
-            if (request()->path === 'plugins') {
-                if (strstr($template,'403.html') === false && strstr($template,'404.html') === false) {
-                    $pluginClass  = request()->pluginClass;
-                    $pluginRoute  = request()->pluginRoute;
-                    $pluginAction = strtolower(preg_replace('/(?<=[a-z])([A-Z])/','_$1', request()->pluginAction));
-                    $pluginView   = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_$1', $pluginClass));
-                    $template     = str_replace('\\', '/', public_path() . "$pluginRoute\\view\\$pluginView\\$pluginAction.html");
-                }
-            }
-        }
         return $this->getContent(function () use ($vars, $template) {
             $this->engine()->fetch($template, array_merge($this->data, $vars));
         });

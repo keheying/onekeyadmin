@@ -47,22 +47,14 @@ abstract class BaseController
     protected function initialize()
     {
         View::assign([
-            'theme'         => theme(),
-            'language'      => $this->request->lang,
-            'searchCatalog' => $this->request->searchCatalog,
+            'label'         => $this->request->label,
             'system'        => $this->request->system,
+            'crumbs'        => $this->request->crumbs,
+            'pathinfo'      => $this->request->pathinfo,
             'catalog'       => $this->request->catalog,
-            'catalogNum'    => $this->request->catalogNum,
             'catalogList'   => $this->request->catalogList,
-            'catalogIndex'  => $this->request->catalogIndex,
             'catalogHeader' => $this->request->catalogHeader,
             'catalogFooter' => $this->request->catalogFooter,
-            'userInfo'      => $this->request->userInfo,
-            'langAllow'     => $this->request->langAllow,
-            'langDefault'   => config('lang.default_lang'),
-            'isMobile'      => $this->request->isMobile(),
-            'header'        => theme_now_view() . 'common/header.html',
-            'footer'        => theme_now_view() . 'common/footer.html',
         ]);
     }
 }

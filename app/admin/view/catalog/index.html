@@ -1,14 +1,13 @@
-{include file="$header"}
+{include file="common/header"}
 <div id="app" v-cloak>
     <el-curd
         :field="field"
-        :copy-multiple="false"
         :table-sort="{prop: 'sort', order: 'desc'}"
         :search-date="false"
         :search-status="[{label: '正常', value: 1}, {label: '屏蔽', value: 0}]"
         :table-operation-width="250"
+        :table-operation-copy="true"
         form-label-width="100px"
-        variable="catalog"
         table-tree
         table-export
         preview>
@@ -100,7 +99,8 @@
                                 table: false,
                                 form: {
                                     rules: [
-                                        {pattern:  /^[A-Za-z0-9-\" "]+$/ig,message: '只能输入字母、数字、空格、破折号-'},
+                                        {pattern:  /^[A-Za-z0-9-\" "]+$/ig, message: '只能输入字母、数字、空格、破折号-'},
+                                        {relationRequired: [{prop: 'type', value: 'page'}], message: '当前类型为页面时，必须输入路由'}
                                     ],
                                     relation: [{prop: 'links_type', value: 0}],
                                     placeholder: '当类型为页面时，会自动生成模板文件',
@@ -120,7 +120,7 @@
                             },
                             {
                                 prop: 'group_id', 
-                                label: '阅读权限',
+                                label: '权限',
                                 table: {prop: 'group_title'},
                                 table: false,
                                 form: {
@@ -133,6 +133,30 @@
                                     multiple: true,
                                     relation: [{prop: 'links_type', value: 0}],
                                     placeholder: '不设置权限则留空',
+                                    colMd: 12,
+                                },
+                            },
+                            {
+                                prop: 'links_type', 
+                                label: '链接', 
+                                table: false,
+                                form: {
+                                    is: 'el-select',
+                                    default: 0, 
+                                    child: {
+                                        value:[{label:'默认', value: 0}, {label:'指定',value: 1}]
+                                    },
+                                    colMd: 12,              
+                                }
+                            },
+                            {
+                                prop: 'links_value',
+                                label: '指定', 
+                                table: false,
+                                form: {
+                                    is:'el-link-select', 
+                                    default: {},
+                                    relation: [{prop: 'links_type', value: 1}],
                                     colMd: 12,
                                 },
                             },
@@ -153,37 +177,9 @@
                                 table: {sort: true},
                             },
                             {
-                                prop: 'num', 
-                                label: '标识', 
-                                table: {sort: true},
-                                form: {colMd: 12,}
-                            },
-                            {
-                                prop: 'links_type', 
-                                label: '链接', 
-                                table: false,
-                                form: {
-                                    is: 'el-select',
-                                    default: 0, 
-                                    child: {
-                                        value:[{label:'默认', value: 0}, {label:'指定',value: 1}]
-                                    },              
-                                }
-                            },
-                            {
-                                prop: 'links_value',
-                                label: '指定', 
-                                table: false,
-                                form: {
-                                    is:'el-link-select', 
-                                    default: {},
-                                    relation: [{prop: 'links_type', value: 1}],
-                                },
-                            },
-                            {
                                 prop: 'status',
                                 label: '状态',  
-                                table: {prop: 'c_status', sort: true},
+                                table: {is: 'el-switch', sort: true},
                                 form: {
                                     is: 'el-switch',
                                     default: 1, 
@@ -192,7 +188,7 @@
                             },
                             {
                                 prop: 'mobile', 
-                                label: '手机',  
+                                label: '手机显示',  
                                 table: false,
                                 form: {
                                     is: 'el-switch',
@@ -202,7 +198,7 @@
                             },
                             {
                                 prop: 'blank', 
-                                label: '新窗口',  
+                                label: '新窗口打开',  
                                 table: false,
                                 form: {
                                     is: 'el-switch',
@@ -275,4 +271,4 @@
         },
     })
 </script>
-{include file="$footer"}
+{include file="common/footer"}

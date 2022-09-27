@@ -36,12 +36,7 @@ class AdminGroup extends Model
     {
         return $value === '*' ? $value : explode(',', $value);
     }
-
-    public function getCStatusAttr($value, $array)
-    {
-        return $array['status'] === 1 ? '正常' : '屏蔽';
-    }
-
+    
     // 修改器
     public function setRoleAttr($value, $array)
     {

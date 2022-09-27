@@ -10,21 +10,37 @@
 // +----------------------------------------------------------------------
 namespace app\index\controller;
 
-use think\facade\View;
 use app\index\BaseController;
 /**
 * 插件跳转
 */
 class Plugins extends BaseController
 {
-	public function index()
+    /**
+    * 插件控制器中间件
+    */
+    protected $middleware = [];
+    
+    protected function initialize()
     {
+        parent::initialize();
         $plugin = input("plugin");
         $action = input('action');
         $class  = ucwords(str_replace('_', ' ', input('class')));
         $class  = str_replace(' ','',lcfirst($class));
-        $class = ucfirst($class);
-        $namespace = "plugins\\$plugin\index\controller\\".$class;
-        return method_exists($namespace, $action) ? app($namespace)->$action() : abort(404);
+        $class  = ucfirst($class);
+        // 当前访问类
+        $this->namespace = "plugins\\$plugin\index\controller\\".$class;
+        // 替换中间件
+        $this->middleware = property_exists(app($this->namespace),'middleware') ? app($this->namespace)->middleware : [];
+    }
+    
+    /**
+    * 插件跳转
+    */
+	public function index()
+    {
+        $action = input('action');
+        return method_exists($this->namespace, $action) ? app($this->namespace)->$action() : abort(404);
     }
 }

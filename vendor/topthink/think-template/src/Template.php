@@ -1214,8 +1214,6 @@ class Template
                 //支持加载变量文件名
                 $templateName = $this->get(substr($templateName, 1));
             }
-
-            // 修改底层（引入模板）
             if (!empty($templateName)) {
                 $template = $this->parseTemplateFile($templateName);
                 if ($template) {
@@ -1229,7 +1227,7 @@ class Template
     }
 
     /**
-     * 解析模板文件名
+     * 解析模板文件名(修改底层)
      * @access private
      * @param  string $template 文件名
      * @return string
@@ -1239,13 +1237,30 @@ class Template
         if ('' == pathinfo($template, PATHINFO_EXTENSION)) {
 
             if (0 !== strpos($template, '/')) {
-                $template = str_replace(['/', ':'], $this->config['view_depr'], $template);
+                $viewName = str_replace(['/', ':'], $this->config['view_depr'], $template);
             } else {
-                $template = str_replace(['/', ':'], $this->config['view_depr'], substr($template, 1));
+                $viewName = str_replace(['/', ':'], $this->config['view_depr'], substr($template, 1));
             }
-            // 修改底层（前端路径改为主题路径）
-            $view_path = app('http')->getName() === 'index' ? theme_now_view() : $this->config['view_path'];
-            $template = $view_path . $template . '.' . ltrim($this->config['view_suffix'], '.');
+            // 前端引入
+            if (App('http')->getName() === 'index') {
+                $template = theme_now_view() . $viewName . '.html';
+                if (! is_file($template) && ! empty(input('plugin'))) {
+                    $pluginName    = input("plugin"); // 插件名
+                    $pluginRoute   = "plugins\\$pluginName\index"; //插件路径
+                    $template      = str_replace('\\', '/', public_path() . "$pluginRoute\\view\\$viewName.html");
+                }
+            }
+            // 后端引入
+            if (App('http')->getName() === 'admin') {
+                $template = $this->config['view_path'] . $viewName . '.html';
+                if (! is_file($template) && ! empty(input('plugin'))) {
+                    $pluginClass  = request()->pluginClass;
+                    $pluginRoute  = request()->pluginRoute;
+                    $pluginAction = strtolower(preg_replace('/(?<=[a-z])([A-Z])/','_$1', request()->pluginAction));
+                    $pluginView   = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_$1', $pluginClass));
+                    $template     = str_replace('\\', '/', public_path() . "$pluginRoute\\view\\$viewName.html");
+                }
+            }
         }
         if (is_file($template)) {
             // 记录模板文件的更新时间

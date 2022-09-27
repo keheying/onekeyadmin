@@ -25,46 +25,11 @@ class Config extends BaseController
      */
     public function index()
     {
-        // 基础配置
-        $system = ConfigModel::getVal('system_' . $this->request->lang);
-        $system = $system ? $system : [
-            'company'         => '', 
-            'email'           => '', 
-            'telephone'       => '', 
-            'phone'           => '', 
-            'fax'             => '',
-            'wechat'          => '',
-            'qq'              => '',
-            'address'         => '',
-            'business_hours'  => '',
-            'ico'             => '',
-            'logo'            => '',
-            'copy_logo'       => '',
-            'wechat_qrcode'   => '',
-            'copyright'       => '',
-            'seo_title'       => '',
-            'seo_keywords'    => '',
-            'seo_description' => '',
-            'icp'             => ''
-        ];
-        // 会员配置-钩子
-        $object = (object)[];
-        $object->userConfig = ConfigModel::getVal('user');
-        if (! $object->userConfig) {
-            $object->userConfig = [];
-        }
-        event('UserConfig', $object);
-        // 主题配置
-        $theme = Themes::where('name', theme())->field('name,title,config')->find()->toArray();
-        $value = ConfigModel::getVal('theme_' . $theme['name'] . '_' . request()->lang);
-        foreach ($theme['config'] as $key => $val) {
-            $theme['config'][$key]['type']['value'] = isset($value[$val['field']]) ? $value[$val['field']] : $val['type']['value'];
-        }
+        $theme = Themes::where('name', theme())->field('name,title,config')->find();
         View::assign([
-            'email'  => ConfigModel::getVal('email'),
-            'system' => $system,
-            'user'   => $object->userConfig,
             'theme'  => $theme,
+            'email'  => ConfigModel::getVal('email'),
+            'system' => ConfigModel::getVal('system'),
             'themes' => Themes::select(),
             'upload' => [
                 'admin' => include(root_path().'app/admin/config/upload.php'),
@@ -86,10 +51,7 @@ class Config extends BaseController
                     $msg = ConfigModel::setVal($input['name'],$input['title'], $input['value']);
                     break;
                 case 'system':
-                    $msg = ConfigModel::setVal($input['name'] . '_' . $this->request->lang,$input['title'], $input['value']);
-                    break;
-                case 'user':
-                    $msg = ConfigModel::setVal($input['name'], $input['title'], $input['value']);
+                    $msg = ConfigModel::setVal($input['name'],$input['title'], $input['value']);
                     break;
                 case 'upload':
                     file_put_contents(root_path().'app/index/config/upload.php', "<?php\nreturn ".var_export($input['value']['index'],true).";");
@@ -97,16 +59,9 @@ class Config extends BaseController
                     $msg = ['status' => 'success', 'message' => '修改成功'];
                     break;
                 default:
-                    $value = [];
-                    foreach ($input['value'] as $key => $val) {
-                        $value[$val['field']] = $val['type']['value'];
-                    }
-                    $name = 'theme_' . $input['name'] . '_' . $this->request->lang;
-                    $msg  = ConfigModel::setVal($name, $input['title'], $value);
-                    if ($msg['status'] === 'success') {
-                        Themes::update(['config' => $input['value']], ['name' => $input['name']]);
-                        cache('themes_' . $input['name'], null);
-                    }
+                    Themes::update(['config' => $input['value']], ['name' => $input['name']]);
+                    cache('theme_'.$input['name'], null);
+                    $msg = ['status' => 'success', 'message' => '修改成功'];
                     break;
             }
             return json($msg);
@@ -127,11 +82,7 @@ class Config extends BaseController
         } else {
             $exist = Db::query("SHOW TABLES LIKE 'mk_".$input['table']."'");
             if (! empty($exist)) {
-                // 多语言
                 $field = Db::query("SHOW COLUMNS FROM mk_".$input['table']."");
-                if (in_array('language', array_column($field, 'Field'))) {
-                    $where[] = ['language', '=', $this->request->lang];
-                }
                 // 模糊查找
                 if (! empty($input['keyword'])) {
                     $where[] = [implode('|', array_column($field, 'Field')), 'like', '%'.$input['keyword'].'%'];

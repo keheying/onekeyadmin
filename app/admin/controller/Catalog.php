@@ -10,9 +10,8 @@
 // +----------------------------------------------------------------------
 namespace app\admin\controller;
 
-use think\facade\Db;
+use onekey\File;
 use think\facade\View;
-use app\addons\File;
 use app\admin\BaseController;
 use app\admin\model\UserGroup;
 use app\admin\model\Catalog as CatalogModel;
@@ -27,12 +26,11 @@ class Catalog extends BaseController
     public function index()
     {
         if ($this->request->isPost()) {
-            $input = input('post.');
-            $data  = CatalogModel::withSearch(['keyword','language','status'], $input)
-            ->where('theme', theme())
-            ->append(['c_show','c_status','c_type','delete_disabled','url'])
-            ->order($input['prop'], $input['order'])
-            ->select();
+            $input  = input('post.');
+            $search = ['keyword','status'];
+            $append = ['c_show','c_type','delete_disabled','url'];
+            $order  = [$input['prop'] => $input['order']];
+            $data   = CatalogModel::withSearch($search, $input)->where('theme', theme())->append($append)->order($order)->select();
             return json(['status' => 'success', 'message' => '获取成功', 'data' => $data]);
         } else {
             $type[] = ['title' => '页面', 'catalog' => "page"];
@@ -56,7 +54,6 @@ class Catalog extends BaseController
             if (! empty($input['seo_url']) && $input['links_type'] === 0) {
                 $input['seo_url']  = strtolower(str_replace(' ', '-', trim($input['seo_url'])));
                 $where[] = ['seo_url', '=', $input['seo_url']];
-                $where[] = ['language', '=', $this->request->lang];
                 $where[] = ['theme', '=', theme()];
                 $where[] = ['links_type', '=', 0];
                 $isExist = CatalogModel::where($where)->value('id');
@@ -71,23 +68,21 @@ class Catalog extends BaseController
                 }
                 $file = theme_now_path() . str_replace('-', '_', $input['seo_url']) . '.html';
                 if (! is_file($file)) {
-                    $fileContent = '{include file="$header"}'."\n\t".'{$catalog.content|raw}'."\n".'{include file="$footer"}';
-                    File::create($file, $fileContent);
+                    File::create($file, '{$catalog.content|raw}');
                 }
             }
             // 绑定模板
             if ($input['type'] !== 'page' && $input['links_type'] === 0 && $input['bind_html'] !== '') {
                 $singleFile = theme_now_path() .'single/'. str_replace('-', '_', $input['bind_html']) . '.html';
-                $catalogFile = theme_now_path() .'catalog/'. str_replace('-', '_', $input['bind_html']) . '.html';
+                $catalogFile = theme_now_path() .'list/'. str_replace('-', '_', $input['bind_html']) . '.html';
                 if (! is_file($singleFile)) File::create($singleFile);
                 if (! is_file($catalogFile)) File::create($catalogFile);
             }
             $input['level']    = $input['pid'] === 0 ? 1 : CatalogModel::where('id', $input['pid'])->value('level') + 1;
-            $input['language'] = $this->request->lang;
             $input['theme']    = theme();
             CatalogModel::create($input);
             // 清除缓存
-            cache('catalog_' . theme() . $this->request->lang, NULL);
+            cache('catalog_' . theme(), NULL);
             return json(['status' => 'success', 'message' => '新增成功']);
         }
     }
@@ -103,7 +98,6 @@ class Catalog extends BaseController
             if (! empty($input['seo_url']) && $input['links_type'] === 0) {
                 $input['seo_url'] = strtolower(str_replace(' ', '-', trim($input['seo_url'])));
                 $where[] = ['seo_url', '=', $input['seo_url']];
-                $where[] = ['language', '=', $this->request->lang];
                 $where[] = ['id', '<>', $input['id']];
                 $where[] = ['theme', '=', theme()];
                 $where[] = ['links_type', '=', 0];
@@ -125,20 +119,19 @@ class Catalog extends BaseController
                 }
                 $file = theme_now_path() . str_replace('-', '_', $input['seo_url']) . '.html';
                 $oldfile = theme_now_path() . str_replace('-', '_', $old) . '.html';
-                $fileContent = '{include file="$header"}'."\n\t".'{$catalog.content|raw}'."\n".'{include file="$footer"}';
-                is_file($oldfile) ? rename($oldfile, $file) : File::create($file,$fileContent);
+                is_file($oldfile) ? rename($oldfile, $file) : File::create($file, '{$catalog.content|raw}');
             }
             // 绑定模板
             if ($input['type'] !== 'page' && $input['links_type'] === 0 && $input['bind_html'] !== "") {
                 $singleFile = theme_now_path() .'single/'. str_replace('-', '_', $input['bind_html']) . '.html';
-                $catalogFile  = theme_now_path() .'catalog/'. str_replace('-', '_', $input['bind_html']) . '.html';
+                $catalogFile  = theme_now_path() .'list/'. str_replace('-', '_', $input['bind_html']) . '.html';
                 if (! is_file($singleFile)) File::create($singleFile);
                 if  (! is_file($catalogFile)) File::create($catalogFile);
             }
             $input['level']    = $input['pid'] === 0 ? 1 : CatalogModel::where('id', $input['pid'])->value('level') + 1;
             CatalogModel::update($input);
             // 清除缓存
-            cache('catalog_' . theme() . $this->request->lang, NULL);
+            cache('catalog_' . theme(), NULL);
             return json(['status' => 'success', 'message' => '修改成功']);
         }
     }
@@ -151,87 +144,8 @@ class Catalog extends BaseController
         if ($this->request->isPost()) {
             CatalogModel::recursiveDestroy(input('post.ids'));
             // 清除缓存
-            cache('catalog_' . theme() . $this->request->lang, NULL);
+            cache('catalog_' . theme(), NULL);
             return json(['status' => 'success', 'message' => '删除成功']);
-        }
-    }
-
-    /**
-     * 同步主语言数据
-     */
-    public function synchro()
-    {
-        if ($this->request->isPost()) {
-            $lang = $this->request->lang;
-            $default = CatalogModel::where('language', config('lang.default_lang'))->where('theme', theme())->select()->toArray();
-            $saveAll = [];
-            foreach ($default as $key => $val) {
-                $val['language'] = $lang;
-                unset($val['id']);
-                array_push($saveAll, $val);
-            }
-            Db::startTrans();
-            try {
-                CatalogModel::where('language', $lang)->delete();
-                $model = new CatalogModel;
-                $list  = $model->saveAll($saveAll)->toArray();
-                // 修改pid
-                foreach($default as $key => $val){
-                    if ($val['pid'] != 0) {
-                        $parent = array_search($val['pid'],array_column($default, 'id'));
-                        $pid = $list[$parent]['id'];
-                        $id  = $list[$key]['id'];
-                        CatalogModel::where('id', $id)->update(['pid' => $pid]);
-                    }
-                }
-                Db::commit();
-                // 清除缓存
-                cache('catalog_' . theme() . $this->request->lang, NULL);
-                return json(['status' => 'success', 'message' => '同步成功']);
-            } catch (\Exception $e) {
-                Db::rollback();
-                return json(['status' => 'error', 'message' => '同步失败']);
-            }
-            return json($result);
-        }
-    }
-
-    /**
-     * 复制到其它语言
-     */
-    public function copy() {
-        if ($this->request->isPost()) {
-            $input = input('post.');
-            $saveAll = [];
-            foreach ($input['rows'] as $key => $val) {
-                $val['language'] = $input['language'];
-                $val['pid'] = $input['catalog'];
-                unset($val['id'],$val['children']);
-                array_push($saveAll, $val);
-            }
-            Db::startTrans();
-            try {
-                $model = new CatalogModel;
-                $list  = $model->saveAll($saveAll)->toArray();
-                // 修改pid
-                foreach($input['rows'] as $key => $val){
-                    if ($val['pid'] != 0) {
-                        $parent = array_search($val['pid'],array_column($input['rows'], 'id'));
-                        if ($parent !== false) {
-                            $pid = $list[$parent]['id'];
-                            $id = $list[$key]['id'];
-                            CatalogModel::where('id',$id)->update(['pid' => $pid]);
-                        }
-                    }
-                }
-                Db::commit();
-                // 清除缓存
-                cache('catalog_' . theme() . $input['language'], NULL);
-                return json(['status' => 'success', 'message' => '复制成功']);
-            } catch (\Exception $e) {
-                Db::rollback();
-                return json(['status' => 'error', 'message' => '复制失败']);
-            }
         }
     }
 
@@ -241,8 +155,6 @@ class Catalog extends BaseController
     public function query() {
         if ($this->request->isPost()) {
             $input = input('post.');
-            $lang  = isset($input['lang']) ? $input['lang'] : $this->request->lang;
-            $where[] = ['language', '=', $lang];
             $where[] = ['status', '=', 1];
             $where[] = ['theme', '=', theme()];
             if (! empty($input['type'])) {

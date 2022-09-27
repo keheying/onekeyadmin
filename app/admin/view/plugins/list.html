@@ -1,4 +1,4 @@
-{include file="$header"}
+{include file="common/header"}
 <div id="app" v-cloak>
     <el-container class="el-layout el-plugin">
         <el-aside width="192px">
@@ -218,13 +218,8 @@
                             <li :class="{active: payMethod == 0}" @click="payMethodChange(0)"><img src="/admin/images/pay-ali.png"></li>
                             <li :class="{active: payMethod == 1}" @click="payMethodChange(1)"><img src="/admin/images/pay-wechat.png"></li>
                         </ul>
-                        <a href="{:config('app.api')}/plugins-agreement" target="_blank">使用前请仔细阅读《协议说明》</a>
+                        <a href="{:config('app.api')}/agreement-plugins" target="_blank">使用前请仔细阅读《协议说明》</a>
                     </div>
-                </div>
-            </el-tab-pane>
-            <el-tab-pane label="图文描述">
-                <div class="el-pane-warp">
-                    <div v-html="row.content"></div>
                 </div>
             </el-tab-pane>
             <el-tab-pane label="版本修订">
@@ -483,4 +478,4 @@
         }
     })
 </script>
-{include file="$footer"}
+{include file="common/footer"}

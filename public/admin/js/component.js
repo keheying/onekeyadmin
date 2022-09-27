@@ -4,10 +4,22 @@
 Vue.component('el-curd', {
     template: `
     <div class="el-curd">
-        <slot name="warp" v-bind="self"></slot>
-        <el-form ref="search" class="el-curd-header" size="small" :inline="true" :model="search" @submit.native.prevent>
+        <slot name="warp"></slot>
+        <el-form 
+            ref="search" 
+            class="el-curd-header" 
+            size="small" 
+            :inline="true" 
+            :model="search" 
+            @submit.native.prevent>
             <el-form-item class="el-button-form">
-                <el-button type="info" icon="el-icon-refresh" @click="refreshData()" v-if="searchRefresh">刷新</el-button>
+                <el-button 
+                    v-if="searchRefresh"
+                    type="info" 
+                    icon="el-icon-refresh" 
+                    @click="refreshData()">
+                    刷新
+                </el-button>
                 <el-button 
                     v-if="tableTree" :icon="expand ? 'el-icon-arrow-down' : 'el-icon-arrow-right'" 
                     @click="expandAll()">
@@ -15,38 +27,19 @@ Vue.component('el-curd', {
                 </el-button>
                 <el-button 
                     v-if="deleteAuthority" 
+                    :disabled="rows.length === 0"
                     type="danger" 
                     icon="el-icon-delete" 
-                    @click="removeData()" 
-                    :disabled="rows.length === 0">
+                    @click="removeData()">
                     删除
                 </el-button>
-                <el-button v-if="synchroAuthority" type="warning" icon="el-icon-warning-outline" @click="synchroData()">同步</el-button>
-                <el-button v-if="saveAuthority" type="primary" icon="el-icon-plus" @click="openData()">添加</el-button>
-                <el-popover v-if="copyAuthority" placement="top" width="200" v-model="copyVisible">
-                    <el-form :model="copyForm" :rules="copyRules" ref="copyForm" @submit.native.prevent>
-                        <el-form-item prop="language">
-                            <el-select v-model="copyForm.language" placeholder="请选择语言" 
-                                @change="copyLanguageSelect()">
-                                <template v-for="item in langAllow" :key="index">
-                                    <el-option v-if="item.name !== language" :label="item.title" :value="item.name"></el-option>
-                                </template>
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item v-if="copyCatalog.length > 0" prop="catalog">
-                            <el-select v-model="copyForm.catalog" placeholder="请选择父级" filterable :multiple="copyMultiple">
-                                <el-option label="顶级" value="">顶级</el-option>
-                                <el-option v-for="(item, index) in copyCatalog" :key="index" :label="item.title" :value="item.id">
-                                    <span v-html="item.treeString"></span>{{ item.title }}
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-form>
-                    <el-form-item>
-                        <el-button type="primary" @click="copyLanguageDetermine()" :loading="copyLoading">确定</el-button>
-                    </el-form-item>
-                    <el-button slot="reference" type="warning" size="small" icon="el-icon-document-copy" :disabled="rows.length === 0">复制到其它语言</el-button>
-                </el-popover>
+                <el-button 
+                    v-if="saveAuthority" 
+                    type="primary" 
+                    icon="el-icon-plus" 
+                    @click="openData()">
+                    添加
+                </el-button>
                 <el-dropdown v-if="tableExport" @command="exportData">
                     <el-button type="success" icon="el-icon-download">导出</el-button>
                     <el-dropdown-menu slot="dropdown">
@@ -56,7 +49,7 @@ Vue.component('el-curd', {
                         <el-dropdown-item command="txt">TXT</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
-                <slot name="button" v-bind="self"></slot>
+                <slot name="button"></slot>
             </el-form-item>
             <el-form-item prop="date" v-if="searchDate">
                 <el-date-picker 
@@ -82,7 +75,7 @@ Vue.component('el-curd', {
                 </el-input>
             </el-form-item>
             <el-form-item prop="catalog" v-if="searchCatalog.length > 0">
-                <el-select v-model="search.catalog" placeholder="查看所有分类目录" @change="searchData()" filterable>
+                <el-select v-model="search.catalog" placeholder="查看所有分类" @change="searchData()" filterable>
                     <el-option label="全部分类" value=""></el-option>
                     <el-option v-for="(item, index) in searchCatalog" :key="index" :label="item.title" :value="item.id">
                         <span v-html="item.treeString"></span>{{ item.title }}
@@ -95,12 +88,12 @@ Vue.component('el-curd', {
                     <el-option v-for="(item, index) in searchStatus" :key="index" :label="item.label" :value="item.value"></el-option>
                 </el-select>
             </el-form-item>
-            <slot name="search" v-bind="self"></slot>
+            <slot name="search"></slot>
         </el-form>
         <el-table 
             ref="table"
-            row-key="id"
             v-loading="loading"
+            :row-key="rowKey"
             :class="{'el-tree-table': tableTree}"
             :data="table"
             :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
@@ -111,52 +104,56 @@ Vue.component('el-curd', {
             @select-all="selectAll"
             @selection-change="selectionChange"
             @sort-change="sortChange">
-            <el-table-column type="selection" width="55" :selectable="selectableDisabled" v-if="tableSelection"></el-table-column>
+            <el-table-column v-if="tableSelection" type="selection" width="55" :selectable="selectableDisabled"></el-table-column>
             <template v-for="(item, index) in column">
                 <el-table-column
                     :key="index"
                     :prop="item.prop" 
+                    :width="item.table.width" 
                     :label="typeof item.table.label !== 'undefined' ? item.table.label : item.label" 
-                    :width="typeof item.table.width === 'undefined' ? '' : item.table.width" 
-                    :sortable="typeof item.table.sort === 'undefined' || item.table.sort === false ? false : 'custom'"
-                    :type="typeof item.table.expand !== 'undefined' && item.table.expand ? 'expand' : undefined">
+                    :type="typeof item.table.expand !== 'undefined' && item.table.expand ? 'expand' : undefined"
+                    :sortable="typeof item.table.sort !== 'undefined' && item.table.sort ? 'custom' : false">
                     <template slot-scope="scope">
-                        <template v-if="item.table.is === 'image'">
-                            <el-image 
-                                :src="scope.row[item.prop]" 
-                                :preview-src-list="[scope.row[item.prop]]">
-                                <div slot="error" class="image-slot">
-                                    <img class="error-image" src="/admin/images/error.png"/>
-                                </div>
-                            </el-image>
+                        <el-image 
+                            v-if="item.table.is === 'image'"
+                            :src="scope.row[item.prop]" 
+                            :preview-src-list="[scope.row[item.prop]]">
+                            <div slot="error" class="image-slot">
+                                <img class="error-image" src="/admin/images/error.png"/>
+                            </div>
+                        </el-image>
+                        <template 
+                            v-if="item.table.is === 'object' && scope.row[item.prop] != null">
+                            <div 
+                                v-for="(child, index) in item.table.child" 
+                                :key="index" 
+                                v-html="typeof item.table.prop === 'undefined' ? scope.row[item.prop][child] : scope.row[item.table.prop][child]">
+                            </div>
                         </template>
-                        <template v-else-if="item.table.is === 'object' && scope.row[item.prop] != null">
-                            <div v-for="(child, index) in item.table.child" :key="index" v-html="typeof item.table.prop === 'undefined' ? scope.row[item.prop][child] : scope.row[item.table.prop][child]"></div>
-                        </template>
-                        <template v-else-if="item.table.is === 'text'">
-                            <span>{{typeof item.table.prop === 'undefined' ? scope.row[item.prop] : scope.row[item.table.prop]}}</span>
-                        </template>
-                        <template v-else-if="item.table.is === 'el-switch'">
-                            <el-switch
-                                v-model="scope.row[item.prop]"
-                                :active-value="1"
-                                :inactive-value="0"
-                                :disabled="scope.row.disabled"
-                                @change="oneKeyData(scope.row)">
-                            </el-switch>
-                        </template>
-                        <template v-else-if="item.table.is === 'el-input'">
-                            <el-input 
-                                class="el-curd-table-input" 
-                                v-model="scope.row[item.prop]" 
-                                size="small" 
-                                :disabled="scope.row.disabled" 
-                                @change="oneKeyData(scope.row)">
-                            </el-input>
-                        </template>
-                        <template v-else>
-                            <span v-html="typeof item.table.prop === 'undefined' ? scope.row[item.prop] : scope.row[item.table.prop]"></span>
-                        </template>
+                        <span 
+                            v-if="item.table.is === 'text'">
+                            {{typeof item.table.prop === 'undefined' ? scope.row[item.prop] : scope.row[item.table.prop]}}
+                            </span>
+                        <el-switch
+                            v-if="item.table.is === 'el-switch'"
+                            v-model="scope.row[item.prop]"
+                            :active-value="1"
+                            :inactive-value="0"
+                            :disabled="scope.row.disabled"
+                            @change="oneKeyData(scope.row)">
+                        </el-switch>
+                        <el-input 
+                            v-if="item.table.is === 'el-input'"
+                            class="el-curd-table-input" 
+                            v-model="scope.row[item.prop]" 
+                            size="small" 
+                            :disabled="scope.row.disabled" 
+                            @change="oneKeyData(scope.row)">
+                        </el-input>
+                        <span 
+                            v-if="typeof item.table.is === 'undefined'" 
+                            v-html="typeof item.table.prop === 'undefined' ? scope.row[item.prop] : scope.row[item.table.prop]">
+                        </span>
                         <template v-if="typeof item.table.bind !== 'undefined'">
                             <div v-for="(bind, index) in item.table.bind" :key="index" v-html="scope.row[bind]"></div>
                         </template>
@@ -165,8 +162,7 @@ Vue.component('el-curd', {
             </template>
             <el-table-column v-if="operationWidth > 0" label="操作" :width="operationWidth">
                 <template slot-scope="scope">
-                    <template v-if="typeof scope.row.operateClose !== 'undefined'"">{{scope.row.operateClose}}</template>
-                    <template v-if="scope.row.disabled !== true && typeof scope.row.operateClose === 'undefined'">
+                    <template v-if="scope.row.disabled !== true">
                         <el-tooltip content="拖动排序" placement="top" v-if="dropAuthority">
                             <el-button size="mini" class="rank" type="info" icon="el-icon-rank" circle></el-button>
                         </el-tooltip>
@@ -183,38 +179,40 @@ Vue.component('el-curd', {
                             <el-button type="danger" size="mini" icon="el-icon-delete" circle @click="removeData(scope.row)"></el-button>
                         </el-tooltip>
                         <el-tooltip content="预览" placement="top" v-if="preview">
-                            <a style="margin:0 10px;display:inline-block" :href="scope.row.url" target="_blank"><el-button size="mini" icon="el-icon-search" circle></el-button></a>
+                            <a style="margin:0 10px;display:inline-block" :href="scope.row.url" target="_blank">
+                                <el-button type="info" size="mini" icon="el-icon-search" circle></el-button>
+                            </a>
                         </el-tooltip>
-                        <slot name="operation" v-bind:self="self" v-bind:row="scope.row"></slot>
+                        <slot name="operation" v-bind="scope.row"></slot>
                     </template>
                 </template>
             </el-table-column>
         </el-table>
         <el-pagination
-            v-if="!tableTree"
+            v-if="! tableTree"
             layout="total, sizes, prev, pager, next, jumper"
-            background
             :current-page="search.page"
             :page-size="search.pageSize"
             :page-sizes="pageSizes"
             :total="total"
             :hide-on-single-page="true"
+            background
             @size-change="pageSizeChange"
             @current-change="pageChange">
         </el-pagination>
         <el-drawer :visible.sync="drawer" :with-header="false" size="100%">
-            <el-page-header @back="drawer=false" :content="drawerData['id'] === '' ? '添加' : '编辑'">
+            <el-page-header @back="drawer=false" :content="drawerData[rowKey] === '' ? '添加' : '编辑'">
                 <template v-slot:title>Esc键返回</template>
             </el-page-header>
             <el-form 
-            ref="drawerData" 
-            class="el-layout" 
-            :class="{'el-layout-one': colrow.length === 1}" 
-            :model="drawerData" 
-            :rules="drawerRules" 
-            :label-width="formLabelWidth" 
-            :validate-on-rule-change="false" 
-            @submit.native.prevent>
+                ref="drawerData" 
+                class="el-layout" 
+                :class="{'el-layout-one': colrow.length === 1}" 
+                :rules="drawerRules" 
+                :model="drawerData" 
+                :label-width="formLabelWidth" 
+                :validate-on-rule-change="false" 
+                @submit.native.prevent>
                 <el-tabs :tab-position="document.body.clientWidth > 768 ? 'left' : 'top'">
                     <el-tab-pane v-for="(tab, key) in colrow" :name="String(key)" :index="key">
                         <span slot="label">
@@ -229,46 +227,44 @@ Vue.component('el-curd', {
                                         :xs="typeof item.form.colSm == 'undefined' ? formColSm : item.form.colSm">
                                         <el-form-item 
                                             :prop="item.prop"
-                                            :label="item.label == '' ? '' : item.label + '：'"
                                             :label-width="item.label == '' ? '0px' : ''">
-                                            <template slot="label" v-if="variable !== ''">
-                                                <el-tooltip placement="top" :content="formVariable(item)">
-                                                    <span>{{item.label == '' ? '' : item.label + '：'}}</span>
+                                            <template v-slot:label>
+                                                <el-tooltip placement="top" :content="formVariable(item)" :disabled="variable == ''">
+                                                    <i>{{item.label == '' ? '' : item.label + '：'}}</i>
                                                 </el-tooltip>
                                             </template>
                                             <component 
-                                                v-model="drawerData[item.prop]" 
                                                 class="el-component"
-                                                :is="item.form.is" 
+                                                v-model="drawerData[item.prop]"
+                                                :is="item.form.is"
+                                                :key="drawerData[rowKey] + index + randId"
                                                 :type="item.form.type"
-                                                :style="typeof item.form.style === 'undefined' ? '' : item.form.style"
-                                                :editorcss="typeof item.form.editorcss === 'undefined' ? '' : item.form.editorcss"
+                                                :style="item.form.style"
+                                                :editorcss="item.form.editorcss"
                                                 :options="item.form.options"
                                                 :disabled="item.form.disabled"
-                                                :variable="variable + '.field'"
-                                                :search="item.form.search"
-                                                :ifset="item.form.ifset"
                                                 :placeholder="item.form.placeholder"
                                                 :filterable="item.form.filterable"
                                                 :multiple="item.form.multiple"
+                                                :remote="typeof item.form.remote !== 'undefined'"
+                                                :remote-method="typeof item.form.remote !== 'undefined' ? (query)=>{remoteMethod(query, item.form)} : undefined"
                                                 :props="item.form.props"
-                                                :list="item.form.list"
-                                                :active-value="typeof item.form.activeValue === 'undefined' ? 1 : item.form.activeValue"
-                                                :inactive-value="typeof item.form.inactiveValue === 'undefined' ? 0 : item.form.inactiveValue"
-                                                :key="drawerData['id'] + index + randId"
-                                                :form-data="drawerData"
                                                 :label-position="item.form.labelPosition"
                                                 :label-width="formLabelWidth"
-                                                :format="typeof item.form.format === 'undefined' ? 'yyyy-MM-dd HH:mm:ss' : item.form.format"
-                                                :value-format="typeof item.form.valueFormat === 'undefined' ? 'yyyy-MM-dd HH:mm:ss' : item.form.valueFormat"
-                                                :start-placeholder="typeof item.form.startPlaceholder === 'undefined' ? '开始日期' : item.form.startPlaceholder"
-                                                :range-separator="typeof item.form.rangeSeparator === 'undefined' ? '至' : item.form.rangeSeparator"
-                                                :end-placeholder="typeof item.form.endPlaceholder === 'undefined' ? '结束日期' : item.form.endPlaceholder"
-                                                :maxlength="typeof item.form.maxlength === 'undefined' ? '' : item.form.maxlength"
-                                                :minlength="typeof item.form.minlength === 'undefined' ? '' : item.form.minlength"
+                                                :format="item.form.format"
+                                                :value-format="item.form.valueFormat"
+                                                :maxlength="item.form.maxlength"
+                                                :minlength="item.form.minlength"
+                                                :active-value="typeof item.form.activeValue === 'undefined' ? 1 : item.form.activeValue"
+                                                :inactive-value="typeof item.form.inactiveValue === 'undefined' ? 0 : item.form.inactiveValue"
+                                                :data="typeof item.form.data  === 'undefined' ? undefined : drawerData"
                                                 :is-range="item.form.type == 'is-range'"
+                                                :search="item.form.search"
+                                                :ifset="item.form.ifset"
+                                                :list="item.form.list"
                                                 arrow-control
-                                                show-word-limit>
+                                                show-word-limit
+                                                @input="formRules()">
                                                 <template v-if="typeof item.form.child !== 'undefined'">
                                                     <template v-if="item.form.is == 'el-radio-group' || item.form.is == 'el-checkbox-group'">
                                                         <component 
@@ -303,7 +299,7 @@ Vue.component('el-curd', {
                             </div>
                         </div>
                     </el-tab-pane>
-                    <slot name="form" v-bind="self"></slot>
+                    <slot name="form"></slot>
                 </el-tabs>
             </el-form>
         </el-drawer>
@@ -313,10 +309,6 @@ Vue.component('el-curd', {
         field: {
             type: Array,
             required: true
-        },
-        variable: {
-            type: String,
-            default: '',
         },
         indexUrl: {
             type: String,
@@ -337,22 +329,6 @@ Vue.component('el-curd', {
         dropUrl: {
             type: String,
             default: controller + '/drop',
-        },
-        synchroUrl: {
-            type: String,
-            default: controller + '/synchro',
-        },
-        copyUrl: {
-            type: String,
-            default: controller + '/copy',
-        },
-        copyMultiple: {
-            type: Boolean,
-            default: true,
-        },
-        copyType: {
-            type: String,
-            default: '',
         },
         tableTree: {
             type: Boolean,
@@ -376,7 +352,7 @@ Vue.component('el-curd', {
         },
         tableOperationCopy: {
             type: Boolean,
-            default: true,
+            default: false,
         },
         tablePageSize: {
             type: Number,
@@ -430,9 +406,17 @@ Vue.component('el-curd', {
             type: Number,
             default: 24,
         },
+        variable: {
+            type: String,
+            default: ''
+        },
         preview: {
             type: Boolean,
             default: false,
+        },
+        rowKey: {
+            type: String,
+            default: 'id'
         },
     },
     data() {
@@ -446,7 +430,6 @@ Vue.component('el-curd', {
             list: [],
             table: [],
             search: {
-                id: locationUrl.get('id'),
                 keyword: '',
                 date: '',
                 catalog: '',
@@ -456,29 +439,18 @@ Vue.component('el-curd', {
                 page: 1,
                 pageSize: this.tablePageSize,
                 theme: theme,
+                param: locationUrl.get('param'),
             },
             pageSizes: this.tablePageSizes,
-            total: 0,
             expand: this.tableExpand,
+            total: 0,
             loading: false,
             select: false,
             drawer: false,
             drawerData: {},
             drawerForm: {},
+            drawerRules: {},
             drawerLoading: false,
-            copyForm: {
-                rows: [],
-                language: "",
-                catalog: "",
-            },
-            copyVisible: false,
-            copyLoading: false,
-            copyCatalog: [],
-            copyRules: {
-                language: [
-                    {required: true, message: '请选择', trigger: 'blur'}
-                ],
-            },
             picker: {
                 shortcuts: [{
                     text: '最近一周',
@@ -524,9 +496,9 @@ Vue.component('el-curd', {
     },
     created() {
         let self = this;
-        self.colrow = typeof self.field[0]['field'] === 'undefined' ? [{label: '基础信息', field: self.field}] : self.field;
-        self.search.prop = typeof self.tableSort.prop === 'undefined' ? '' : self.tableSort.prop,
+        self.search.prop  = typeof self.tableSort.prop === 'undefined' ? '' : self.tableSort.prop,
         self.search.order = typeof self.tableSort.order === 'undefined' ? '' : self.tableSort.order
+        self.colrow = typeof self.field[0]['field'] === 'undefined' ? [{label: '基础信息', field: self.field}] : self.field;
         self.colrow.forEach(function (items, index) {
             items.field.forEach(function (item, index) {
                 // 表单
@@ -542,36 +514,9 @@ Vue.component('el-curd', {
             })
         })
         self.getData();
+        self.formRules();
     },
     computed: {
-        /**
-         * 表单验证
-         */
-        drawerRules() {
-            let self  = this;
-            let rules = {};
-            self.colrow.forEach( function (items, index) {
-                if (typeof items.field != 'undefined') {
-                    items.field.forEach(function (item, index) {
-                        if (typeof item.form.rules !== 'undefined') {
-                            let test = common.parseJson(common.stringifyJson(item.form.rules));
-                            test.forEach(function (rule, index) {
-                                // 添加时不能为空
-                                if (typeof rule.saveRequired !== 'undefined' && self.drawerData['id'] === '') {
-                                    test.push({required: true, message: rule.message, trigger: 'blur'});
-                                }
-                                // 更新时不能为空
-                                if (typeof rule.updateRequired !== 'undefined' && self.drawerData['id'] !== '') {
-                                    test.push({required: true, message: rule.message, trigger: 'blur'});
-                                }
-                            });
-                            rules[item.prop] = test;
-                        }
-                    })
-                }
-            });
-            return rules;
-        },
         saveAuthority() {
             return authority.indexOf(this.saveUrl) !== -1;
         },
@@ -587,21 +532,15 @@ Vue.component('el-curd', {
         dropAuthority() {
             return authority.indexOf(this.dropUrl) !== -1;
         },
-        synchroAuthority() {
-            return authority.indexOf(this.synchroUrl) !== -1 && language !== langDefault;
-        },
-        copyAuthority() {
-            return authority.indexOf(this.copyUrl) !== -1 && authority.indexOf(this.catalogUrl) !== -1
-        },
         operationWidth() {
             if (this.tableOperationWidth === '') {
                 let width = 0;
                 if (this.updateAuthority) width += 50;
                 if (this.deleteAuthority) width += 50;
-                if (this.dropAuthority) width += 50;
-                if (this.saveAuthority) width += 50;
-                if (this.pushAuthority) width += 50;
-                if (this.preview) width += 50;
+                if (this.dropAuthority)   width += 50;
+                if (this.saveAuthority)   width += 50;
+                if (this.pushAuthority)   width += 50;
+                if (this.preview)         width += 50;
                 return width;
             } else {
                 return this.tableOperationWidth;
@@ -634,16 +573,7 @@ Vue.component('el-curd', {
          * 查看数据
          */
         openData(row = "") {
-            this.randId = common.id(16);
-            if (row === "") {
-                this.drawerData = JSON.parse(JSON.stringify(this.drawerForm));
-            } else {
-                let data = {id: row.id};
-                for (var key in this.drawerForm) {
-                　　data[key] = row[key];
-                }
-                this.drawerData = JSON.parse(JSON.stringify(data));
-            }
+            this.drawerData = row === "" ? JSON.parse(JSON.stringify(this.drawerForm)) : JSON.parse(JSON.stringify(row));
             this.drawerData.theme = theme;
             this.drawer = true;
             this.$emit('open-data', this.drawerData);
@@ -669,7 +599,7 @@ Vue.component('el-curd', {
             self.$refs.drawerData.validate((valid) => {
                 if (valid) {
                     self.drawerLoading = true;
-                    request.post(self.drawerData['id'] === '' ? self.saveUrl : self.updateUrl, self.drawerData, function(res){
+                    request.post(self.drawerData[self.rowKey] === '' ? self.saveUrl : self.updateUrl, self.drawerData, function(res){
                         self.drawerLoading = false;
                         if (res.status === 'success') {
                             self.getData();
@@ -739,17 +669,11 @@ Vue.component('el-curd', {
             link.click();
         },
         /**
-         * 表格行类名
-         */
-        tableRowClass({row, rowIndex}) {
-            return typeof row.table_row_class !== 'undefined' ? row.table_row_class : '';
-        },
-        /**
          * 追加数据
          */
         pushData(row) {
             let arr = JSON.parse(JSON.stringify(this.drawerForm));
-            arr.pid  = row.id;
+            arr.pid = row[this.rowKey];
             this.openData(arr);
         },
         /**
@@ -757,15 +681,15 @@ Vue.component('el-curd', {
          */
         copyData(row) {
             let arr = JSON.parse(JSON.stringify(row));
-            arr['id'] = "";
+            arr[this.rowKey] = "";
             this.openData(arr);
         },
         /**
-         * 删除
+         * 删除数据
          */
         removeData(row = "") {
             let self = this;
-            let ids  = row === "" ? common.arrayColumn(self.rows, 'id') : [row.id]; 
+            let ids  = row === "" ? common.arrayColumn(self.rows, self.rowKey) : [row[self.rowKey]]; 
             self.$confirm('确定删除数据吗？', '', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
                 request.post(self.deleteUrl, {'ids': ids}, function(res){
                     if (res.status === 'success') {
@@ -775,52 +699,6 @@ Vue.component('el-curd', {
                     self.$notify({ showClose: true, message: res.message, type: res.status});
                 });
             }).catch(() => {});
-        },
-        /**
-         * 同步数据
-         */
-        synchroData() {
-            let self = this;
-            self.$confirm('系统会删除当前数据，确定同步主语言数据吗？', '', {confirmButtonText: '确定',cancelButtonText: '取消',type: 'warning'}).then(() => {
-                request.post(self.synchroUrl, {theme: theme}, function(res) {
-                    if (res.status === 'success') {
-                        self.getData();
-                        self.$emit('synchro-data', res);
-                    }
-                    self.$notify({ showClose: true, message: res.message, type: res.status});
-                });
-            }).catch(() => {});
-        },
-        /**
-         * 语言分类请求
-         */
-        copyLanguageSelect() {
-            let self = this;
-            request.post(self.catalogUrl, {lang: self.copyForm.language, type: self.copyType}, function(res) {
-                self.copyCatalog = tree.convertString(res.data);
-            });
-        },
-        /**
-         * 复制到其它语言
-         */
-        copyLanguageDetermine() {
-            let self = this;
-            self.$refs.copyForm.validate((valid) => {
-                if (valid) {
-                    self.copyLoading = true;
-                    self.copyForm.rows = self.rows;
-                    request.post(self.copyUrl, self.copyForm, function(res) {
-                        self.copyLoading = false;
-                        if (res.status === 'success') {
-                            self.copyVisible = false;
-                            self.$refs.copyForm.clearValidate();
-                        }
-                        self.$notify({ showClose: true, message: res.message, type: res.status});
-                    });
-                } else {
-                    return false;
-                }
-            })
         },
         /**
          * 刷新数据
@@ -854,11 +732,127 @@ Vue.component('el-curd', {
             this.search = Object.assign({}, this.search, {page: val});
         },
         /**
+         * 表格行类名
+         */
+        tableRowClass({row, rowIndex}) {
+            return typeof row.table_row_class !== 'undefined' ? row.table_row_class : '';
+        },
+        /**
+         * 表格行不可选中
+         */
+        selectableDisabled(row, index) {
+            if (row.disabled === true || row.delete_disabled === true) {
+                return false;
+            } else {
+                return true;
+            }
+        },
+        /**
+         * 表格选中行，树形结构需要这样处理
+         */
+        selectRow(selection, row) {
+            let self = this;
+            self.$nextTick(() => {
+                let select = self.rows.indexOf(row) !== -1;
+                if (typeof row.children !== 'undefined') {
+                    row.children.forEach(function (item, index) {
+                        self.$refs.table.toggleRowSelection(item, select);
+                        if (typeof item.children !== 'undefined') {
+                            self.selectRow([], item);
+                        }
+                    })
+                }
+            })
+        },
+        /**
+         * 表格选中所有行，树形结构需要这样处理
+         */
+        selectAll() {
+            let self = this;
+            self.select = !self.select;
+            self.list.forEach(function (item, index){
+                if (item.disabled !== true && item.delete_disabled !== true) {
+                    self.$refs.table.toggleRowSelection(item, self.select);
+                }
+            });
+        },
+        /**
+         * 表格选中行
+         */
+        selectionChange(rows) {
+            this.rows = rows;
+        },
+        /**
+         * 表格折叠/展开行，只有树形结构需要这样处理
+         */
+        expandAll() {
+            let self = this;
+            self.expand = !self.expand;
+            self.list.forEach(function (item, index){
+                self.$refs.table.toggleRowExpansion(item, self.expand);
+            });
+        },
+        /**
+         * 表单验证
+         */
+        formRules() {
+            let self  = this;
+            let rules = {};
+            self.colrow.forEach( function (items, index) {
+                if (typeof items.field !== 'undefined') {
+                    items.field.forEach(function (item, index) {
+                        if (typeof item.form.rules !== 'undefined') {
+                            let test = common.parseJson(common.stringifyJson(item.form.rules));
+                            test.forEach(function (rule, index) {
+                                // 添加时不能为空
+                                if (typeof rule.saveRequired !== 'undefined' && self.drawerData[self.rowKey] === '') {
+                                    test.push({required: true, message: rule.message, trigger: 'blur'});
+                                }
+                                // 更新时不能为空
+                                if (typeof rule.updateRequired !== 'undefined' && self.drawerData[self.rowKey] !== '') {
+                                    test.push({required: true, message: rule.message, trigger: 'blur'});
+                                }
+                                // 关联时不能为空
+                                if (typeof rule.relationRequired !== 'undefined') {
+                                    let relationRequired = false;
+                                    rule.relationRequired.forEach(function (r,i) {
+                                        relationRequired = self.drawerData[r.prop] == r.value;
+                                    })
+                                    if (relationRequired) {
+                                        test.push({required: true, message: rule.message, trigger: 'blur'});
+                                    }
+                                }
+                            });
+                            rules[item.prop] = test;
+                        }
+                    })
+                }
+            });
+            this.drawerRules = rules;
+        },
+        /**
          * 表单提示变量
          */
         formVariable(item) {
             let raw = item.form.is == 'el-editor' ? '|raw' : '';
             return '{$' + this.variable + '.' + item.prop + raw + '}';
+        },
+        /**
+         * 表单内值(远程搜索)
+         */
+        remoteMethod(query, form) {
+            if (query !== '') {
+                let self = this;
+                request.post(form.remote, {keyword: query}, function(res){
+                    if (res.status === 'success') {
+                        form.child.value = res.data;
+                    } else {
+                        self.$notify({ showClose: true, message: res.message, type: res.status});
+                    }
+                });
+            } else {
+                form.child.value = [];
+            }
         },
         /**
          * 表单内值
@@ -871,20 +865,10 @@ Vue.component('el-curd', {
                         // 本身
                         let list = [];
                         self.list.forEach(function (option, index) {
-                            let tvalue = typeof self.drawerData['id'] === 'undefined' ? '' : self.drawerData['id'];
+                            let value = typeof option[self.rowKey] === 'undefined' ? '' : option[self.rowKey];
                             let label = typeof option['title'] === 'undefined' ? '' : option['title'];
-                            let value = typeof option['id'] === 'undefined' ? '' : option['id'];
                             let pid   = typeof option['pid'] === 'undefined' ? 0 : option['pid'];
-                            let id    = typeof option['id'] === 'undefined' ? 0 : option['id'];
-                            if (typeof item.form.child.props !== 'undefined') {
-                                // 指定
-                                if (typeof item.form.child.props.label !== 'undefined') label = option[item.form.child.props.label];
-                                if (typeof item.form.child.props.value !== 'undefined') value = option[item.form.child.props.value];
-                                if (typeof item.form.child.props.value !== 'undefined') tvalue = self.drawerData[item.form.child.props.value];
-                            }
-                            if (tvalue !== value) {
-                                list.push({id: id, pid: pid, label: label, value: value});
-                            }
+                            list.push({id: value, pid: pid, label: label, value: value});
                         })
                         // 树形
                         list = tree.convertString(list);
@@ -915,16 +899,19 @@ Vue.component('el-curd', {
             if (item.form === false) {
                 show = false;
             }
+            if (typeof item.form.show != 'undefined' && item.form.show === false) {
+                show = false;
+            }
             // 主键不显示
-            if (item.prop === 'id') {
+            if (item.prop === self.rowKey) {
                 show = false;
             }
             // 更新时不显示
-            if (self.drawerData.id !== '' && item.form.update === false) {
+            if (self.drawerData[self.rowKey] !== '' && item.form.update === false) {
                 show = false;
             }
             // 新增时不显示
-            if (self.drawerData.id === '' && item.form.save === false) {
+            if (self.drawerData[self.rowKey] === '' && item.form.save === false) {
                 show = false;
             }
             // 关联显示
@@ -943,70 +930,19 @@ Vue.component('el-curd', {
             }
             return show;
         },
-        /**
-         * 行不可选中
-         */
-        selectableDisabled(row, index) {
-            if (row.disabled === true || typeof row.operateClose !== 'undefined' || row.delete_disabled === true) {
-                return false;
-            } else {
-                return true;
-            }
-        },
-        /**
-         * 选中行，树形结构需要这样处理
-         */
-        selectRow(selection, row) {
-            let self = this;
-            self.$nextTick(() => {
-                let select = self.rows.indexOf(row) !== -1;
-                if (typeof row.children !== 'undefined') {
-                    row.children.forEach(function (item, index) {
-                        self.$refs.table.toggleRowSelection(item, select);
-                        if (typeof item.children !== 'undefined') {
-                            self.selectRow([], item);
-                        }
-                    })
-                }
-            })
-        },
-        /**
-         * 选中所有行，树形结构需要这样处理
-         */
-        selectAll() {
-            let self = this;
-            self.select = !self.select;
-            self.list.forEach(function (item, index){
-                if (item.disabled !== true && item.delete_disabled !== true) {
-                    self.$refs.table.toggleRowSelection(item, self.select);
-                }
-            });
-        },
-        /**
-         * 选中行
-         */
-        selectionChange(rows) {
-            this.rows = rows;
-        },
-        /**
-         * 折叠/展开行，只有树形结构需要这样处理
-         */
-        expandAll() {
-            let self = this;
-            self.expand = !self.expand;
-            self.list.forEach(function (item, index){
-                self.$refs.table.toggleRowExpansion(item, self.expand);
-            });
-        },
     },
     watch: {
         search() {
             this.getData();
         },
+        drawerData() {
+            this.formRules();
+        },
         drawer(val) {
             if(!val){
                 this.$refs.drawerData.clearValidate();
             }
+            this.randId = common.id(16);
         },
     }
 });
@@ -1370,7 +1306,7 @@ Vue.component('el-watermark', {
                         <el-form-item class="el-watermark-angle" label="水印图片：">
                             <el-upload
                                 class="el-watermark-uploader"
-                                :action="url('file/uploadAppoint')"
+                                :action="admin_url('file/uploadAppoint')"
                                 :data="{name: 'watermark', ext: 'png'}"
                                 :show-file-list="false"
                                 :on-success="watermarkSuccess"
@@ -1583,7 +1519,7 @@ Vue.component('el-file-list', {
                 <div class="el-file-header">
                     <el-watermark v-show="search.type == 'image' || search.type == '' || search.type == 'all'"></el-watermark>
                     <el-button size="small" icon="el-icon-refresh-right" @click="refresh()" plain>刷新</el-button>
-                    <el-upload v-show="search.type !== 'recycle'" class="el-upload" :accept="accept" :show-file-list="false" :action="url(addUrl)" :before-upload="beforeUpload" :on-progress="progressUpload" :on-success="successUpload" :on-error="errorUpload" :data="{theme: theme}" multiple>
+                    <el-upload v-show="search.type !== 'recycle'" class="el-upload" :accept="accept" :show-file-list="false" :action="admin_url(addUrl)" :before-upload="beforeUpload" :on-progress="progressUpload" :on-success="successUpload" :on-error="errorUpload" :data="{theme: theme}" multiple>
                         <el-button size="small" icon="el-icon-upload2" plain>上传</el-button>
                     </el-upload>
                     <el-button v-show="search.type !== 'recycle'" size="small" icon="el-icon-delete" :disabled="rows.length === 0" @click="recovery()" plain>放入回收站</el-button>
@@ -1796,10 +1732,19 @@ Vue.component('el-file-list', {
         initData(item) {
             let cover      = '/admin/images/filecover/';
             let type       = file.type(item.url)['name'];
-            let urlArr     = item['url'].split('.');
+            let name       = item.url.substring(item.url.lastIndexOf('/') + 1, item.url.lastIndexOf('.'));
             item['size']   = file.size(item.size);
             item['type']   = type;
-            item['cover']  = type === 'image' ? urlArr[0] + '100x100.' + urlArr[1]  : cover + type + '.png';
+            if (item['cover']  = type === 'image') {
+                let suffix = item.url.substring(item.url.lastIndexOf('.') + 1);
+                if (suffix != 'gif' && suffix != 'ico') {
+                    item['cover']  = item.url.replace(name, name + '100x100');
+                } else {
+                    item['cover']  = item.url;
+                }
+            } else {
+                item['cover']  = cover + type + '.png';
+            }
             item['rename'] = false;
             item['ctitle'] = item.title;
             return item;
@@ -1864,7 +1809,7 @@ Vue.component('el-file-list', {
          * 点击下载
          */
         downloadClick(item) {
-            window.open(url('file/download', {title: item.title, url: item.url}));
+            window.open(admin_url('file/download', {title: item.title, url: item.url}));
         },
         /**
          * 点击重命名
@@ -2026,7 +1971,7 @@ Vue.component('el-file-list', {
         errorUpload(res, item) {
             let index = common.arrayIndex(this.list, item['uid'], 'uid');
             this.list.splice(index,1);
-            self.$notify({showClose: true, message: '系统错误！', type: 'error'});
+            this.$notify({showClose: true, message: '系统错误！', type: 'error'});
         },
     },
     watch: {
@@ -2301,8 +2246,8 @@ Vue.component('el-file-select', {
  */
 Vue.component('el-link-select', {
     template:`
-    <div class="el-link">
-        <el-input v-model="title" style="width: 170px;margin-right: 10px;" disabled></el-input>
+    <div class="el-link-select">
+        <el-input v-model="title" style="width:calc(100% - 112px);margin-right: 10px;" disabled></el-input>
         <el-button @click="dialog = true" plain>设置链接</el-button>
         <el-dialog v-if="dialog" class="el-link-dialog" top="20px" title="设置链接" width="600px" :visible.sync="dialog" :close-on-click-modal="false" append-to-body>
             <el-form :model="valueForm" ref="valueForm" :rules="rules" label-width="150px" :validate-on-rule-change="false" @submit.native.prevent>
@@ -2315,7 +2260,7 @@ Vue.component('el-link-select', {
                 </el-form-item>
                 <template v-if="linkForm.type == 1">
                 <el-form-item label="链接：" prop="url">
-                    <el-input v-model="valueForm.url" placeholder="输入链接如果不带http://或https://，则系统会自动加上url()函数"></el-input>
+                    <el-input v-model="valueForm.url" placeholder="输入链接如果不带http://或https://，则系统会自动加上admin_url()函数"></el-input>
                 </el-form-item>
                 </template>
                 <template v-if="linkForm.type == 2">
@@ -2534,11 +2479,6 @@ Vue.component('el-field', {
         </el-form>
         <el-dialog :visible.sync="setShow" title="字段设置" width="500px" top="30px" :close-on-click-modal="false" append-to-body>
             <el-form ref="setForm" :model="setForm" :rules="rules" :label-width="labelWidth" @submit.native.prevent>
-                <el-form-item label="字段类型：" prop="type">
-                    <el-select style="width: 100%" v-model="setForm.type" value-key="label" placeholder="请选择字段类型" filterable>
-                        <el-option v-for="(item, index) in common.formType()" :key="index" :label="item.label" :value="item"></el-option>
-                    </el-select>
-                </el-form-item>
                 <el-form-item label="字段标题：" prop="label"> 
                     <el-input v-model="setForm.label" placeholder="如：内容"></el-input>
                 </el-form-item>
@@ -2580,13 +2520,6 @@ Vue.component('el-field', {
         },
     },
     data() {
-        var validateRepeatField = (rule, value, callback) => {
-            if(common.arrayIndex(this.list, this.ruleForm.field, 'field') !== -1 || typeof this.repeat[this.ruleForm.field] !== 'undefined') {
-                callback(new Error('字段变量不能重复！'));
-            } else {
-                callback();
-            }
-        }
         return {
             show: true,
             list: this.value,
@@ -2609,7 +2542,6 @@ Vue.component('el-field', {
                 ],
                 field: [
                     { required: true, message: '请输入字段变量', trigger: 'blur' },
-                    { validator: validateRepeatField, trigger: 'blur' },
                     { pattern: /^[a-zA-Z][a-zA-Z0-9_]*$/, message: '以字母开头只能输入字母、下划线、数字', trigger: 'blur' },
                 ],
                 type: [

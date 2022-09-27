@@ -24,13 +24,11 @@ class AdminLog extends BaseController
     public function index()
     {
         if ($this->request->isPost()) {
-            $input = input("post.");
-            $count = AdminLogModel::withSearch(["keyword", "date", "id"], $input)->count();
-            $data  = AdminLogModel::withSearch(["keyword", "date", "id"], $input)
-            ->with(['admin'])
-            ->page($input["page"], $input["pageSize"])
-            ->order('create_time', 'desc')
-            ->select();
+            $input  = input("post.");
+            $search = ["keyword", "date"];
+            $order  = [$input['prop'] => $input['order']];
+            $count  = AdminLogModel::withSearch($search, $input)->count();
+            $data   = AdminLogModel::withSearch($search, $input)->with(['admin'])->page($input["page"], $input["pageSize"])->order($order)->select();
             return json(["status" => "success", "message" => "请求成功", "data" => $data, "count" => $count]);
         } else {
             return View::fetch();

@@ -1,4 +1,4 @@
-{include file="$header"}
+{include file="common/header"}
 <div id="app" v-cloak>
     <el-container class="el-layout el-theme">
         <el-aside width="192px">
@@ -57,7 +57,7 @@
                             </el-tooltip>
                         </div>
                     </el-card>
-                    <div style="margin: 0 -20px" v-loading="loading">
+                    <div style="el-themes" v-loading="loading">
                         <el-empty v-if="table.length == 0" description="暂无模板"></el-empty>
                         <div class="el-themes-item" v-for="(item, index) in table">
                             <img v-if="item.use" class="use" src="/admin/images/use.png">
@@ -383,7 +383,9 @@
             pluginInstall(row) {
                 let self = this;
                 request.post(self.pluginsInstallUrl, {name: row.name}, function(res) {
-                    self.$message({ showClose: true, message: row.title + res.message, type: res.status});
+                    if (res.status != 'success') {
+                        self.$message({ showClose: true, message: row.title + res.message, type: res.status});
+                    }
                 });
             },
             /**
@@ -455,4 +457,4 @@
         }
     })
 </script>
-{include file="$footer"}
+{include file="common/footer"}

@@ -38,13 +38,6 @@ class Admin extends Model
         }
     }
 
-    public function searchIdAttr($query, $value, $array)
-    {
-        if (! empty($value)) {
-            $query->where("user_id", $value);
-        }
-    }
-
     // 获取器
     public function getPasswordAttr($value, $array)
     {

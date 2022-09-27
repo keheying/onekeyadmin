@@ -1,16 +1,16 @@
-{include file="$header"}
-<script type="text/javascript" src="/admin/js/nprogress.js?v={:config('app.version')}"></script>
-<div id="app" :class="color" v-cloak>
+{include file="common/header"}
+<div id="app" v-cloak>
 	<el-container class="el-index">
 		<el-aside :width="asideWidth">
-	        <component :is="document.body.clientWidth > 768 ? 'a' : 'div'" class="header" href="/" target="_blank">
-	        	<i class="iconfont icon-onekey"></i><span>OneKeyAdmin</span>
-	        	<i class="el-icon-close" @click="isCollapse = !isCollapse"></i>
-	        </component>
+	        <div class="header">
+	        	<img class="logo" src="/admin/images/logo_site.png">
+	        	<span class="title">OneKeyAdmin</span>
+	        	<i class="iconfont collapse" :class="isCollapse ? 'icon-caidanyou' : 'icon-caidanzuo01'" @click="isCollapse = !isCollapse"></i>
+	        </div>
 	        <el-menu class="menu" :default-active="path" :collapse="isCollapse" text-color="#fff" active-text-color="#fff" @select="clickMenu">
 	            <template v-for="(item, index) in menuTree" :key="index">
 	                <template v-if="item.children">
-	                    <el-submenu :popper-class="color" :index="item.path" :key="item.path">
+	                    <el-submenu :index="item.path" :key="item.path">
 	                        <template slot="title">
 	                            <img class="el-menu-icon" :src="item.icon" />
 	                            <span slot="title">{{item.title}}</span>
@@ -46,113 +46,76 @@
 	    </el-aside>
 		<el-container>
 			<el-header>
-				<row :gutter="10">
-					<el-col :md="12" :xs="4">
-						<div class="el-notice">
-							<i class="iconfont" :class="isCollapse ? 'icon-caidanyou' : 'icon-caidanzuo01'" @click="isCollapse = !isCollapse"></i>
-					        <i class="iconfont icon-bobao"></i>
-					        <ul :class="{top: animate}">
-					            <li v-for="(item,index) in horn" :key="index" v-html="item"></li>
-					        </ul>
-					    </div>
-					</el-col>
-					<el-col :md="12" :xs="20">
-						<div class="el-right-panel">
-							<el-dropdown class="el-language-dropdown" @command="langClick">
-								<div>
-									<img :src="languageArr.cover">
-									<span>{{languageArr.title}}</span>
-									<i class="el-icon-arrow-down el-icon--right"></i>
-								</div>
-								<el-dropdown-menu slot="dropdown">
-									<el-dropdown-item v-for="(item, index) in langAllow" :key="index" :command="item.name">
-										<img class="el-language-item" :src="item.cover">{{item.title}}
-									</el-dropdown-item>
-								</el-dropdown-menu>
-							</el-dropdown>
-							<span class="item" @click="cacheClear()">
-							    <el-tooltip content="清除缓存" placement="bottom">
-    							    <span class="icon el-icon-refresh"></span>
-							    </el-tooltip>
-							</span>
-							<span class="item" @click="systemCheck()">
-							    <el-tooltip content="检测更新" placement="bottom">
-    							    <span class="icon el-icon-warning-outline"></span>
-							    </el-tooltip>
-							</span>
-							<span class="item" @click="drawer = true">
-							    <el-tooltip content="切换肤色" placement="bottom">
-    							    <span class="icon el-icon-brush"></span>
-							    </el-tooltip>
-							</span>
-							<el-dropdown class="el-userinfo-dropdown" @command="userClick">
-								<div>
-									<el-avatar size="medium" :src="userInfo.cover">
-										<img src="/admin/images/error.png"/>
-									</el-avatar>
-									<span>{{userInfo.nickname}}</span>
-									<i class="el-icon-arrow-down el-icon--right"></i>
-								</div>
-								<el-dropdown-menu slot="dropdown">
-									<el-dropdown-item command="personal">个人中心</el-dropdown-item>
-									<el-dropdown-item command="logout">退出登录</el-dropdown-item>
-								</el-dropdown-menu>
-							</el-dropdown>
-						</div>
-						<el-drawer :visible.sync="drawer" :with-header="false" size="80px">
-						    <div class="el-item-color-warp" v-for="(item, index) in colors">
-                                <div 
-                                    class="el-item-color"
-                                    :class="{active: color == item.class}"
-                                    :style="{backgroundColor: item.color}"
-                                    :title="item.title"
-                                    @click="color = item.class">
-                                    <div v-if="typeof item.bcolor != 'undefined'" :style="{backgroundColor: item.bcolor}"></div>
-                                </div>
-                                <p>{{item.title}}</p>
-                            </div>
-                        </el-drawer>
-						<el-dialog 
-							top="120px" 
-							width="800px"
-							:title="'当前版本：'+version" 
-							:visible.sync="dialogCheck" 
-							:close-on-click-modal="false">
-				            <div v-loading="loadingCheck">
-				                <div v-if="versionList.length > 0">
-				                    <el-timeline v-for="(item, index) in versionList">
-				                        <el-timeline-item :timestamp="item.c_version" placement="top">
-					                        <el-card>
-					                            <div v-html="item.content"></div>
-					                            <p style="margin-top: 10px">版本提交于 {{item.create_time}}</p>
-					                        </el-card>
-					                    </el-timeline-item>
-					                </el-timeline>
-				                </div>
-				                <div v-else>
-				                    已经是最新版本啦~
-				                </div>
-				            </div>
-				            <span slot="footer" class="dialog-footer">
-				                <el-button size="small" @click="dialogCheck = false">关 闭</el-button>
-				                <el-button v-if="versionList.length > 0" size="small" type="primary" @click="systemUpdate()" :disabled="loadingUpdate">
-				                    {{loadingUpdate ? loadingTitle : '开始更新'}}
-				                </el-button>
-				            </span>
-				        </el-dialog>
-			        </el-col>
-			    </row>
+			    <div class="el-tabs-warp">
+        		    <el-tabs type="card" v-model="path" @tab-remove="removeTab" closable>
+        	            <el-tab-pane v-for="(item, index) in tabs" :key="item.path" :name="item.path" :label="item.title"></el-tab-pane>
+        	        </el-tabs>
+    	        </div>
+    	        <div class="el-tool">
+    	        	<span class="item menu" @click="isCollapse = !isCollapse">
+	    	        	<span class="icon el-icon-menu"></span>
+	    	        </span>
+    				<a href="/" target="_blank" class="item">
+    				    <el-tooltip content="访问首页" placement="bottom">
+    					    <span class="icon el-icon-monitor"></span>
+    				    </el-tooltip>
+    				</a>
+    				<span class="item" @click="cacheClear()">
+    				    <el-tooltip content="清除缓存" placement="bottom">
+    					    <span class="icon el-icon-refresh"></span>
+    				    </el-tooltip>
+    				</span>
+    				<span class="item" @click="systemCheck()">
+    				    <el-tooltip content="检测更新" placement="bottom">
+    					    <span class="icon el-icon-warning-outline"></span>
+    				    </el-tooltip>
+    				</span>
+    				<el-dropdown class="el-userinfo-dropdown" @command="userClick">
+    					<div>
+    						<el-avatar size="medium" :src="userInfo.cover">
+    							<img src="/admin/images/avatar.png"/>
+    						</el-avatar>
+    						<span>{{userInfo.nickname}}</span>
+    						<i class="el-icon-arrow-down el-icon--right"></i>
+    					</div>
+    					<el-dropdown-menu slot="dropdown">
+    						<el-dropdown-item command="personal">个人中心</el-dropdown-item>
+    						<el-dropdown-item command="logout">退出登录</el-dropdown-item>
+    					</el-dropdown-menu>
+    				</el-dropdown>
+    			</div>
 		    </el-header>
-		    <div class="el-tabs-warp">
-    		    <el-tabs type="card" v-model="path" @tab-remove="removeTab" closable>
-    	            <el-tab-pane v-for="(item, index) in tabs" :key="item.path" :name="item.path" :label="item.title"></el-tab-pane>
-    	        </el-tabs>
-    	        <el-tooltip v-if="tabs.length > 2" content="清除导航项" placement="bottom">
-        	        <i class="el-tabs-close el-icon-d-arrow-left" @click="removeAllTab()"></i>
-    	        </el-tooltip>
-	        </div>
-	        <el-main><iframe id="iframe" :src="url(path)"></iframe></el-main>
+	        <el-main><iframe id="iframe" :src="admin_url(path)"></iframe></el-main>
 		</el-container>
+        <!--版本更新-->
+    	<el-dialog 
+    		top="120px" 
+    		width="800px"
+    		:title="'当前版本：'+version" 
+    		:visible.sync="dialogCheck" 
+    		:close-on-click-modal="false">
+            <div v-loading="loadingCheck">
+                <div v-if="versionList.length > 0">
+                    <el-timeline v-for="(item, index) in versionList">
+                        <el-timeline-item :timestamp="item.c_version" placement="top">
+                            <el-card>
+                                <div v-html="item.content"></div>
+                                <p style="margin-top: 10px">版本提交于 {{item.create_time}}</p>
+                            </el-card>
+                        </el-timeline-item>
+                    </el-timeline>
+                </div>
+                <div v-else>
+                    已经是最新版本啦~
+                </div>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="small" @click="dialogCheck = false">关 闭</el-button>
+                <el-button v-if="versionList.length > 0" size="small" type="primary" @click="systemUpdate()" :disabled="loadingUpdate">
+                    {{loadingUpdate ? loadingTitle : '开始更新'}}
+                </el-button>
+            </span>
+        </el-dialog>
 	</el-container>
 </div>
 <script> 
@@ -161,19 +124,9 @@
 		data () {
 	        return {
 	        	menu: {:json_encode($menu)},
-	            horn: {:json_encode($notification)},
-	            drawer: false,
-	            color: localStorage.color,
-	            colors: [
-	                {title: '蓝黑', class: 'lanhei', color: '#1890ff', bcolor: '#282c34'},
-	                {title: '绿黑', class: 'lvhei', color: '#41b584', bcolor: '#282c34'},
-	                {title: '红黑', class: 'honghei', color: '#41b584', bcolor: '#f34d37'},
-	                {title: '默认', class: '', color: '#399efd'},
-                ],
 	            version: "{$version}",
+	            drawer: false,
 	            userInfo: userInfo,
-	            language: language,
-	            langAllow: langAllow,
 	            versionList: [],
 	            tabs: [],
 	            path: "",
@@ -195,10 +148,6 @@
 	    	menuTree() {
 	    		return tree.convert(this.menu);
 	    	},
-	        languageArr() {
-	            let index = common.arrayIndex(this.langAllow, this.language, 'name');
-	            return index === -1 ? "" : this.langAllow[index];
-	        },
 	    },
 	    mounted () {
             let iframe = document.querySelector('#iframe');
@@ -210,7 +159,6 @@
         },
 	    created() {
 	    	this.init();
-	    	setInterval(this.showMarquee, 4000);
 	    },
 	    methods: {
 	    	/**
@@ -236,21 +184,6 @@
 	            }
 	        },
 	        /**
-	         * 清除导航项
-	         */
-	        removeAllTab() {
-	            let tabs = [];
-	            let consoleIndex = common.arrayIndex(this.menu, 'console/index', 'path');
-	    		if (consoleIndex !== -1) {
-	    			tabs.push(this.menu[consoleIndex]);
-	    		}
-	            if (this.tabs.length > 1) {
-	                let index = common.arrayIndex(this.menu, this.path, 'path');
-	                tabs.push(this.menu[index]);
-	            }
-	            this.tabs = tabs;
-	        },
-	        /**
 	         * 删除导航项
 	         * @param  {String} targetName 导航项
 	         */
@@ -269,7 +202,7 @@
                         this.clickMenu('admin/personal');
                         break;
                     case 'logout':
-                        location.href = url('login/logout');
+                        location.href = admin_url('login/index');
                         break;
                 }
 	        },
@@ -328,27 +261,6 @@
                     self.$notify({ showClose: true, message: res.message, type: res.status });
                 })
 	        },
-	        /**
-	         * 选择语言
-	         */
-	        langClick(name) {
-	            locationUrl.set('lang', name);
-	        },
-	        /**
-			 * 文字通告
-			 */
-	        showMarquee() {
-	            if (this.horn.length > 1) {
-	                this.animate = true;
-	                setTimeout(() => {
-	                    this.horn.push(this.horn[0]);
-	                    this.horn.shift();
-	                    this.animate = false;
-	                }, 1000);
-	            } else {
-	                this.animate = false;
-	            }
-	        },
 	    },
 	    watch: {
 	    	path(path) {
@@ -366,10 +278,7 @@
 	    	isCollapse(v){
 	    	    localStorage.isCollapse = v;
 	    	},
-	    	color(v) {
-	    	    localStorage.color = v;
-	    	}
 	    }
 	})
 </script>
-{include file="$footer"}
+{include file="common/footer"}

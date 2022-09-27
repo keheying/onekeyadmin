@@ -11,10 +11,10 @@
 namespace app\admin\controller;
 
 use PDO;
+use onekey\File;
 use think\facade\Db;
 use think\facade\View;
 use think\facade\Cache;
-use app\addons\File;
 use app\admin\BaseController;
 /**
  * 外壳
@@ -26,11 +26,9 @@ class Index extends BaseController
      */
     public function index()
     {
-        $result = api_post('token/systemNotification');
         View::assign([
-            'version'      => implode('.', str_split(str_replace('.', '', config("app.version")))),
-            'menu'         => $this->request->publicMenu,
-            'notification' => $result['status'] === 'success' ? $result['data'] : [],
+            'version' => implode('.', str_split(str_replace('.', '', config("app.version")))),
+            'menu'    => $this->request->publicMenu,
         ]);
         return View::fetch();
     }
@@ -51,7 +49,7 @@ class Index extends BaseController
     {
         if ($this->request->isPost()) {
             $data['version'] = config('app.version');
-            return json(api_post('token/systemCheck', $data));
+            return json(api_post('tokenSystem/check', $data));
         }
     }
 
@@ -62,7 +60,7 @@ class Index extends BaseController
     {
         if ($this->request->isPost()) {
             $version = input('post.version');
-            $result  = api_post('token/systemUpdate', ['version' => $version]);
+            $result  = api_post('tokenSystem/update', ['version' => $version]);
             if ($result['status'] === 'success') {
                 $zip   = $result['data']['zip'];
                 $isnew = $result['data']['isnew'];

@@ -24,7 +24,7 @@ class User extends Model
     {
         return $this->hasOne(UserGroup::class, 'id', 'group_id')->bind([
             'group_title' => 'title'
-        ]);;
+        ]);
     }
 
     // 搜索器
@@ -39,7 +39,7 @@ class User extends Model
     public function searchKeywordAttr($query, $value, $array)
     {
         if (! empty($value)) {
-            $query->where("nickname|email|mobile|account",'like', '%' . $value . '%');
+            $query->where("nickname|email|mobile",'like', '%' . $value . '%');
         }
     }
 
@@ -52,7 +52,7 @@ class User extends Model
 
     public function searchStatusAttr($query, $value, $array)
     {
-        if ($value !== '') {
+        if ($value !== '' && $value !== null) {
             $query->where("status", '=', $value);
         }
     }
@@ -60,7 +60,7 @@ class User extends Model
     // 获取器
     public function getUrlAttr($value, $array)
     {
-        return request()->domain() . '/userpage?id=' . $array['id'];
+        return index_url('user/info', ['id' => $array['id']]);
     }
 
     public function getPasswordAttr($value)

@@ -1,7 +1,4 @@
-<p align="center">
-    <img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/logo.png" />
-</p>
-<h2 align="center">:tw-1f525: OneKeyAdmin 开源免费商用</h2>
+<h2 align="center">:tw-1f525: OneKeyAdmin</h2>
 <p align="center">
     <a href="http://www.onekeyadmin.com" target="_blank">
         <img src="https://img.shields.io/badge/OfficialWebsite-OneKeyAdmin-yellow.svg" />
@@ -10,135 +7,128 @@
         <img src="https://img.shields.io/badge/Licence-Apache2.0-green.svg?style=flat" />
     </a>
     <a href="http://www.onekeyadmin.com" target="_blank">
-        <img src="https://img.shields.io/badge/Edition-1.2.7-blue.svg" />
+        <img src="https://img.shields.io/badge/Edition-1.3.9-blue.svg" />
     </a>
      <a href="http://www.onekeyadmin.com/version.html" target="_blank">
         <img src="https://img.shields.io/badge/download-7.0m-red.svg" />
     </a>
 </p>
-<p align="center">    
-    <b>如果对您有帮助，点右上角 "Star" 支持一下 谢谢！</b>
-</p>
 
 ## 导航栏目
 =========================================================
 
-<a href="http://www.onekeyadmin.com/docs" target="_blank">开发文档&nbsp;&nbsp;</a>
-<a href="http://www.onekeyadmin.com/question.html" target="_blank">社区地址&nbsp;&nbsp;</a>
-<a href="http://www.onekeyadmin.com" target="_blank">官网地址&nbsp;&nbsp;</a>
-<a href="http://gitee.onekeyadmin.com/mk_admin" target="_blank">演示地址&nbsp;&nbsp;</a>
-<a href="http://www.onekeyadmin.com/api/system/version.html" target="_blank">立即下载</a>
+<a href="https://www.onekeyadmin.com/docs-home.html" target="_blank">开发文档&nbsp;&nbsp;</a>
+<a href="https://www.onekeyadmin.com/question.html" target="_blank">社区地址&nbsp;&nbsp;</a>
+<a href="https://www.onekeyadmin.com" target="_blank">官网地址&nbsp;&nbsp;</a>
+<a href="http://github.onekeyadmin.com/mk_admin" target="_blank">演示地址&nbsp;&nbsp;</a>
 
 =========================================================
 
-OneKeyAdmin基于ThinkPHP+Element的低代码后台开发框架，开箱即用无需配置。填写参数即可完成CRUD，拥有开发助手选择单或多个数据表生成一个完整应用，包含控制器、模型、视图、菜单权限、API接口，让你的开发效率翻倍。
-
-## 开发助手
-
-<img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/curd.gif"/>
-
-## 代码格式
-
-<img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/curd.png"/>
+<div>基于Thinkphp6+Element的插件化管理系统，网站、小程序、商城、CMS、APP、ERP、API接口一个系统全部搞定，无需脚手架开箱即用！</div>
 
 ## 主要特性
 
-* php7.1+环境
+* 支持php7.1+
+
 * 基于Auth验证的权限管理系统
 
-* 支持无限级父子级权限继承，父级的管理员可任意增删改子级管理员及权限设置
-* 支持单管理员多角色
-* 支持管理子级数据或个人数据
-* 强大的开发助手
+* 基于数据驱动视图的理念封装 element，即使没有 vue 的使用经验也能快速上手
 
-* 选择单或多个数据表一键生成完整应用插件，包含控制器、模型、视图、菜单权限、API接口，让你的开发效率翻倍
-* 一键生成代码只需配置组件参数，json格式代码清晰易读
-* 一键生成控制器菜单和规则
-* 一键生成API接口
-* 完善的前端功能组件开发
+* 低代码数据可视化
 
-* 基于ELment.ui开发，自适应手机、平板、PC
-* 基于Vue.js进行组件化管理，按需调用
-* 强大的应用插件扩展功能，在线安装卸载升级应用插件
-* 强大的主题模板功能，在线安装卸载，随心切换心仪模板
-* 通用的会员模块和API模块
-* 强大的路由机制，让搜索引擎快速收录
-* 多语言数据独立、路由优雅
-* 支持文件上传、水印、回收站、下载、检索、排序、编辑、列表切换、滚动加载
-* 支持无限级分类、TDK设置、自定义字段、自定义路由、自定义页面、会员权限控制等等；
-* 支持手机端访问后台管理系统，界面优雅，体验丝滑
-* 强大的应用模块支持(CMS系统、博客系统、tinymce编辑器、流量统计、表单可视化管理、客服系统、电子画册、阿里云短信、支付（微信支付宝）、本地代码编辑、数据库备份、SEO网站优化、禁* 止指定IP访问、微信公众号登录、会员签到、CSDN采集、PHP中文网采集)
-* 整合第三方阿里云短信接口
-* 无缝整合第三方阿里云OSS云存储功能
-* 第三方富文本编辑器支持
-* 第三方登录(QQ、微信、微博)整合
-* 第三方支付(微信、支付宝)无缝整合，微信支持PC端扫码支付
-* 丰富的插件应用市场
+* 开发助手可一键生成完整应用，包含控制器、模型、视图、菜单权限、API接口
+
+* 应用插件在线安装卸载升级
+
+* 主题模板在线安装卸载切换
+
+* 通用的API模块
+
+## 系统截图
+
+<table>
+    <tr>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/资源库1.png"/></td>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/资源库2.png"/></td> 
+    </tr>
+    <tr>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/系统配置1.png"/></td>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/系统配置2.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/分类管理1.png "/></td>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/分类管理2.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/管理员管理1.png"/></td>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/管理员管理2.png"/></td>
+    </tr>   
+    <tr>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/菜单规则1.png"/></td>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/菜单规则2.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/角色管理1.png"/></td>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/角色管理2.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/会员列表1.png"/></td>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/会员列表2.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/会员分组1.png"/></td>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/会员分组2.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/插件商店1.png"/></td>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/插件商店2.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/主题商店1.png"/></td>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/主题商店2.png"/></td>
+    </tr>
+</table>
+
+## 开发助手
+
+<table>
+    <tr>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/开发助手1.png"/></td>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/开发助手2.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/开发助手3.png"/></td>
+        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/开发助手4.png"/></td>
+    </tr>
+</table>
 
 ## 在线演示
 
-* <a href="http://gitee.onekeyadmin.com/mk_admin" target="_blank">无插件演示</a>
+* <a href="http://github.onekeyadmin.com/mk_admin" target="_blank">无插件演示</a>
 * <a href="http://cms.onekeyadmin.com/mk_admin" target="_blank">cms应用插件演示</a>
 * <a href="http://blog.onekeyadmin.com/mk_admin" target="_blank">博客应用插件演示</a>
 * <a href="http://swoole.onekeyadmin.com/mk_admin" target="_blank">swoole客服应用插件演示</a>
 
 ## 一键安装
 
-* 运行环境要求PHP7.1+；
-* 访问localhost/onekeyadmin/public输入数据库信息以完成安装；
-
-## 系统截图
-
-<table>
-    <tr>
-        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/1.jpg"/></td>
-        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/2.jpg"/></td>
-    </tr>
-    <tr>
-        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/3.jpg"/></td>
-        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/4.jpg"/></td>
-    </tr>
-    <tr>
-        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/6.jpg"/></td>
-        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/7.jpg"/></td>
-    </tr>
-    <tr>
-        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/8.jpg "/></td>
-        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/9.jpg"/></td>
-    </tr>
-    <tr>
-        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/10.jpg"/></td>
-        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/11.jpg"/></td>
-    </tr>   
-    <tr>
-        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/12.jpg"/></td>
-        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/13.jpg"/></td>
-    </tr>
-    <tr>
-        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/15.jpg"/></td>
-        <td><img src="https://gitee.com/keheying/onekeyadmin/raw/master/readme/16.jpg"/></td>
-    </tr>
-</table>
-
-## 兼容手机端
-
-![截图](https://gitee.com/keheying/onekeyadmin/raw/master/readme/17.png)
+<div>以 Linux 宝塔面板 为例</div>
+<div>进入宝塔面板，新建站点</div>
+<div>下载的 OneKeyAdmin 完整包 解压到此站点根目录</div>
+<div>设置运行目录public</div>
+<div>设置伪静态为thinkphp</div>
+<div>访问你的站点域名进行安装，比如：https://xxx.onekeyadmin.com</div>
 
 ## 开源版使用须知
 
 1.允许用于个人学习、毕业设计、教学案例、公益事业、商用;
 
-2.如果商用必须保留版权信息，请自觉遵守;
+2.系统允许个人或公司进行任意二开及商用需要遵守Apache2.0开源协议的有关要求。
 
-3.系统允许个人或公司进行任意二开及商用需要遵守Apache2.0开源协议的有关要求。
-
-4.我们仅提供系统，运营内容与我们无关，请合法使用。
+3.我们仅提供系统，运营内容与我们无关，请合法使用。
 
 ## 版权信息
 
 遵循Apache2开源协议发布，并提供免费使用。
-
-未经版权所有者明确授权，禁止发行本文档及其被实质上修改的版本。 
 
 未经版权所有者明确授权，禁止去除后台管理系统版权标识。
 

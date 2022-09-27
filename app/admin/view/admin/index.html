@@ -1,4 +1,4 @@
-{include file="$header"}
+{include file="common/header"}
 <div id="app" v-cloak>
     <el-curd 
         :field="field" 
@@ -58,7 +58,7 @@
                     {
                         prop: 'login_count', 
                         label: '登录次数', 
-                        table:{sort: true, is: 'el-input'},
+                        table:{sort: true},
                         form: false,
                     },
                     {
@@ -106,4 +106,4 @@
         },
     })
 </script>
-{include file="$footer"}
+{include file="common/footer"}
