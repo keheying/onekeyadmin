@@ -20,7 +20,7 @@
 <a href="https://www.onekeyadmin.com/docs-home.html" target="_blank">开发文档&nbsp;&nbsp;</a>
 <a href="https://www.onekeyadmin.com/question.html" target="_blank">社区地址&nbsp;&nbsp;</a>
 <a href="https://www.onekeyadmin.com" target="_blank">官网地址&nbsp;&nbsp;</a>
-<a href="http://github.onekeyadmin.com/mk_admin" target="_blank">演示地址&nbsp;&nbsp;</a>
+<a href="http://gitee.onekeyadmin.com/mk_admin" target="_blank">演示地址&nbsp;&nbsp;</a>
 
 =========================================================
 
@@ -48,44 +48,44 @@
 
 <table>
     <tr>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/资源库1.png"/></td>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/资源库2.png"/></td> 
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/资源库1.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/资源库2.png"/></td> 
     </tr>
     <tr>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/系统配置1.png"/></td>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/系统配置2.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/系统配置1.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/系统配置2.png"/></td>
     </tr>
     <tr>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/分类管理1.png "/></td>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/分类管理2.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/分类管理1.png "/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/分类管理2.png"/></td>
     </tr>
     <tr>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/管理员管理1.png"/></td>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/管理员管理2.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/管理员管理1.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/管理员管理2.png"/></td>
     </tr>   
     <tr>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/菜单规则1.png"/></td>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/菜单规则2.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/菜单规则1.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/菜单规则2.png"/></td>
     </tr>
     <tr>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/角色管理1.png"/></td>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/角色管理2.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/角色管理1.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/角色管理2.png"/></td>
     </tr>
     <tr>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/会员列表1.png"/></td>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/会员列表2.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/会员列表1.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/会员列表2.png"/></td>
     </tr>
     <tr>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/会员分组1.png"/></td>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/会员分组2.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/会员分组1.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/会员分组2.png"/></td>
     </tr>
     <tr>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/插件商店1.png"/></td>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/插件商店2.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/插件商店1.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/插件商店2.png"/></td>
     </tr>
     <tr>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/主题商店1.png"/></td>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/主题商店2.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/主题商店1.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/主题商店2.png"/></td>
     </tr>
 </table>
 
@@ -93,18 +93,18 @@
 
 <table>
     <tr>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/开发助手1.png"/></td>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/开发助手2.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/开发助手1.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/开发助手2.png"/></td>
     </tr>
     <tr>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/开发助手3.png"/></td>
-        <td><img src="https://github.com/keheying/onekeyadmin/raw/master/readme/开发助手4.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/开发助手3.png"/></td>
+        <td><img src="https://raw.githubusercontent.com/keheying/onekeyadmin/master/readme/开发助手4.png"/></td>
     </tr>
 </table>
 
 ## 在线演示
 
-* <a href="http://github.onekeyadmin.com/mk_admin" target="_blank">无插件演示</a>
+* <a href="http://gitee.onekeyadmin.com/mk_admin" target="_blank">无插件演示</a>
 * <a href="http://cms.onekeyadmin.com/mk_admin" target="_blank">cms应用插件演示</a>
 * <a href="http://blog.onekeyadmin.com/mk_admin" target="_blank">博客应用插件演示</a>
 * <a href="http://swoole.onekeyadmin.com/mk_admin" target="_blank">swoole客服应用插件演示</a>
