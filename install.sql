@@ -201,7 +201,7 @@ CREATE TABLE IF NOT EXISTS `mk_config` (
 insert  into `mk_config`(`id`,`title`,`name`,`value`) values 
 (1,'邮箱配置','email','{\"email\":\"\",\"password\":\"\",\"sender\":\"onekeyadmin\",\"smtp\":\"smtp.qq.com\",\"sendstyle\":\"ssl\"}'),
 (2,'基础配置','system','{"company":"温州万旗信息科技有限公司","email":"513038996@qq.com","telephone":"0577-010101","phone":"157573963XX","fax":"0577-010101","address":"浙江省温州市洞头区北岙街道89号","business_hours":"早上8:30-下午17:30","ico":"\/upload\/favicon.ico?5874802","logo":"\/upload\/image\/20220215\/e4c5c91f707df300ec49860df7eb92df.png","copyright":"温州万旗信息科技有限公司","seo_title":"温州万旗信息科技有限公司","seo_keywords":"OneKeyAdmin","seo_description":"温州万旗信息科技有限公司","icp":"<p>Copyright &copy; 2021-2024 onekeyadmin.com All rights reserved 温州市万旗信息科技有限公司 版权所有 &nbsp;浙江省 ICP备案号2021005285<\/p>","copy_logo":"\/upload\/image\/20220420\/3ee6d6771233863c2f6957b05ace9b2b.png","qq":"513038996","wechat":"157573963XX","wechat_qrcode":"\/upload\/image\/20220521\/8408e90f09bc6761db4d4a780a8d2492.png"}'),
-(3,'图片水印','watermark','{\"open\":0,\"type\":\"font\",\"sizeType\":\"actual\",\"scale\":\"15\",\"position\":\"5\",\"opacity\":\"100\",\"image\":\"\\/upload\\/watermark.png?4476064\",\"fontText\":\"OneKeyAdmin\",\"fontFamily\":\"\\/admin\\/css\\/fonts\\/FZHTJW.ttf\",\"fontSize\":\"28\",\"fontAngle\":0,\"fontColor\":\"#C91818\"}');
+(3,'图片水印','watermark','{\"open\":0,\"type\":\"font\",\"sizeType\":\"actual\",\"scale\":\"15\",\"position\":\"5\",\"opacity\":\"100\",\"image\":\"\\/upload\\/watermark.png?4476064\",\"fontText\":\"OneKeyAdmin\",\"fontFamily\":\"\\/admin\\/fonts\\/FZHTJW.ttf\",\"fontSize\":\"28\",\"fontAngle\":0,\"fontColor\":\"#C91818\"}');
 
 CREATE TABLE IF NOT EXISTS `mk_file` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
